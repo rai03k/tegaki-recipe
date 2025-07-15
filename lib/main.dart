@@ -76,35 +76,99 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: Stack(
         children: [
-          Center(
-            child: SizedBox(
-              height: 280,
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: _items.length,
-                clipBehavior: Clip.none,
-                itemBuilder: (context, index) {
-                  return Container(
-                    width: 200,
-                    height: 280,
-                    margin: const EdgeInsets.symmetric(horizontal: 10),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 1),
+          Column(
+            children: [
+              const SizedBox(height: 60),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 30),
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.black, width: 2),
+                      ),
+                      child: const Stack(
+                        children: [
+                          Center(
+                            child: Text(
+                              '12\n3\n6\n9',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 10, height: 0.8),
+                            ),
+                          ),
+                          Center(
+                            child: Icon(Icons.access_time, size: 40),
+                          ),
+                        ],
+                      ),
                     ),
-                  );
-                },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 30),
+                    child: GestureDetector(
+                      onTap: widget.onThemeToggle,
+                      child: Image.asset(
+                        'assets/images/lamp.png',
+                        width: 60,
+                        height: 60,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
+              const SizedBox(height: 80),
+              SizedBox(
+                height: 280,
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: _items.length,
+                  clipBehavior: Clip.none,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      width: 200,
+                      height: 280,
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1),
+                        color: Colors.white,
+                      ),
+                      child: const Center(
+                        child: Text(
+                          '中華料理の\nレシピ',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                '中華料理のレシピ',
+                style: TextStyle(fontSize: 16),
+              ),
+              const Spacer(),
+            ],
           ),
           Positioned(
-            top: 50,
-            right: 20,
-            child: GestureDetector(
-              onTap: widget.onThemeToggle,
-              child: Image.asset(
-                'assets/images/lamp.png',
-                width: 40,
-                height: 40,
+            bottom: 30,
+            right: 30,
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: const BoxDecoration(
+                color: Colors.blue,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+                size: 30,
               ),
             ),
           ),
