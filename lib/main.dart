@@ -62,7 +62,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final PageController _pageController = PageController();
+  final PageController _pageController = PageController(viewportFraction: 0.7);
   final List<int> _items = List.generate(5, (index) => index);
 
   @override
