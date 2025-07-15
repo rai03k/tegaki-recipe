@@ -82,7 +82,6 @@ class _MyHomePageState extends State<MyHomePage> {
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: _items.length,
-                padEnds: false,
                 clipBehavior: Clip.none,
                 itemBuilder: (context, index) {
                   return Container(
@@ -90,8 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     height: 280,
                     margin: const EdgeInsets.symmetric(horizontal: 10),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 2),
-                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.black, width: 1),
                     ),
                   );
                 },
