@@ -84,27 +84,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(left: 30),
-                    child: Container(
+                    child: Image.asset(
+                      'assets/images/clock.png',
                       width: 80,
                       height: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.black, width: 2),
-                      ),
-                      child: const Stack(
-                        children: [
-                          Center(
-                            child: Text(
-                              '12\n3\n6\n9',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 10, height: 0.8),
-                            ),
-                          ),
-                          Center(
-                            child: Icon(Icons.access_time, size: 40),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                   Padding(
