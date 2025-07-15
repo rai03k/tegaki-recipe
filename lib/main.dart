@@ -78,15 +78,17 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           Center(
             child: SizedBox(
-              height: 400,
+              height: 280,
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: _items.length,
+                padEnds: false,
+                clipBehavior: Clip.none,
                 itemBuilder: (context, index) {
                   return Container(
-                    width: 300,
-                    height: 400,
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    width: 200,
+                    height: 280,
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.black, width: 2),
                       borderRadius: BorderRadius.circular(8),
