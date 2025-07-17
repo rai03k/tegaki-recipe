@@ -36,34 +36,27 @@ class _MyAppState extends State<MyApp> {
         fontFamily: 'ArmedLemon',
       ),
       themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: MyHomePage(
-        title: 'Flutter Demo Home Page',
-        onThemeToggle: _toggleTheme,
-        isDarkMode: _isDarkMode,
-      ),
+      home: CarouselSampleScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({
-    super.key,
-    required this.title,
-    required this.onThemeToggle,
-    required this.isDarkMode,
-  });
-
-  final String title;
-  final VoidCallback onThemeToggle;
-  final bool isDarkMode;
+class CarouselSampleScreen extends StatefulWidget {
+  const CarouselSampleScreen({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<CarouselSampleScreen> createState() => _CarouselSampleScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  final PageController _pageController = PageController(viewportFraction: 0.7);
-  final List<int> _items = List.generate(5, (index) => index);
+class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
+  final _pageController = PageController(viewportFraction: 0.75);
+
+  final List<String> _recipeBooks = [
+    '中華料理のレシピ本',
+    '和食のレシピ本',
+    '洋食のレシピ本',
+    'イタリアンのレシピ本',
+  ];
 
   @override
   void dispose() {
@@ -73,90 +66,92 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    // 基準となるカードの高さを定義
+    final cardHeight = screenHeight / 3;
+
     return Scaffold(
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              const SizedBox(height: 60),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30),
-                    child: Image.asset(
-                      'assets/images/clock.png',
-                      width: 80,
-                      height: 80,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 30),
-                    child: GestureDetector(
-                      onTap: widget.onThemeToggle,
-                      child: Image.asset(
-                        'assets/images/lamp.png',
-                        width: 60,
-                        height: 60,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 80),
-              SizedBox(
-                height: 280,
-                child: PageView.builder(
-                  controller: _pageController,
-                  itemCount: _items.length,
-                  clipBehavior: Clip.none,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      width: 200,
-                      height: 280,
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1),
-                        color: Colors.white,
-                      ),
-                      child: const Center(
-                        child: Text(
-                          '中華料理の\nレシピ',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ),
-                    );
-                  },
+      backgroundColor: Colors.grey[100],
+      body: Center(
+        child: SizedBox(
+          // PageViewの高さは、最大になるカードの高さ + 下のテキストエリアを考慮
+          height: cardHeight + 80,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: _recipeBooks.length,
+            itemBuilder: (context, index) {
+              return AnimatedBuilder(
+                animation: _pageController,
+                builder: (context, child) {
+                  double value = 1.0;
+                  if (_pageController.position.haveDimensions) {
+                    value = _pageController.page! - index;
+                    value = (1 - (value.abs() * 0.2)).clamp(0.8, 1.0);
+                  }
+                  // 変更点: レイアウトサイズではなく Transform.scale を使ってアニメーションさせる
+                  return Transform.scale(scale: value, child: child);
+                },
+                // 変更点: builderの外でitemを生成し、cardHeightを渡す
+                child: _buildCarouselItem(
+                  context,
+                  _recipeBooks[index],
+                  cardHeight,
                 ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 変更点: 引数で cardHeight を受け取るように変更
+  Widget _buildCarouselItem(
+    BuildContext context,
+    String title,
+    double cardHeight,
+  ) {
+    // 変更点: 高さを基準に幅を計算する
+    final cardWidth = cardHeight * (3 / 4);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // 変更点: AspectRatioの代わりに、サイズを直接指定したContainerを使用
+        Container(
+          width: cardWidth,
+          height: cardHeight,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey.shade400, width: 2),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
-              const SizedBox(height: 20),
-              const Text(
-                '中華料理のレシピ',
-                style: TextStyle(fontSize: 16),
-              ),
-              const Spacer(),
             ],
           ),
-          Positioned(
-            bottom: 30,
-            right: 30,
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: const BoxDecoration(
-                color: Colors.blue,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.add,
-                color: Colors.white,
-                size: 30,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                '中華料理\nの\nレシピ本',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 26,
+                  color: Colors.grey[800],
+                  height: 1.5,
+                ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 16),
+        Text(title, style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+      ],
     );
   }
 }
