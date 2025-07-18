@@ -86,25 +86,14 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
               return AnimatedBuilder(
                 animation: _pageController,
                 builder: (context, child) {
-                  double value = 1.0;
+                  final currentPage = _pageController.position.haveDimensions
+                      ? _pageController.page!
+                      : _pageController.initialPage.toDouble();
                   
-                  // PageViewが描画された後でないとpageプロパティは使えないためチェック
-                  if (_pageController.position.haveDimensions) {
-                    // 現在のページ位置と各アイテムのインデックスの差を計算
-                    value = _pageController.page! - index;
-                    // 差分（絶対値）に0.2を掛けて、1から引くことで縮小率を計算
-                    // clamp(0.8, 1.0)で最小0.8倍、最大1.0倍に制限
-                    value = (1 - (value.abs() * 0.2)).clamp(0.8, 1.0);
-                  } else {
-                    // 初期状態でも正しいスケール値を計算
-                    // initialPageから現在のindexまでの差分を計算
-                    final initialPage = _pageController.initialPage;
-                    final difference = (initialPage - index).abs().toDouble();
-                    value = (1 - (difference * 0.2)).clamp(0.8, 1.0);
-                  }
-                  
-                  // 計算したvalueをTransform.scaleに適用して大きさを変える
-                  return Transform.scale(scale: value, child: child);
+                  final difference = (currentPage - index).abs();
+                  final scale = (1 - (difference * 0.2)).clamp(0.8, 1.0);
+
+                  return Transform.scale(scale: scale, child: child);
                 },
                 // 上のbuilderにchildとして渡されるウィジェット
                 child: _buildCarouselItem(
@@ -153,7 +142,7 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                '中華料理\nの\nレシピ本',
+                '中華料理のレシピ本',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 26,
