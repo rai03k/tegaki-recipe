@@ -12,14 +12,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool _isDarkMode = false;
-
-  void _toggleTheme() {
-    setState(() {
-      _isDarkMode = !_isDarkMode;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -35,7 +27,6 @@ class _MyAppState extends State<MyApp> {
         ),
         fontFamily: 'ArmedLemon',
       ),
-      themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: CarouselSampleScreen(),
     );
   }
@@ -49,7 +40,7 @@ class CarouselSampleScreen extends StatefulWidget {
 }
 
 class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
-  final _pageController = PageController(viewportFraction: 0.75);
+  late final PageController _pageController;
 
   final List<String> _recipeBooks = [
     '中華料理のレシピ本',
@@ -57,6 +48,16 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
     '洋食のレシピ本',
     'イタリアンのレシピ本',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // ユーザーが調整した viewportFraction: 0.6 を使用
+    _pageController = PageController(
+      viewportFraction: 0.5,
+      initialPage: _recipeBooks.length * 100,
+    );
+  }
 
   @override
   void dispose() {
@@ -67,37 +68,52 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    // 基準となるカードの高さを定義
     final cardHeight = screenHeight / 3;
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: Center(
         child: SizedBox(
-          // PageViewの高さは、最大になるカードの高さ + 下のテキストエリアを考慮
           height: cardHeight + 80,
           child: PageView.builder(
             controller: _pageController,
-            itemCount: _recipeBooks.length,
+            itemCount: null,
+            clipBehavior: Clip.none,
             itemBuilder: (context, index) {
+              final itemIndex = index % _recipeBooks.length;
+
+              // ★変更点：ここからアニメーションのロジックを戻します
               return AnimatedBuilder(
                 animation: _pageController,
                 builder: (context, child) {
                   double value = 1.0;
+                  
+                  // PageViewが描画された後でないとpageプロパティは使えないためチェック
                   if (_pageController.position.haveDimensions) {
+                    // 現在のページ位置と各アイテムのインデックスの差を計算
                     value = _pageController.page! - index;
+                    // 差分（絶対値）に0.2を掛けて、1から引くことで縮小率を計算
+                    // clamp(0.8, 1.0)で最小0.8倍、最大1.0倍に制限
                     value = (1 - (value.abs() * 0.2)).clamp(0.8, 1.0);
+                  } else {
+                    // 初期状態でも正しいスケール値を計算
+                    // initialPageから現在のindexまでの差分を計算
+                    final initialPage = _pageController.initialPage;
+                    final difference = (initialPage - index).abs().toDouble();
+                    value = (1 - (difference * 0.2)).clamp(0.8, 1.0);
                   }
-                  // 変更点: レイアウトサイズではなく Transform.scale を使ってアニメーションさせる
+                  
+                  // 計算したvalueをTransform.scaleに適用して大きさを変える
                   return Transform.scale(scale: value, child: child);
                 },
-                // 変更点: builderの外でitemを生成し、cardHeightを渡す
+                // 上のbuilderにchildとして渡されるウィジェット
                 child: _buildCarouselItem(
                   context,
-                  _recipeBooks[index],
+                  _recipeBooks[itemIndex],
                   cardHeight,
                 ),
               );
+              // ★変更点：ここまでがアニメーションのロジックです
             },
           ),
         ),
@@ -105,25 +121,24 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
     );
   }
 
-  // 変更点: 引数で cardHeight を受け取るように変更
+  // _buildCarouselItemウィジェットは変更ありません
   Widget _buildCarouselItem(
     BuildContext context,
     String title,
     double cardHeight,
   ) {
-    // 変更点: 高さを基準に幅を計算する
     final cardWidth = cardHeight * (3 / 4);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // 変更点: AspectRatioの代わりに、サイズを直接指定したContainerを使用
         Container(
           width: cardWidth,
           height: cardHeight,
+          margin: const EdgeInsets.symmetric(horizontal: 10.0),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: Colors.grey.shade400, width: 2),
+            border: Border.all(color: Colors.grey.shade300),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
