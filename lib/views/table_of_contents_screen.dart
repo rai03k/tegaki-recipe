@@ -10,13 +10,11 @@ import 'dart:io';
 class TableOfContentsScreen extends ConsumerStatefulWidget {
   final RecipeBook recipeBook;
 
-  const TableOfContentsScreen({
-    super.key,
-    required this.recipeBook,
-  });
+  const TableOfContentsScreen({super.key, required this.recipeBook});
 
   @override
-  ConsumerState<TableOfContentsScreen> createState() => _TableOfContentsScreenState();
+  ConsumerState<TableOfContentsScreen> createState() =>
+      _TableOfContentsScreenState();
 }
 
 class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
@@ -25,7 +23,9 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
     super.initState();
     // 画面初期化時にレシピ一覧を読み込み
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(recipeNotifierProvider.notifier).loadRecipesByBookId(widget.recipeBook.id);
+      ref
+          .read(recipeNotifierProvider.notifier)
+          .loadRecipesByBookId(widget.recipeBook.id);
     });
   }
 
@@ -67,7 +67,10 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                         // レシピ本の小さな表紙画像
                         if (widget.recipeBook.coverImagePath != null)
                           FutureBuilder<bool>(
-                            future: File(widget.recipeBook.coverImagePath!).exists(),
+                            future:
+                                File(
+                                  widget.recipeBook.coverImagePath!,
+                                ).exists(),
                             builder: (context, snapshot) {
                               if (snapshot.hasData && snapshot.data == true) {
                                 return Container(
@@ -76,7 +79,10 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(4),
                                     border: Border.all(
-                                      color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
+                                      color:
+                                          isDarkMode
+                                              ? Colors.grey[600]!
+                                              : Colors.grey[300]!,
                                     ),
                                   ),
                                   child: ClipRRect(
@@ -92,15 +98,24 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                                   width: 40,
                                   height: 53,
                                   decoration: BoxDecoration(
-                                    color: isDarkMode ? Colors.grey[800] : Colors.white,
+                                    color:
+                                        isDarkMode
+                                            ? Colors.grey[800]
+                                            : Colors.white,
                                     borderRadius: BorderRadius.circular(4),
                                     border: Border.all(
-                                      color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
+                                      color:
+                                          isDarkMode
+                                              ? Colors.grey[600]!
+                                              : Colors.grey[300]!,
                                     ),
                                   ),
                                   child: HugeIcon(
                                     icon: HugeIcons.strokeRoundedBook02,
-                                    color: isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
+                                    color:
+                                        isDarkMode
+                                            ? Colors.grey[400]!
+                                            : Colors.grey[600]!,
                                     size: 20.0,
                                   ),
                                 );
@@ -150,9 +165,10 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
 
               // レシピ一覧またはローディング・空状態
               Expanded(
-                child: recipeState.isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : recipeState.recipes.isEmpty
+                child:
+                    recipeState.isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : recipeState.recipes.isEmpty
                         ? _buildEmptyState(isDarkMode)
                         : _buildRecipeList(isDarkMode, recipeState.recipes),
               ),
@@ -162,9 +178,12 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // TODO: レシピ作成画面への遷移
-          // await context.push('/create-recipe/${widget.recipeBook.id}');
-          // ref.read(recipeNotifierProvider.notifier).refresh(widget.recipeBook.id);
+          await context.push(
+            '/create-recipe/${widget.recipeBook.id}',
+            extra: widget.recipeBook,
+          );
+          // レシピ作成画面から戻ってきたときにデータを再読み込み
+          ref.read(recipeNotifierProvider.notifier).refresh(widget.recipeBook.id);
         },
         backgroundColor: isDarkMode ? Colors.grey[700] : Colors.deepPurple,
         foregroundColor: Colors.white,
@@ -182,12 +201,6 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          HugeIcon(
-            icon: HugeIcons.strokeRoundedFileAdd,
-            color: isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
-            size: 80.0,
-          ),
-          const SizedBox(height: 24),
           Text(
             'レシピがまだありません',
             style: TextStyle(
@@ -235,7 +248,11 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                   color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
                 ),
               ),
-              child: _buildTableOfContentsRow(recipe.title, pageNumber, isDarkMode),
+              child: _buildTableOfContentsRow(
+                recipe.title,
+                pageNumber,
+                isDarkMode,
+              ),
             ),
           ),
         );
@@ -244,7 +261,11 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
   }
 
   // 目次行の構築（・料理名.......ページ数）
-  Widget _buildTableOfContentsRow(String recipeName, int pageNumber, bool isDarkMode) {
+  Widget _buildTableOfContentsRow(
+    String recipeName,
+    int pageNumber,
+    bool isDarkMode,
+  ) {
     return Row(
       children: [
         // ・マーク
@@ -256,7 +277,7 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
           ),
         ),
         const SizedBox(width: 8),
-        
+
         // 料理名
         Expanded(
           child: Text(
@@ -269,7 +290,7 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        
+
         // ドットリーダー（.......）
         Expanded(
           child: Container(
@@ -282,7 +303,7 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
             ),
           ),
         ),
-        
+
         // ページ数
         Text(
           pageNumber.toString(),
@@ -299,14 +320,15 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
 // ドットリーダー（.......）を描画するCustomPainter
 class DotLeaderPainter extends CustomPainter {
   final Color color;
-  
+
   DotLeaderPainter({required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.0;
+    final paint =
+        Paint()
+          ..color = color
+          ..strokeWidth = 1.0;
 
     const dotSpacing = 8.0;
     final dotCount = (size.width / dotSpacing).floor();
