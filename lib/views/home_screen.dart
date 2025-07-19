@@ -40,10 +40,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     // PageControllerの初期化
     if (recipeBookState.recipeBooks.isNotEmpty && _pageController == null) {
-      _pageController = PageController(
-        viewportFraction: 0.5,
-        initialPage: 0,
-      );
+      _pageController = PageController(viewportFraction: 0.5, initialPage: 0);
     }
 
     return Scaffold(
@@ -56,7 +53,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           else if (recipeBookState.recipeBooks.isEmpty)
             _buildEmptyState(isDarkMode)
           else
-            _buildRecipeBooksCarousel(cardHeight, isDarkMode, recipeBookState.recipeBooks),
+            _buildRecipeBooksCarousel(
+              cardHeight,
+              isDarkMode,
+              recipeBookState.recipeBooks,
+            ),
 
           // ランプUI
           Positioned(
@@ -65,11 +66,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: _buildLampWidget(isDarkMode, themeNotifier.toggleTheme),
           ),
           // 時計UI
-          Positioned(
-            top: 70,
-            left: 40,
-            child: _buildClockWidget(isDarkMode),
-          ),
+          Positioned(top: 70, left: 40, child: _buildClockWidget(isDarkMode)),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -94,12 +91,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          HugeIcon(
-            icon: HugeIcons.strokeRoundedBook02,
-            color: isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
-            size: 80.0,
-          ),
-          const SizedBox(height: 24),
           Text(
             'レシピ本がまだないよ',
             style: TextStyle(
@@ -124,7 +115,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   // レシピ本カルーセルの表示
-  Widget _buildRecipeBooksCarousel(double cardHeight, bool isDarkMode, List<RecipeBook> recipeBooks) {
+  Widget _buildRecipeBooksCarousel(
+    double cardHeight,
+    bool isDarkMode,
+    List<RecipeBook> recipeBooks,
+  ) {
     return Center(
       child: SizedBox(
         height: cardHeight + 80,
@@ -148,7 +143,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                 return Transform.scale(scale: scale, child: child);
               },
-              child: _buildCarouselItem(context, recipeBook, cardHeight, isDarkMode),
+              child: GestureDetector(
+                onTap: () {
+                  // 目次ページへの遷移
+                  context.push(
+                    '/table-of-contents/${recipeBook.id}',
+                    extra: recipeBook,
+                  );
+                },
+                child: _buildCarouselItem(
+                  context,
+                  recipeBook,
+                  cardHeight,
+                  isDarkMode,
+                ),
+              ),
             );
           },
         ),
@@ -179,38 +188,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: isDarkMode 
-                    ? Colors.black.withOpacity(0.3)
-                    : Colors.black.withOpacity(0.1),
+                color:
+                    isDarkMode
+                        ? Colors.black.withOpacity(0.3)
+                        : Colors.black.withOpacity(0.1),
                 spreadRadius: 1,
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: recipeBook.coverImagePath != null
-              ? FutureBuilder<bool>(
-                  future: File(recipeBook.coverImagePath!).exists(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData && snapshot.data == true) {
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: Image.file(
-                          File(recipeBook.coverImagePath!),
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                          errorBuilder: (context, error, stackTrace) {
-                            return _buildDefaultBookContent(recipeBook, isDarkMode);
-                          },
-                        ),
-                      );
-                    } else {
-                      return _buildDefaultBookContent(recipeBook, isDarkMode);
-                    }
-                  },
-                )
-              : _buildDefaultBookContent(recipeBook, isDarkMode),
+          child:
+              recipeBook.coverImagePath != null
+                  ? FutureBuilder<bool>(
+                    future: File(recipeBook.coverImagePath!).exists(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData && snapshot.data == true) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: Image.file(
+                            File(recipeBook.coverImagePath!),
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            errorBuilder: (context, error, stackTrace) {
+                              return _buildDefaultBookContent(
+                                recipeBook,
+                                isDarkMode,
+                              );
+                            },
+                          ),
+                        );
+                      } else {
+                        return _buildDefaultBookContent(recipeBook, isDarkMode);
+                      }
+                    },
+                  )
+                  : _buildDefaultBookContent(recipeBook, isDarkMode),
         ),
         const SizedBox(height: 16),
         // タイトルを下部に表示（画像がある場合）
@@ -270,15 +284,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: SizedBox(
                 height: 70,
                 child: ColorFiltered(
-                  colorFilter: isDarkMode
-                      ? const ColorFilter.mode(
-                          Colors.white,
-                          BlendMode.srcIn,
-                        )
-                      : const ColorFilter.mode(
-                          Colors.transparent,
-                          BlendMode.multiply,
-                        ),
+                  colorFilter:
+                      isDarkMode
+                          ? const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          )
+                          : const ColorFilter.mode(
+                            Colors.transparent,
+                            BlendMode.multiply,
+                          ),
                   child: Image.asset(
                     'assets/images/furniture/lamp.png',
                     fit: BoxFit.contain,
@@ -327,12 +342,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return SizedBox(
       height: 100,
       child: ColorFiltered(
-        colorFilter: isDarkMode
-            ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
-            : const ColorFilter.mode(
-                Colors.transparent,
-                BlendMode.multiply,
-              ),
+        colorFilter:
+            isDarkMode
+                ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                : const ColorFilter.mode(
+                  Colors.transparent,
+                  BlendMode.multiply,
+                ),
         child: Image.asset(
           'assets/images/furniture/clock.png',
           fit: BoxFit.contain,

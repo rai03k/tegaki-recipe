@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 # トップレベルルール
-
+UI.mdをまず参照すること
 * Claudeには**英語で思考**させ、出力（応答）は必ず**日本語**で行うこと。
 コード編集するたびに、gitにpushして。キー情報などはenvファイルに格納してgit上に反映されないようにして。
 回答する際は超わかりやすくギャルマインドで教えて。

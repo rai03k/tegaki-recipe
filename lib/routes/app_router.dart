@@ -1,6 +1,8 @@
 import 'package:go_router/go_router.dart';
 import '../views/home_screen.dart';
 import '../views/create_recipe_book_screen.dart';
+import '../views/table_of_contents_screen.dart';
+import '../models/database.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -12,6 +14,13 @@ class AppRouter {
       GoRoute(
         path: '/create-recipe-book',
         builder: (context, state) => const CreateRecipeBookScreen(),
+      ),
+      GoRoute(
+        path: '/table-of-contents/:recipeBookId',
+        builder: (context, state) {
+          final recipeBook = state.extra as RecipeBook;
+          return TableOfContentsScreen(recipeBook: recipeBook);
+        },
       ),
     ],
   );
