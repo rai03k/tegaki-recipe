@@ -83,13 +83,20 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
     setState(() {
       if (_currentEditingType == 'seasoning') {
         _seasoningNameControllers[index].text = ingredient.name;
-        _seasoningAmountFocusNodes[index].requestFocus();
       } else {
         _nameControllers[index].text = ingredient.name;
-        _amountFocusNodes[index].requestFocus();
       }
       _suggestions = [];
       _currentEditingIndex = -1;
+    });
+    
+    // 候補リストが消えた後にフォーカスを移動
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (_currentEditingType == 'seasoning') {
+        _seasoningAmountFocusNodes[index].requestFocus();
+      } else {
+        _amountFocusNodes[index].requestFocus();
+      }
     });
   }
 
@@ -290,7 +297,16 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
                     
                     // 食材入力フォーム
                     ...List.generate(_nameControllers.length, (index) {
-                      return _buildIngredientRow(index, isDarkMode, 'ingredient');
+                      return Column(
+                        children: [
+                          _buildIngredientRow(index, isDarkMode, 'ingredient'),
+                          // 候補表示（このフィールドが編集中の場合）
+                          if (_suggestions.isNotEmpty && 
+                              _currentEditingIndex == index && 
+                              _currentEditingType == 'ingredient')
+                            _buildSuggestionsList(isDarkMode),
+                        ],
+                      );
                     }),
 
                     // 食材追加ボタン
@@ -303,15 +319,20 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
                     
                     // 調味料入力フォーム
                     ...List.generate(_seasoningNameControllers.length, (index) {
-                      return _buildIngredientRow(index, isDarkMode, 'seasoning');
+                      return Column(
+                        children: [
+                          _buildIngredientRow(index, isDarkMode, 'seasoning'),
+                          // 候補表示（このフィールドが編集中の場合）
+                          if (_suggestions.isNotEmpty && 
+                              _currentEditingIndex == index && 
+                              _currentEditingType == 'seasoning')
+                            _buildSuggestionsList(isDarkMode),
+                        ],
+                      );
                     }),
 
                     // 調味料追加ボタン
                     _buildAddButton('調味料を追加', _addNewSeasoningRow, isDarkMode),
-
-                    // 材料候補表示
-                    if (_suggestions.isNotEmpty && _currentEditingIndex >= 0)
-                      _buildSuggestionsList(isDarkMode),
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -429,8 +450,19 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
                             .where((ingredient) => ingredient.category != '調味料')
                             .toList();
                       }
+                    } else {
+                      _suggestions = [];
                     }
                   });
+                },
+                onTapOutside: (event) {
+                  // フィールド外をタップした時に候補を非表示
+                  if (_currentEditingIndex == index && _currentEditingType == type) {
+                    setState(() {
+                      _suggestions = [];
+                      _currentEditingIndex = -1;
+                    });
+                  }
                 },
               ),
             ),
@@ -505,7 +537,7 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
 
   Widget _buildSuggestionsList(bool isDarkMode) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(top: 8, bottom: 16),
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[800] : Colors.white,
         borderRadius: BorderRadius.circular(12),
