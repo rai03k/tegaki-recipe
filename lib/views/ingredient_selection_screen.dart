@@ -13,16 +13,25 @@ class IngredientSelectionScreen extends ConsumerStatefulWidget {
 }
 
 class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionScreen> {
+  // 食材用のコントローラー
   final List<TextEditingController> _nameControllers = [TextEditingController()];
   final List<TextEditingController> _amountControllers = [TextEditingController()];
   final List<FocusNode> _nameFocusNodes = [FocusNode()];
   final List<FocusNode> _amountFocusNodes = [FocusNode()];
   
+  // 調味料用のコントローラー
+  final List<TextEditingController> _seasoningNameControllers = [TextEditingController()];
+  final List<TextEditingController> _seasoningAmountControllers = [TextEditingController()];
+  final List<FocusNode> _seasoningNameFocusNodes = [FocusNode()];
+  final List<FocusNode> _seasoningAmountFocusNodes = [FocusNode()];
+  
   List<Ingredient> _suggestions = [];
   int _currentEditingIndex = -1;
+  String _currentEditingType = 'ingredient'; // 'ingredient' or 'seasoning'
 
   @override
   void dispose() {
+    // 食材用のdispose
     for (final controller in _nameControllers) {
       controller.dispose();
     }
@@ -35,24 +44,52 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
     for (final focusNode in _amountFocusNodes) {
       focusNode.dispose();
     }
+    
+    // 調味料用のdispose
+    for (final controller in _seasoningNameControllers) {
+      controller.dispose();
+    }
+    for (final controller in _seasoningAmountControllers) {
+      controller.dispose();
+    }
+    for (final focusNode in _seasoningNameFocusNodes) {
+      focusNode.dispose();
+    }
+    for (final focusNode in _seasoningAmountFocusNodes) {
+      focusNode.dispose();
+    }
     super.dispose();
   }
 
-  void _onIngredientNameChanged(String value, int index) {
+  void _onIngredientNameChanged(String value, int index, String type) {
     setState(() {
       _currentEditingIndex = index;
-      _suggestions = IngredientData.searchByName(value);
+      _currentEditingType = type;
+      if (type == 'seasoning') {
+        // 調味料のみをフィルタリング
+        _suggestions = IngredientData.searchByName(value)
+            .where((ingredient) => ingredient.category == '調味料')
+            .toList();
+      } else {
+        // 調味料以外をフィルタリング
+        _suggestions = IngredientData.searchByName(value)
+            .where((ingredient) => ingredient.category != '調味料')
+            .toList();
+      }
     });
   }
 
   void _selectIngredient(Ingredient ingredient, int index) {
     setState(() {
-      _nameControllers[index].text = ingredient.name;
+      if (_currentEditingType == 'seasoning') {
+        _seasoningNameControllers[index].text = ingredient.name;
+        _seasoningAmountFocusNodes[index].requestFocus();
+      } else {
+        _nameControllers[index].text = ingredient.name;
+        _amountFocusNodes[index].requestFocus();
+      }
       _suggestions = [];
       _currentEditingIndex = -1;
-      
-      // フォーカスを分量フィールドに移動
-      _amountFocusNodes[index].requestFocus();
     });
   }
 
@@ -62,6 +99,15 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
       _amountControllers.add(TextEditingController());
       _nameFocusNodes.add(FocusNode());
       _amountFocusNodes.add(FocusNode());
+    });
+  }
+
+  void _addNewSeasoningRow() {
+    setState(() {
+      _seasoningNameControllers.add(TextEditingController());
+      _seasoningAmountControllers.add(TextEditingController());
+      _seasoningNameFocusNodes.add(FocusNode());
+      _seasoningAmountFocusNodes.add(FocusNode());
     });
   }
 
@@ -78,7 +124,28 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
         _nameFocusNodes.removeAt(index);
         _amountFocusNodes.removeAt(index);
         
-        if (_currentEditingIndex == index) {
+        if (_currentEditingIndex == index && _currentEditingType == 'ingredient') {
+          _suggestions = [];
+          _currentEditingIndex = -1;
+        }
+      });
+    }
+  }
+
+  void _removeSeasoningRow(int index) {
+    if (_seasoningNameControllers.length > 1) {
+      setState(() {
+        _seasoningNameControllers[index].dispose();
+        _seasoningAmountControllers[index].dispose();
+        _seasoningNameFocusNodes[index].dispose();
+        _seasoningAmountFocusNodes[index].dispose();
+        
+        _seasoningNameControllers.removeAt(index);
+        _seasoningAmountControllers.removeAt(index);
+        _seasoningNameFocusNodes.removeAt(index);
+        _seasoningAmountFocusNodes.removeAt(index);
+        
+        if (_currentEditingIndex == index && _currentEditingType == 'seasoning') {
           _suggestions = [];
           _currentEditingIndex = -1;
         }
@@ -89,12 +156,33 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
   void _saveIngredients() {
     final ingredients = <RecipeIngredient>[];
     
+    // 食材を追加
     for (int i = 0; i < _nameControllers.length; i++) {
       final name = _nameControllers[i].text.trim();
       final amount = _amountControllers[i].text.trim();
       
       if (name.isNotEmpty && amount.isNotEmpty) {
         // 定義済み材料から背景色とアイコンを取得
+        final predefinedIngredient = IngredientData.predefinedIngredients
+            .where((ingredient) => ingredient.name == name)
+            .firstOrNull;
+        
+        ingredients.add(RecipeIngredient(
+          name: name,
+          amount: amount,
+          iconPath: predefinedIngredient?.iconPath,
+          backgroundColor: predefinedIngredient?.backgroundColor,
+        ));
+      }
+    }
+    
+    // 調味料を追加
+    for (int i = 0; i < _seasoningNameControllers.length; i++) {
+      final name = _seasoningNameControllers[i].text.trim();
+      final amount = _seasoningAmountControllers[i].text.trim();
+      
+      if (name.isNotEmpty && amount.isNotEmpty) {
+        // 定義済み調味料から背景色とアイコンを取得
         final predefinedIngredient = IngredientData.predefinedIngredients
             .where((ingredient) => ingredient.name == name)
             .firstOrNull;
@@ -196,53 +284,34 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
                     ),
                     const SizedBox(height: 24),
 
-                    // 材料入力フォーム
+                    // 食材セクション
+                    _buildSectionTitle('食材', isDarkMode),
+                    const SizedBox(height: 12),
+                    
+                    // 食材入力フォーム
                     ...List.generate(_nameControllers.length, (index) {
-                      return _buildIngredientRow(index, isDarkMode);
+                      return _buildIngredientRow(index, isDarkMode, 'ingredient');
                     }),
+
+                    // 食材追加ボタン
+                    _buildAddButton('食材を追加', _addNewIngredientRow, isDarkMode),
+                    const SizedBox(height: 24),
+
+                    // 調味料セクション
+                    _buildSectionTitle('調味料', isDarkMode),
+                    const SizedBox(height: 12),
+                    
+                    // 調味料入力フォーム
+                    ...List.generate(_seasoningNameControllers.length, (index) {
+                      return _buildIngredientRow(index, isDarkMode, 'seasoning');
+                    }),
+
+                    // 調味料追加ボタン
+                    _buildAddButton('調味料を追加', _addNewSeasoningRow, isDarkMode),
 
                     // 材料候補表示
                     if (_suggestions.isNotEmpty && _currentEditingIndex >= 0)
                       _buildSuggestionsList(isDarkMode),
-
-                    const SizedBox(height: 16),
-
-                    // 材料追加ボタン
-                    GestureDetector(
-                      onTap: _addNewIngredientRow,
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.deepPurple,
-                            width: 2,
-                            style: BorderStyle.solid,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const HugeIcon(
-                              icon: HugeIcons.strokeRoundedAdd01,
-                              color: Colors.deepPurple,
-                              size: 20.0,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '材料を追加',
-                              style: TextStyle(
-                                color: Colors.deepPurple,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -254,7 +323,66 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
     );
   }
 
-  Widget _buildIngredientRow(int index, bool isDarkMode) {
+  Widget _buildSectionTitle(String title, bool isDarkMode) {
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: isDarkMode ? Colors.white : Colors.black,
+        fontFamily: 'ArmedLemon',
+      ),
+    );
+  }
+
+  Widget _buildAddButton(String text, VoidCallback onTap, bool isDarkMode) {
+    return Container(
+      margin: const EdgeInsets.only(top: 16),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.deepPurple,
+              width: 2,
+              style: BorderStyle.solid,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedAdd01,
+                color: Colors.deepPurple,
+                size: 18.0,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                text,
+                style: const TextStyle(
+                  color: Colors.deepPurple,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIngredientRow(int index, bool isDarkMode, String type) {
+    final nameControllers = type == 'seasoning' ? _seasoningNameControllers : _nameControllers;
+    final amountControllers = type == 'seasoning' ? _seasoningAmountControllers : _amountControllers;
+    final nameFocusNodes = type == 'seasoning' ? _seasoningNameFocusNodes : _nameFocusNodes;
+    final amountFocusNodes = type == 'seasoning' ? _seasoningAmountFocusNodes : _amountFocusNodes;
+    final hintText = type == 'seasoning' ? '調味料名' : '材料名';
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -272,26 +400,35 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
                 ),
               ),
               child: TextField(
-                controller: _nameControllers[index],
-                focusNode: _nameFocusNodes[index],
+                controller: nameControllers[index],
+                focusNode: nameFocusNodes[index],
                 style: TextStyle(
                   color: isDarkMode ? Colors.white : Colors.black,
                   fontSize: 16,
                 ),
                 decoration: InputDecoration(
-                  hintText: '材料名',
+                  hintText: hintText,
                   hintStyle: TextStyle(
                     color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                   ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
-                onChanged: (value) => _onIngredientNameChanged(value, index),
+                onChanged: (value) => _onIngredientNameChanged(value, index, type),
                 onTap: () {
                   setState(() {
                     _currentEditingIndex = index;
-                    if (_nameControllers[index].text.isNotEmpty) {
-                      _suggestions = IngredientData.searchByName(_nameControllers[index].text);
+                    _currentEditingType = type;
+                    if (nameControllers[index].text.isNotEmpty) {
+                      if (type == 'seasoning') {
+                        _suggestions = IngredientData.searchByName(nameControllers[index].text)
+                            .where((ingredient) => ingredient.category == '調味料')
+                            .toList();
+                      } else {
+                        _suggestions = IngredientData.searchByName(nameControllers[index].text)
+                            .where((ingredient) => ingredient.category != '調味料')
+                            .toList();
+                      }
                     }
                   });
                 },
@@ -313,8 +450,8 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
                 ),
               ),
               child: TextField(
-                controller: _amountControllers[index],
-                focusNode: _amountFocusNodes[index],
+                controller: amountControllers[index],
+                focusNode: amountFocusNodes[index],
                 style: TextStyle(
                   color: isDarkMode ? Colors.white : Colors.black,
                   fontSize: 16,
@@ -329,10 +466,12 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
                 ),
                 onChanged: (value) {
                   // 分量が入力されたら新しい行を自動追加
-                  if (value.isNotEmpty && 
-                      _nameControllers[index].text.isNotEmpty && 
-                      index == _nameControllers.length - 1) {
-                    _addNewIngredientRow();
+                  if (value.isNotEmpty && nameControllers[index].text.isNotEmpty) {
+                    if (type == 'seasoning' && index == _seasoningNameControllers.length - 1) {
+                      _addNewSeasoningRow();
+                    } else if (type == 'ingredient' && index == _nameControllers.length - 1) {
+                      _addNewIngredientRow();
+                    }
                   }
                 },
               ),
@@ -340,11 +479,11 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
           ),
           
           // 削除ボタン
-          if (_nameControllers.length > 1)
+          if (nameControllers.length > 1)
             Padding(
               padding: const EdgeInsets.only(left: 8),
               child: GestureDetector(
-                onTap: () => _removeIngredientRow(index),
+                onTap: () => type == 'seasoning' ? _removeSeasoningRow(index) : _removeIngredientRow(index),
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -388,7 +527,7 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
           Padding(
             padding: const EdgeInsets.all(12),
             child: Text(
-              '候補の材料',
+              _currentEditingType == 'seasoning' ? '候補の調味料' : '候補の食材',
               style: TextStyle(
                 color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
                 fontSize: 14,
