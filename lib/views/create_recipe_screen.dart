@@ -123,7 +123,6 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = ref.watch(themeNotifierProvider) == ThemeMode.dark;
-    final recipeState = ref.watch(recipeNotifierProvider);
 
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.grey[900] : Colors.grey[100],
@@ -226,13 +225,15 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
   }
 
   Widget _buildNotePaperSection(bool isDarkMode) {
+    final recipeState = ref.watch(recipeNotifierProvider);
+    
     return LayoutBuilder(
       builder: (context, constraints) {
         return CustomPaint(
           painter: NotePaperPainter(
             lineColor: isDarkMode 
-                ? Colors.grey[700]!.withOpacity(0.3)
-                : Colors.grey[300]!.withOpacity(0.5),
+                ? Colors.grey[700]!.withValues(alpha: 0.3)
+                : Colors.grey[300]!.withValues(alpha: 0.5),
             lineSpacing: 40.0,
           ),
           child: Container(
@@ -290,7 +291,7 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isDarkMode ? Colors.grey[600]!.withOpacity(0.3) : Colors.grey[400]!.withOpacity(0.3),
+                      color: isDarkMode ? Colors.grey[600]!.withValues(alpha: 0.3) : Colors.grey[400]!.withValues(alpha: 0.3),
                       width: 1,
                     ),
                   ),
@@ -465,28 +466,28 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(
-            color: isDarkMode ? Colors.grey[600]!.withOpacity(0.3) : Colors.grey[400]!.withOpacity(0.3),
+            color: isDarkMode ? Colors.grey[600]!.withValues(alpha: 0.3) : Colors.grey[400]!.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(
-            color: isDarkMode ? Colors.grey[600]!.withOpacity(0.3) : Colors.grey[400]!.withOpacity(0.3),
+            color: isDarkMode ? Colors.grey[600]!.withValues(alpha: 0.3) : Colors.grey[400]!.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(
-            color: Colors.deepPurple.withOpacity(0.7),
+            color: Colors.deepPurple.withValues(alpha: 0.7),
             width: 2,
           ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(
-            color: Colors.red.withOpacity(0.7),
+            color: Colors.red.withValues(alpha: 0.7),
             width: 2,
           ),
         ),
