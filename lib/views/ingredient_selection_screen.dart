@@ -304,7 +304,7 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
                           if (_suggestions.isNotEmpty && 
                               _currentEditingIndex == index && 
                               _currentEditingType == 'ingredient')
-                            _buildSuggestionsList(isDarkMode),
+                            _buildFullWidthSuggestionsList(isDarkMode),
                         ],
                       );
                     }),
@@ -326,7 +326,7 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
                           if (_suggestions.isNotEmpty && 
                               _currentEditingIndex == index && 
                               _currentEditingType == 'seasoning')
-                            _buildSuggestionsList(isDarkMode),
+                            _buildFullWidthSuggestionsList(isDarkMode),
                         ],
                       );
                     }),
@@ -551,10 +551,10 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
     );
   }
 
-  Widget _buildSuggestionsList(bool isDarkMode) {
+  Widget _buildFullWidthSuggestionsList(bool isDarkMode) {
     return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(top: 8, bottom: 16, left: -20, right: -20),
+      width: MediaQuery.of(context).size.width,
+      margin: const EdgeInsets.only(top: 8, bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[800] : Colors.white,
@@ -583,7 +583,7 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
             ),
           ),
           const SizedBox(height: 8),
-          // Chipスタイルの候補表示（画面横いっぱい）
+          // Chipスタイルの候補表示
           Wrap(
             spacing: 8,
             runSpacing: 8,
