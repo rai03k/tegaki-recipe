@@ -160,11 +160,25 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
 
               // スクロール可能なコンテンツ
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                child: Stack(
+                  children: [
+                    // ノート風横線背景
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: NotePaperPainter(
+                          lineColor: isDarkMode 
+                              ? Colors.grey[700]!.withOpacity(0.3)
+                              : Colors.grey[300]!.withOpacity(0.5),
+                          lineSpacing: 48.0,
+                        ),
+                      ),
+                    ),
+                    // メインコンテンツ
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                       // 料理画像選択
                       GestureDetector(
                         onTap: _selectImage,
@@ -258,10 +272,11 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: isDarkMode ? Colors.grey[800] : Colors.white,
-                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
+                            color: isDarkMode ? Colors.grey[600]!.withOpacity(0.3) : Colors.grey[400]!.withOpacity(0.3),
+                            width: 1,
                           ),
                         ),
                         child: Column(
@@ -367,9 +382,11 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                                 ),
                         ),
                       ),
-                      const SizedBox(height: 32),
-                    ],
-                  ),
+                          const SizedBox(height: 32),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -420,6 +437,7 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
       style: TextStyle(
         color: isDarkMode ? Colors.white : Colors.black,
         fontSize: 16,
+        height: 1.5, // 行間を調整して横線に合わせる
       ),
       decoration: InputDecoration(
         hintText: hintText,
@@ -428,30 +446,33 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
           color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
         ),
         filled: true,
-        fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
+        fillColor: Colors.transparent, // 背景を透明にして横線を見せる
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(
-            color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
+            color: isDarkMode ? Colors.grey[600]!.withOpacity(0.3) : Colors.grey[400]!.withOpacity(0.3),
+            width: 1,
           ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(
-            color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
+            color: isDarkMode ? Colors.grey[600]!.withOpacity(0.3) : Colors.grey[400]!.withOpacity(0.3),
+            width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Colors.deepPurple,
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: Colors.deepPurple.withOpacity(0.7),
             width: 2,
           ),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Colors.red,
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: Colors.red.withOpacity(0.7),
             width: 2,
           ),
         ),
@@ -464,4 +485,37 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
       },
     );
   }
+}
+
+// ノート風横線背景を描画するCustomPainter
+class NotePaperPainter extends CustomPainter {
+  final Color lineColor;
+  final double lineSpacing;
+  final double lineHeight;
+
+  NotePaperPainter({
+    required this.lineColor,
+    this.lineSpacing = 40.0,
+    this.lineHeight = 1.0,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = lineColor
+      ..strokeWidth = lineHeight
+      ..style = PaintingStyle.stroke;
+
+    // 横線を描画
+    for (double y = lineSpacing; y < size.height; y += lineSpacing) {
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
