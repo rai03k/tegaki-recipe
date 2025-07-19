@@ -132,8 +132,16 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
           // ランプUI
           Positioned(top: 40, right: 20, child: _buildLampWidget()),
           // 時計UI
-          Positioned(top: 40, left: 20, child: _buildClockWidget()),
+          Positioned(top: 70, left: 40, child: _buildClockWidget()),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // TODO: レシピ追加機能を実装
+        },
+        backgroundColor: widget.isDarkMode ? Colors.grey[700] : Colors.deepPurple,
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -265,12 +273,15 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
 
   Widget _buildClockWidget() {
     return Container(
-      width: 60,
-      height: 60,
+      height: 100,
       child: ColorFiltered(
-        colorFilter: widget.isDarkMode 
-            ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
-            : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
+        colorFilter:
+            widget.isDarkMode
+                ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                : const ColorFilter.mode(
+                  Colors.transparent,
+                  BlendMode.multiply,
+                ),
         child: Image.asset(
           'assets/images/furniture/clock.png',
           fit: BoxFit.contain,
