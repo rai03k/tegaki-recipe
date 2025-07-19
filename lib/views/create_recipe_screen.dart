@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/database.dart';
+import '../models/ingredient.dart';
 import '../services/image_service.dart';
 import '../view_models/recipe_view_model.dart';
 import '../view_models/theme_view_model.dart';
@@ -31,7 +32,7 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
   final _imageService = ImageService();
   
   String? _selectedImagePath;
-  final List<String> _ingredients = []; // 仮実装：後で材料選択機能に置き換え
+  List<RecipeIngredient> _selectedIngredients = [];
 
   @override
   void dispose() {
@@ -281,54 +282,10 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // 材料（仮実装）
+                // 材料
                 _buildSectionTitle('材料', isDarkMode),
                 const SizedBox(height: 8),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isDarkMode ? Colors.grey[600]!.withValues(alpha: 0.3) : Colors.grey[400]!.withValues(alpha: 0.3),
-                      width: 1,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          HugeIcon(
-                            icon: HugeIcons.strokeRoundedAdd01,
-                            color: Colors.deepPurple,
-                            size: 20.0,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '材料を選択',
-                            style: TextStyle(
-                              color: Colors.deepPurple,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (_ingredients.isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            '※材料選択機能は後で実装予定',
-                            style: TextStyle(
-                              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+                _buildIngredientsSection(isDarkMode),
                 const SizedBox(height: 24),
 
                 // 作り方
@@ -404,6 +361,121 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildIngredientsSection(bool isDarkMode) {
+    return Column(
+      children: [
+        // 材料追加ボタン
+        GestureDetector(
+          onTap: () async {
+            final result = await context.push('/ingredient-selection');
+            if (result != null && result is List<RecipeIngredient>) {
+              setState(() {
+                _selectedIngredients = result;
+              });
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: isDarkMode ? Colors.grey[600]!.withValues(alpha: 0.3) : Colors.grey[400]!.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedAdd01,
+                  color: Colors.deepPurple,
+                  size: 20.0,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '材料を選択',
+                  style: TextStyle(
+                    color: Colors.deepPurple,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        
+        // 選択された材料一覧
+        if (_selectedIngredients.isNotEmpty)
+          Container(
+            margin: const EdgeInsets.only(top: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isDarkMode ? Colors.grey[800]!.withValues(alpha: 0.3) : Colors.grey[100]!.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '選択された材料（${_selectedIngredients.length}個）',
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...List.generate(_selectedIngredients.length, (index) {
+                  final ingredient = _selectedIngredients[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      children: [
+                        // アイコン背景
+                        if (ingredient.backgroundColor != null)
+                          Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: ingredient.backgroundColor,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Center(
+                              child: Text(
+                                ingredient.name.substring(0, 1),
+                                style: const TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        if (ingredient.backgroundColor != null) const SizedBox(width: 8),
+                        
+                        // 材料名と分量
+                        Expanded(
+                          child: Text(
+                            '${ingredient.name}...${ingredient.amount}',
+                            style: TextStyle(
+                              color: isDarkMode ? Colors.white : Colors.black,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+      ],
     );
   }
 
