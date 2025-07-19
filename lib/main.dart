@@ -1,47 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'routes/app_router.dart';
+import 'view_models/theme_view_model.dart';
+import 'constants/app_strings.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeNotifierProvider);
 
-class _MyAppState extends State<MyApp> {
-  bool _isDarkMode = false;
-  late final GoRouter _router;
-
-  void _toggleTheme() {
-    setState(() {
-      _isDarkMode = !_isDarkMode;
-    });
-    // ルーターを再作成してテーマ状態を反映
-    _updateRouter();
-  }
-
-  void _updateRouter() {
-    _router = AppRouter.createRouter(
-      onThemeToggle: _toggleTheme,
-      isDarkMode: _isDarkMode,
-    );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _updateRouter();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Tegaki Recipe',
+      title: AppStrings.appTitle,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         fontFamily: 'ArmedLemon',
@@ -53,8 +28,8 @@ class _MyAppState extends State<MyApp> {
         ),
         fontFamily: 'ArmedLemon',
       ),
-      themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      routerConfig: _router,
+      themeMode: themeMode,
+      routerConfig: AppRouter.router,
     );
   }
 }

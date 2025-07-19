@@ -102,9 +102,8 @@ lib/
 - **カスタムフォント**: ✅ ArmedLemon適用済み
 - **レスポンシブデザイン**: ✅ MediaQuery使用
 
-### 実装予定の技術スタック
-- **Riverpod**: ❌ 未実装（状態管理）
-- **Freezed**: ❌ 未実装（イミュータブルクラス）
-- **GoRouter**: ❌ 未実装（ナビゲーション）
-- **Firebase**: ❌ 未実装（Auth、Firestore、Storage、Functions）
-- **Just Audio**: ❌ 未実装（音声再生）
+### 技術スタック
+- **Riverpod**: （状態管理）
+- **Freezed**: （イミュータブルクラス）
+- **GoRouter**: （ナビゲーション）
+- **Just Audio**: （音声再生）

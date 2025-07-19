@@ -10,7 +10,9 @@
       "Bash(git push:*)",
       "Bash(flutter run:*)",
       "Bash(mkdir:*)",
-      "Bash(flutter packages pub run:*)"
+      "Bash(flutter packages pub run:*)",
+      "Bash(dart run build_runner build:*)",
+      "Bash(flutter analyze:*)"
     ],
     "deny": []
   }
