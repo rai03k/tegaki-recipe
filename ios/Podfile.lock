@@ -1,0 +1,70 @@
+PODS:
+  - Flutter (1.0.0)
+  - image_cropper (0.0.4):
+    - Flutter
+    - TOCropViewController (~> 2.7.4)
+  - image_picker_ios (0.0.1):
+    - Flutter
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - sqlite3 (3.50.2):
+    - sqlite3/common (= 3.50.2)
+  - sqlite3/common (3.50.2)
+  - sqlite3/dbstatvtab (3.50.2):
+    - sqlite3/common
+  - sqlite3/fts5 (3.50.2):
+    - sqlite3/common
+  - sqlite3/math (3.50.2):
+    - sqlite3/common
+  - sqlite3/perf-threadsafe (3.50.2):
+    - sqlite3/common
+  - sqlite3/rtree (3.50.2):
+    - sqlite3/common
+  - sqlite3_flutter_libs (0.0.1):
+    - Flutter
+    - FlutterMacOS
+    - sqlite3 (~> 3.50.2)
+    - sqlite3/dbstatvtab
+    - sqlite3/fts5
+    - sqlite3/math
+    - sqlite3/perf-threadsafe
+    - sqlite3/rtree
+  - TOCropViewController (2.7.4)
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
+  - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/darwin`)
+
+SPEC REPOS:
+  trunk:
+    - sqlite3
+    - TOCropViewController
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  image_cropper:
+    :path: ".symlinks/plugins/image_cropper/ios"
+  image_picker_ios:
+    :path: ".symlinks/plugins/image_picker_ios/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  sqlite3_flutter_libs:
+    :path: ".symlinks/plugins/sqlite3_flutter_libs/darwin"
+
+SPEC CHECKSUMS:
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  image_cropper: c4326ea50132b1e1564499e5d32a84f01fb03537
+  image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  sqlite3: 3e82a2daae39ba3b41ae6ee84a130494585460fc
+  sqlite3_flutter_libs: 52ecc4dfaae71f496da86159263dbce5d23a051a
+  TOCropViewController: 80b8985ad794298fb69d3341de183f33d1853654
+
+PODFILE CHECKSUM: 4305caec6b40dde0ae97be1573c53de1882a07e5
+
+COCOAPODS: 1.16.2

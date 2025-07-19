@@ -18,7 +18,8 @@ class RecipeBooks extends Table {
 // レシピテーブル
 class Recipes extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get recipeBookId => integer().references(RecipeBooks, #id, onDelete: KeyAction.cascade)();
+  IntColumn get recipeBookId =>
+      integer().references(RecipeBooks, #id, onDelete: KeyAction.cascade)();
   TextColumn get title => text().withLength(min: 1, max: 100)();
   TextColumn get imagePath => text().nullable()();
   IntColumn get cookingTimeMinutes => integer().nullable()();
@@ -32,7 +33,8 @@ class Recipes extends Table {
 // 材料テーブル
 class Ingredients extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get recipeId => integer().references(Recipes, #id, onDelete: KeyAction.cascade)();
+  IntColumn get recipeId =>
+      integer().references(Recipes, #id, onDelete: KeyAction.cascade)();
   TextColumn get name => text().withLength(min: 1, max: 50)();
   TextColumn get amount => text().nullable()();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
@@ -94,6 +96,6 @@ LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'tegaki_recipe.db'));
-    return driftDatabase(name: 'tegaki_recipe', web: false);
+    return driftDatabase(name: 'tegaki_recipe');
   });
 }

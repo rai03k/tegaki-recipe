@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../models/database.dart';
+import '../repositories/recipe_book_repository.dart';
+import 'dart:io';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onThemeToggle;
@@ -18,27 +21,47 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final PageController _pageController;
-
-  final List<String> _recipeBooks = [
-    '中華料理のレシピ本',
-    '和食のレシピ本',
-    '洋食のレシピ本',
-    'イタリアンのレシピ本',
-  ];
+  late final TegakiDatabase _database;
+  late final RecipeBookRepository _repository;
+  List<RecipeBook> _recipeBooks = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(
-      viewportFraction: 0.5,
-      initialPage: _recipeBooks.length * 100,
-    );
+    _database = TegakiDatabase();
+    _repository = RecipeBookRepository(_database);
+    _loadRecipeBooks();
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _database.close();
     super.dispose();
+  }
+
+  Future<void> _loadRecipeBooks() async {
+    try {
+      final books = await _repository.getAllRecipeBooks();
+      setState(() {
+        _recipeBooks = books;
+        _isLoading = false;
+      });
+
+      // レシピ本がある場合のみPageControllerを初期化
+      if (_recipeBooks.isNotEmpty) {
+        _pageController = PageController(
+          viewportFraction: 0.5,
+          initialPage: _recipeBooks.length * 100,
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      debugPrint('レシピ本読み込みエラー: $e');
+    }
   }
 
   @override
@@ -50,39 +73,16 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: widget.isDarkMode ? Colors.grey[900] : Colors.grey[100],
       body: Stack(
         children: [
-          Center(
-            child: SizedBox(
-              height: cardHeight + 80,
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: null,
-                clipBehavior: Clip.none,
-                itemBuilder: (context, index) {
-                  final itemIndex = index % _recipeBooks.length;
-
-                  return AnimatedBuilder(
-                    animation: _pageController,
-                    builder: (context, child) {
-                      final currentPage =
-                          _pageController.position.haveDimensions
-                              ? _pageController.page!
-                              : _pageController.initialPage.toDouble();
-
-                      final difference = (currentPage - index).abs();
-                      final scale = (1 - (difference * 0.2)).clamp(0.8, 1.0);
-
-                      return Transform.scale(scale: scale, child: child);
-                    },
-                    child: _buildCarouselItem(
-                      context,
-                      _recipeBooks[itemIndex],
-                      cardHeight,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
+          // メインコンテンツ
+          if (_isLoading)
+            const Center(
+              child: CircularProgressIndicator(),
+            )
+          else if (_recipeBooks.isEmpty)
+            _buildEmptyState()
+          else
+            _buildRecipeBooksCarousel(cardHeight),
+          
           // ランプUI
           Positioned(top: 40, right: 30, child: _buildLampWidget()),
           // 時計UI
@@ -104,9 +104,81 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // 空状態の表示
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          HugeIcon(
+            icon: HugeIcons.strokeRoundedBook02,
+            color: widget.isDarkMode ? Colors.grey[400] : Colors.grey[600],
+            size: 80.0,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'レシピ本がまだないよ',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: widget.isDarkMode ? Colors.grey[300] : Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '右下のボタンから\nレシピ本を作ってみよう！',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: widget.isDarkMode ? Colors.grey[400] : Colors.grey[600],
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // レシピ本カルーセルの表示
+  Widget _buildRecipeBooksCarousel(double cardHeight) {
+    return Center(
+      child: SizedBox(
+        height: cardHeight + 80,
+        child: PageView.builder(
+          controller: _pageController,
+          itemCount: null,
+          clipBehavior: Clip.none,
+          itemBuilder: (context, index) {
+            final itemIndex = index % _recipeBooks.length;
+            final recipeBook = _recipeBooks[itemIndex];
+
+            return AnimatedBuilder(
+              animation: _pageController,
+              builder: (context, child) {
+                final currentPage = _pageController.position.haveDimensions
+                    ? _pageController.page!
+                    : _pageController.initialPage.toDouble();
+
+                final difference = (currentPage - index).abs();
+                final scale = (1 - (difference * 0.2)).clamp(0.8, 1.0);
+
+                return Transform.scale(scale: scale, child: child);
+              },
+              child: _buildCarouselItem(
+                context,
+                recipeBook,
+                cardHeight,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   Widget _buildCarouselItem(
     BuildContext context,
-    String title,
+    RecipeBook recipeBook,
     double cardHeight,
   ) {
     final cardWidth = cardHeight * (3 / 4);
@@ -135,29 +207,58 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                '中華料理のレシピ本',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 26,
-                  color: widget.isDarkMode ? Colors.grey[200] : Colors.grey[800],
-                  height: 1.5,
+          child: recipeBook.coverImagePath != null
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: Image.file(
+                    File(recipeBook.coverImagePath!),
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                )
+              : Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedBook02,
+                          color: widget.isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                          size: 48.0,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          recipeBook.title,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: widget.isDarkMode ? Colors.grey[200] : Colors.grey[800],
+                            height: 1.3,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
         ),
         const SizedBox(height: 16),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 16,
-            color: widget.isDarkMode ? Colors.grey[300] : Colors.grey[700],
+        // タイトルを下部に表示（画像がある場合）
+        if (recipeBook.coverImagePath != null)
+          Text(
+            recipeBook.title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: widget.isDarkMode ? Colors.grey[300] : Colors.grey[700],
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-        ),
       ],
     );
   }
