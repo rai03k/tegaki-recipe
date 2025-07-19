@@ -404,6 +404,13 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
     final amountFocusNodes = type == 'seasoning' ? _seasoningAmountFocusNodes : _amountFocusNodes;
     final hintText = type == 'seasoning' ? '調味料名' : '材料名';
     
+    // 選択された材料の情報を取得
+    final selectedIngredient = nameControllers[index].text.isNotEmpty 
+        ? IngredientData.predefinedIngredients
+            .where((ingredient) => ingredient.name == nameControllers[index].text)
+            .firstOrNull
+        : null;
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -420,50 +427,59 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
                   width: 1,
                 ),
               ),
-              child: TextField(
-                controller: nameControllers[index],
-                focusNode: nameFocusNodes[index],
-                style: TextStyle(
-                  color: isDarkMode ? Colors.white : Colors.black,
-                  fontSize: 16,
-                ),
-                decoration: InputDecoration(
-                  hintText: hintText,
-                  hintStyle: TextStyle(
-                    color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: nameControllers[index],
+                      focusNode: nameFocusNodes[index],
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                        fontSize: 16,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: hintText,
+                        hintStyle: TextStyle(
+                          color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      ),
+                      onChanged: (value) => _onIngredientNameChanged(value, index, type),
+                      onTap: () {
+                        setState(() {
+                          _currentEditingIndex = index;
+                          _currentEditingType = type;
+                          if (nameControllers[index].text.isNotEmpty) {
+                            if (type == 'seasoning') {
+                              _suggestions = IngredientData.searchByName(nameControllers[index].text)
+                                  .where((ingredient) => ingredient.category == '調味料')
+                                  .toList();
+                            } else {
+                              _suggestions = IngredientData.searchByName(nameControllers[index].text)
+                                  .where((ingredient) => ingredient.category != '調味料')
+                                  .toList();
+                            }
+                          } else {
+                            _suggestions = [];
+                          }
+                        });
+                      },
+                      onTapOutside: (event) {
+                        // フィールド外をタップした時に候補を非表示
+                        if (_currentEditingIndex == index && _currentEditingType == type) {
+                          setState(() {
+                            _suggestions = [];
+                            _currentEditingIndex = -1;
+                          });
+                        }
+                      },
+                    ),
                   ),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-                onChanged: (value) => _onIngredientNameChanged(value, index, type),
-                onTap: () {
-                  setState(() {
-                    _currentEditingIndex = index;
-                    _currentEditingType = type;
-                    if (nameControllers[index].text.isNotEmpty) {
-                      if (type == 'seasoning') {
-                        _suggestions = IngredientData.searchByName(nameControllers[index].text)
-                            .where((ingredient) => ingredient.category == '調味料')
-                            .toList();
-                      } else {
-                        _suggestions = IngredientData.searchByName(nameControllers[index].text)
-                            .where((ingredient) => ingredient.category != '調味料')
-                            .toList();
-                      }
-                    } else {
-                      _suggestions = [];
-                    }
-                  });
-                },
-                onTapOutside: (event) {
-                  // フィールド外をタップした時に候補を非表示
-                  if (_currentEditingIndex == index && _currentEditingType == type) {
-                    setState(() {
-                      _suggestions = [];
-                      _currentEditingIndex = -1;
-                    });
-                  }
-                },
+                  // 選択された材料の画像を右側に表示
+                  if (selectedIngredient != null)
+                    _buildSelectedIngredientImage(selectedIngredient),
+                ],
               ),
             ),
           ),
@@ -537,8 +553,9 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
 
   Widget _buildSuggestionsList(bool isDarkMode) {
     return Container(
-      margin: const EdgeInsets.only(top: 8, bottom: 16),
-      padding: const EdgeInsets.all(12),
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 8, bottom: 16, left: -20, right: -20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[800] : Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -566,7 +583,7 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
             ),
           ),
           const SizedBox(height: 8),
-          // Chipスタイルの候補表示
+          // Chipスタイルの候補表示（画面横いっぱい）
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -577,6 +594,97 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
         ],
       ),
     );
+  }
+
+  Widget _buildIngredientImage(Ingredient ingredient) {
+    return FutureBuilder<bool>(
+      future: _imageExists(ingredient.iconPath),
+      builder: (context, snapshot) {
+        if (snapshot.data == true) {
+          return Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                ingredient.iconPath,
+                width: 24,
+                height: 24,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _buildSelectedIngredientImage(Ingredient ingredient) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.asset(
+              ingredient.iconPath,
+              width: 32,
+              height: 32,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: ingredient.backgroundColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Text(
+                      ingredient.name.substring(0, 1),
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          // 色付きバッジ（右下）
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: ingredient.backgroundColor,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: Colors.white,
+                  width: 1,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<bool> _imageExists(String path) async {
+    try {
+      await DefaultAssetBundle.of(context).load(path);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   Widget _buildIngredientChip(Ingredient ingredient, bool isDarkMode) {
@@ -595,50 +703,6 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 材料画像
-            Stack(
-              children: [
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      ingredient.iconPath,
-                      width: 24,
-                      height: 24,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        // 画像が見つからない場合はテキストで代替
-                        return Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            color: ingredient.backgroundColor,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Center(
-                            child: Text(
-                              ingredient.name.substring(0, 1),
-                              style: const TextStyle(
-                                color: Colors.black87,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                // 選択時の色付きバッジ（今は表示せず、選択時のみ表示）
-              ],
-            ),
-            const SizedBox(width: 8),
             // 材料名
             Text(
               ingredient.name,
@@ -648,6 +712,8 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
                 fontWeight: FontWeight.w500,
               ),
             ),
+            // 材料画像（右側、画像がある場合のみ）
+            _buildIngredientImage(ingredient),
           ],
         ),
       ),
