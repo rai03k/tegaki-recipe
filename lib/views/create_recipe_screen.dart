@@ -166,48 +166,48 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // 料理画像選択
-                      Center(
-                        child: GestureDetector(
-                          onTap: _selectImage,
-                          child: Container(
-                            width: 200,
-                            height: 150, // 4:3比率
-                            decoration: BoxDecoration(
-                              color: isDarkMode ? Colors.grey[800] : Colors.white,
-                              border: Border.all(
-                                color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
-                                width: 2,
-                                style: BorderStyle.solid,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
+                      GestureDetector(
+                        onTap: _selectImage,
+                        child: Container(
+                          width: double.infinity,
+                          height: (MediaQuery.of(context).size.width - 40) * 3 / 4, // 4:3比率
+                          decoration: BoxDecoration(
+                            color: isDarkMode ? Colors.grey[800] : Colors.white,
+                            border: Border.all(
+                              color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
+                              width: 2,
+                              style: BorderStyle.solid,
                             ),
-                            child: _selectedImagePath != null
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Image.file(
-                                      File(_selectedImagePath!),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  )
-                                : Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      HugeIcon(
-                                        icon: HugeIcons.strokeRoundedImage01,
-                                        color: isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
-                                        size: 48.0,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        '料理画像を選択',
-                                        style: TextStyle(
-                                          color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                            borderRadius: BorderRadius.circular(12),
                           ),
+                          child: _selectedImagePath != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.file(
+                                    File(_selectedImagePath!),
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                                )
+                              : Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    HugeIcon(
+                                      icon: HugeIcons.strokeRoundedImage01,
+                                      color: isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
+                                      size: 48.0,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      '料理画像を選択',
+                                      style: TextStyle(
+                                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                         ),
                       ),
                       const SizedBox(height: 32),
