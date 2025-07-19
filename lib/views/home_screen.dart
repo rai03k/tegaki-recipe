@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../models/database.dart';
-import '../repositories/recipe_book_repository.dart';
+import '../services/database_service.dart';
 import 'dart:io';
 
 class HomeScreen extends StatefulWidget {
@@ -21,29 +21,26 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final PageController _pageController;
-  late final TegakiDatabase _database;
-  late final RecipeBookRepository _repository;
   List<RecipeBook> _recipeBooks = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _database = TegakiDatabase();
-    _repository = RecipeBookRepository(_database);
     _loadRecipeBooks();
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
-    _database.close();
+    if (_recipeBooks.isNotEmpty) {
+      _pageController.dispose();
+    }
     super.dispose();
   }
 
   Future<void> _loadRecipeBooks() async {
     try {
-      final books = await _repository.getAllRecipeBooks();
+      final books = await DatabaseService.instance.recipeBookRepository.getAllRecipeBooks();
       setState(() {
         _recipeBooks = books;
         _isLoading = false;

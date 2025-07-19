@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../services/image_service.dart';
-import '../models/database.dart';
-import '../repositories/recipe_book_repository.dart';
+import '../services/database_service.dart';
 import 'dart:io';
 
 class CreateRecipeBookScreen extends StatefulWidget {
@@ -21,22 +20,12 @@ class CreateRecipeBookScreen extends StatefulWidget {
 class _CreateRecipeBookScreenState extends State<CreateRecipeBookScreen> {
   final _titleController = TextEditingController();
   final _imageService = ImageService();
-  late final TegakiDatabase _database;
-  late final RecipeBookRepository _repository;
   String? _selectedImagePath;
   bool _isLoading = false;
 
   @override
-  void initState() {
-    super.initState();
-    _database = TegakiDatabase();
-    _repository = RecipeBookRepository(_database);
-  }
-
-  @override
   void dispose() {
     _titleController.dispose();
-    _database.close();
     super.dispose();
   }
 
@@ -66,7 +55,7 @@ class _CreateRecipeBookScreenState extends State<CreateRecipeBookScreen> {
     });
 
     try {
-      await _repository.createRecipeBook(
+      await DatabaseService.instance.recipeBookRepository.createRecipeBook(
         title: _titleController.text.trim(),
         coverImagePath: _selectedImagePath,
       );
