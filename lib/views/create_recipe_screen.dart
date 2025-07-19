@@ -45,7 +45,7 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
 
   Future<void> _selectImage() async {
     final isDarkMode = ref.read(themeNotifierProvider) == ThemeMode.dark;
-    final imagePath = await _imageService.pickAndCropImage(
+    final imagePath = await _imageService.pickAndCropRecipeImage(
       context: context,
       isDarkMode: isDarkMode,
     );
@@ -171,7 +171,7 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                           onTap: _selectImage,
                           child: Container(
                             width: 200,
-                            height: 267, // 3:4比率
+                            height: 150, // 4:3比率
                             decoration: BoxDecoration(
                               color: isDarkMode ? Colors.grey[800] : Colors.white,
                               border: Border.all(

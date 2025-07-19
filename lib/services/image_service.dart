@@ -8,7 +8,7 @@ import 'package:path/path.dart' as p;
 class ImageService {
   final ImagePicker _picker = ImagePicker();
 
-  // 画像を選択し、3:4比率でトリミング
+  // 画像を選択し、3:4比率でトリミング（レシピ本表紙用）
   Future<String?> pickAndCropImage({
     required BuildContext context,
     bool isDarkMode = false,
@@ -162,6 +162,63 @@ class ImageService {
     } catch (e) {
       debugPrint('画像削除エラー: $e');
       return false;
+    }
+  }
+
+  // 画像を選択し、4:3比率でトリミング（レシピ用）
+  Future<String?> pickAndCropRecipeImage({
+    required BuildContext context,
+    bool isDarkMode = false,
+  }) async {
+    try {
+      // 画像ソース選択ダイアログ
+      final source = await _showImageSourceDialog(context, isDarkMode);
+      if (source == null) return null;
+
+      // 画像を選択
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 80,
+      );
+
+      if (pickedFile == null) return null;
+
+      // 4:3比率でトリミング
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: pickedFile.path,
+        aspectRatio: const CropAspectRatio(ratioX: 4, ratioY: 3),
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: '画像をトリミング',
+            toolbarColor: isDarkMode ? Colors.grey[800] : Colors.deepPurple,
+            toolbarWidgetColor: Colors.white,
+            activeControlsWidgetColor: Colors.deepPurple,
+            backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
+            cropGridColor: Colors.white70,
+            cropFrameColor: Colors.deepPurple,
+            dimmedLayerColor: Colors.black54,
+            lockAspectRatio: true,
+          ),
+          IOSUiSettings(
+            title: '画像をトリミング',
+            aspectRatioLockEnabled: true,
+            resetAspectRatioEnabled: false,
+            rotateButtonsHidden: false,
+            rotateClockwiseButtonHidden: false,
+          ),
+        ],
+      );
+
+      if (croppedFile == null) return null;
+
+      // アプリの永続化ディレクトリに保存
+      final savedPath = await _saveImageToAppDirectory(croppedFile.path);
+      return savedPath;
+    } catch (e) {
+      debugPrint('画像選択エラー: $e');
+      return null;
     }
   }
 
