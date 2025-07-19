@@ -9,7 +9,8 @@
       "Bash(find:*)",
       "Bash(git push:*)",
       "Bash(flutter run:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(flutter packages pub run:*)"
     ],
     "deny": []
   }

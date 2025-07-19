@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../services/image_service.dart';
+import '../models/database.dart';
+import '../repositories/recipe_book_repository.dart';
+import 'dart:io';
 
 class CreateRecipeBookScreen extends StatefulWidget {
   final bool isDarkMode;
@@ -16,19 +20,40 @@ class CreateRecipeBookScreen extends StatefulWidget {
 
 class _CreateRecipeBookScreenState extends State<CreateRecipeBookScreen> {
   final _titleController = TextEditingController();
+  final _imageService = ImageService();
+  late final TegakiDatabase _database;
+  late final RecipeBookRepository _repository;
   String? _selectedImagePath;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _database = TegakiDatabase();
+    _repository = RecipeBookRepository(_database);
+  }
 
   @override
   void dispose() {
     _titleController.dispose();
+    _database.close();
     super.dispose();
   }
 
-  void _selectImage() {
-    // TODO: 画像選択とトリミング機能を実装
+  Future<void> _selectImage() async {
+    final imagePath = await _imageService.pickAndCropImage(
+      context: context,
+      isDarkMode: widget.isDarkMode,
+    );
+    
+    if (imagePath != null) {
+      setState(() {
+        _selectedImagePath = imagePath;
+      });
+    }
   }
 
-  void _saveRecipeBook() {
+  Future<void> _saveRecipeBook() async {
     if (_titleController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('タイトルを入力してください')),
@@ -36,8 +61,35 @@ class _CreateRecipeBookScreenState extends State<CreateRecipeBookScreen> {
       return;
     }
 
-    // TODO: データベースに保存
-    context.pop();
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _repository.createRecipeBook(
+        title: _titleController.text.trim(),
+        coverImagePath: _selectedImagePath,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('レシピ本を作成しました')),
+        );
+        context.pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('エラーが発生しました: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -95,8 +147,8 @@ class _CreateRecipeBookScreenState extends State<CreateRecipeBookScreen> {
                     child: _selectedImagePath != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(10),
-                            child: Image.asset(
-                              _selectedImagePath!,
+                            child: Image.file(
+                              File(_selectedImagePath!),
                               fit: BoxFit.cover,
                             ),
                           )
@@ -182,7 +234,7 @@ class _CreateRecipeBookScreenState extends State<CreateRecipeBookScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _saveRecipeBook,
+                  onPressed: _isLoading ? null : _saveRecipeBook,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.deepPurple,
                     foregroundColor: Colors.white,
@@ -191,13 +243,22 @@ class _CreateRecipeBookScreenState extends State<CreateRecipeBookScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    '作成',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          '作成',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
             ],
