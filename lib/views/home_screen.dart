@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (_recipeBooks.isNotEmpty) {
         _pageController = PageController(
           viewportFraction: 0.5,
-          initialPage: _recipeBooks.length * 100,
+          initialPage: 0,
         );
       }
     } catch (e) {
@@ -75,14 +75,12 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           // メインコンテンツ
           if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            )
+            const Center(child: CircularProgressIndicator())
           else if (_recipeBooks.isEmpty)
             _buildEmptyState()
           else
             _buildRecipeBooksCarousel(cardHeight),
-          
+
           // ランプUI
           Positioned(top: 40, right: 30, child: _buildLampWidget()),
           // 時計UI
@@ -112,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           HugeIcon(
             icon: HugeIcons.strokeRoundedBook02,
-            color: widget.isDarkMode ? Colors.grey[400] : Colors.grey[600],
+            color: widget.isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
             size: 80.0,
           ),
           const SizedBox(height: 24),
@@ -146,29 +144,25 @@ class _HomeScreenState extends State<HomeScreen> {
         height: cardHeight + 80,
         child: PageView.builder(
           controller: _pageController,
-          itemCount: null,
+          itemCount: _recipeBooks.length,
           clipBehavior: Clip.none,
           itemBuilder: (context, index) {
-            final itemIndex = index % _recipeBooks.length;
-            final recipeBook = _recipeBooks[itemIndex];
+            final recipeBook = _recipeBooks[index];
 
             return AnimatedBuilder(
               animation: _pageController,
               builder: (context, child) {
-                final currentPage = _pageController.position.haveDimensions
-                    ? _pageController.page!
-                    : _pageController.initialPage.toDouble();
+                final currentPage =
+                    _pageController.position.haveDimensions
+                        ? _pageController.page!
+                        : _pageController.initialPage.toDouble();
 
                 final difference = (currentPage - index).abs();
                 final scale = (1 - (difference * 0.2)).clamp(0.8, 1.0);
 
                 return Transform.scale(scale: scale, child: child);
               },
-              child: _buildCarouselItem(
-                context,
-                recipeBook,
-                cardHeight,
-              ),
+              child: _buildCarouselItem(context, recipeBook, cardHeight),
             );
           },
         ),
@@ -193,57 +187,46 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: BoxDecoration(
             color: widget.isDarkMode ? Colors.grey[800] : Colors.white,
             border: Border.all(
-              color: widget.isDarkMode ? Colors.grey[600]! : Colors.grey.shade300,
+              color:
+                  widget.isDarkMode ? Colors.grey[600]! : Colors.grey.shade300,
             ),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: widget.isDarkMode
-                    ? Colors.black.withOpacity(0.3)
-                    : Colors.black.withOpacity(0.1),
+                color:
+                    widget.isDarkMode
+                        ? Colors.black.withOpacity(0.3)
+                        : Colors.black.withOpacity(0.1),
                 spreadRadius: 1,
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: recipeBook.coverImagePath != null
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: Image.file(
-                    File(recipeBook.coverImagePath!),
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
-                  ),
-                )
-              : Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedBook02,
-                          color: widget.isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                          size: 48.0,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          recipeBook.title,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: widget.isDarkMode ? Colors.grey[200] : Colors.grey[800],
-                            height: 1.3,
+          child:
+              recipeBook.coverImagePath != null
+                  ? FutureBuilder<bool>(
+                    future: File(recipeBook.coverImagePath!).exists(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData && snapshot.data == true) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: Image.file(
+                            File(recipeBook.coverImagePath!),
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            errorBuilder: (context, error, stackTrace) {
+                              return _buildDefaultBookContent(recipeBook);
+                            },
                           ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                        );
+                      } else {
+                        return _buildDefaultBookContent(recipeBook);
+                      }
+                    },
+                  )
+                  : _buildDefaultBookContent(recipeBook),
         ),
         const SizedBox(height: 16),
         // タイトルを下部に表示（画像がある場合）
@@ -303,15 +286,16 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 height: 70,
                 child: ColorFiltered(
-                  colorFilter: widget.isDarkMode
-                      ? const ColorFilter.mode(
-                          Colors.white,
-                          BlendMode.srcIn,
-                        )
-                      : const ColorFilter.mode(
-                          Colors.transparent,
-                          BlendMode.multiply,
-                        ),
+                  colorFilter:
+                      widget.isDarkMode
+                          ? const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          )
+                          : const ColorFilter.mode(
+                            Colors.transparent,
+                            BlendMode.multiply,
+                          ),
                   child: Image.asset(
                     'assets/images/furniture/lamp.png',
                     fit: BoxFit.contain,
@@ -325,16 +309,48 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // デフォルトの本コンテンツ（画像がない、または読み込めない場合）
+  Widget _buildDefaultBookContent(RecipeBook recipeBook) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedBook02,
+              color: widget.isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
+              size: 48.0,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              recipeBook.title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                color: widget.isDarkMode ? Colors.grey[200] : Colors.grey[800],
+                height: 1.3,
+              ),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildClockWidget() {
     return Container(
       height: 100,
       child: ColorFiltered(
-        colorFilter: widget.isDarkMode
-            ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
-            : const ColorFilter.mode(
-                Colors.transparent,
-                BlendMode.multiply,
-              ),
+        colorFilter:
+            widget.isDarkMode
+                ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                : const ColorFilter.mode(
+                  Colors.transparent,
+                  BlendMode.multiply,
+                ),
         child: Image.asset(
           'assets/images/furniture/clock.png',
           fit: BoxFit.contain,
