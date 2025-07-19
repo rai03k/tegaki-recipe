@@ -130,11 +130,9 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
             ),
           ),
           // ランプUI
-          Positioned(
-            top: 40,
-            right: 20,
-            child: _buildLampWidget(),
-          ),
+          Positioned(top: 40, right: 20, child: _buildLampWidget()),
+          // 時計UI
+          Positioned(top: 40, left: 20, child: _buildClockWidget()),
         ],
       ),
     );
@@ -158,14 +156,16 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
           decoration: BoxDecoration(
             color: widget.isDarkMode ? Colors.grey[800] : Colors.white,
             border: Border.all(
-              color: widget.isDarkMode ? Colors.grey[600]! : Colors.grey.shade300,
+              color:
+                  widget.isDarkMode ? Colors.grey[600]! : Colors.grey.shade300,
             ),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: widget.isDarkMode 
-                    ? Colors.black.withOpacity(0.3)
-                    : Colors.black.withOpacity(0.1),
+                color:
+                    widget.isDarkMode
+                        ? Colors.black.withOpacity(0.3)
+                        : Colors.black.withOpacity(0.1),
                 spreadRadius: 1,
                 blurRadius: 8,
                 offset: const Offset(0, 4),
@@ -180,7 +180,8 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 26,
-                  color: widget.isDarkMode ? Colors.grey[200] : Colors.grey[800],
+                  color:
+                      widget.isDarkMode ? Colors.grey[200] : Colors.grey[800],
                   height: 1.5,
                 ),
               ),
@@ -189,9 +190,9 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
         ),
         const SizedBox(height: 16),
         Text(
-          title, 
+          title,
           style: TextStyle(
-            fontSize: 16, 
+            fontSize: 16,
             color: widget.isDarkMode ? Colors.grey[300] : Colors.grey[700],
           ),
         ),
@@ -200,38 +201,24 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
   }
 
   Widget _buildLampWidget() {
-    return GestureDetector(
-      onTap: widget.onThemeToggle,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 吊り下げ棒
-          Container(
-            width: 2,
-            height: 30,
-            color: widget.isDarkMode ? Colors.white70 : Colors.black54,
-          ),
-          // ランプ本体
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              // ランプ画像
-              Container(
-                width: 60,
-                height: 60,
-                child: ColorFiltered(
-                  colorFilter: widget.isDarkMode 
-                      ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
-                      : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
-                  child: Image.asset(
-                    'assets/images/furniture/lamp.png',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-              // ライトモード時の光エフェクト
-              if (!widget.isDarkMode)
-                Container(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 吊り下げ棒
+        Container(
+          width: 1,
+          height: 60,
+          color: widget.isDarkMode ? Colors.white70 : Colors.black54,
+        ),
+        // ランプ本体
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            // ライトモード時の光エフェクト
+            if (!widget.isDarkMode)
+              Positioned(
+                top: 50,
+                child: Container(
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
@@ -246,9 +233,48 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
                     ],
                   ),
                 ),
-            ],
-          ),
-        ],
+              ),
+            // ランプ画像
+            GestureDetector(
+              onTap: widget.onThemeToggle,
+              child: Container(
+                height: 80,
+                child: ColorFiltered(
+                  colorFilter:
+                      widget.isDarkMode
+                          ? const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          )
+                          : const ColorFilter.mode(
+                            Colors.transparent,
+                            BlendMode.multiply,
+                          ),
+                  child: Image.asset(
+                    'assets/images/furniture/lamp.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildClockWidget() {
+    return Container(
+      width: 60,
+      height: 60,
+      child: ColorFiltered(
+        colorFilter: widget.isDarkMode 
+            ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+            : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
+        child: Image.asset(
+          'assets/images/furniture/clock.png',
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }
