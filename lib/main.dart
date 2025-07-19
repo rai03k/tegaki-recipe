@@ -72,14 +72,16 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Center(
-        child: SizedBox(
-          height: cardHeight + 80,
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: null,
-            clipBehavior: Clip.none,
-            itemBuilder: (context, index) {
+      body: Stack(
+        children: [
+          Center(
+            child: SizedBox(
+              height: cardHeight + 80,
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: null,
+                clipBehavior: Clip.none,
+                itemBuilder: (context, index) {
               final itemIndex = index % _recipeBooks.length;
 
               // ★変更点：ここからアニメーションのロジックを戻します
@@ -103,9 +105,19 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
                 ),
               );
               // ★変更点：ここまでがアニメーションのロジックです
-            },
+              },
+            ),
           ),
-        ),
+          Positioned(
+            top: 50,
+            right: 20,
+            child: Image.asset(
+              'assets/images/furniture/lamp.png',
+              width: 40,
+              height: 40,
+            ),
+          ),
+        ],
       ),
     );
   }
