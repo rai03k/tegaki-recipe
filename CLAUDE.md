@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # トップレベルルール
 
 * Claudeには**英語で思考**させ、出力（応答）は必ず**日本語**で行うこと。
@@ -30,13 +34,6 @@
   * 質問を複数回に分けて行う。
 
 ## 開発スタイル
-
-### 各タスクの要件
-
-* 設計内容は`.tmp/design.md`に記載する。
-* 各メインタスクの詳細なサブタスクは`.tmp/task.md`に記載する。
-* 作業進行に応じて`.tmp/task.md`を随時更新する。
-
 ### 作業開始時の手順
 
 * 必要な設計を行い、方針を明確に示してください。
@@ -57,3 +54,57 @@
 ### アーキテクチャ
 MVVMの画面ファーストで開発してください。
 View, ViewModel, Repository, Serivceで開発してください。
+
+## 共通開発コマンド
+
+### 基本コマンド
+```bash
+flutter run              # アプリを実行
+flutter test             # テストを実行
+flutter analyze          # 静的解析とlintを実行
+flutter build apk        # Androidビルド
+flutter build ios        # iOSビルド
+flutter clean            # ビルドキャッシュをクリア
+flutter pub get          # 依存関係をインストール
+```
+
+### git操作
+```bash
+git add .
+git commit -m "メッセージ"
+git push origin main
+```
+
+## プロジェクト構造
+
+### 現在の構造
+- **lib/main.dart** - 単一エントリーポイント（現在全てのコードがここに含まれている）
+- **assets/images/** - 画像アセット
+- **assets/font/** - カスタムフォント（ArmedLemon）
+
+### 目標構造（実装予定）
+```
+lib/
+├── main.dart
+├── views/              # 画面ファーストのView層
+├── view_models/        # ViewModel層
+├── repositories/       # Repository層
+├── services/          # Service層
+├── models/            # データモデル（Freezed使用）
+└── utils/             # ユーティリティ
+```
+
+## 技術的詳細
+
+### 現在の実装状況
+- **基本Flutter**: ✅ 実装済み
+- **カルーセルUI**: ✅ 実装済み（PageView + アニメーション）
+- **カスタムフォント**: ✅ ArmedLemon適用済み
+- **レスポンシブデザイン**: ✅ MediaQuery使用
+
+### 実装予定の技術スタック
+- **Riverpod**: ❌ 未実装（状態管理）
+- **Freezed**: ❌ 未実装（イミュータブルクラス）
+- **GoRouter**: ❌ 未実装（ナビゲーション）
+- **Firebase**: ❌ 未実装（Auth、Firestore、Storage、Functions）
+- **Just Audio**: ❌ 未実装（音声再生）

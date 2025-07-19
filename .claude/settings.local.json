@@ -5,7 +5,8 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git init:*)",
-      "Bash(gemini -p \"I want to add a lamp icon in the top right corner of a Flutter carousel screen. What''s the best approach? Should I use a FloatingActionButton, AppBar actions, or Stack with Positioned? Consider Material Design guidelines and user experience. Also suggest what lamp icon to use from Material Icons.\")"
+      "Bash(gemini -p \"I want to add a lamp icon in the top right corner of a Flutter carousel screen. What''s the best approach? Should I use a FloatingActionButton, AppBar actions, or Stack with Positioned? Consider Material Design guidelines and user experience. Also suggest what lamp icon to use from Material Icons.\")",
+      "Bash(find:*)"
     ],
     "deny": []
   }

@@ -12,6 +12,14 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  bool _isDarkMode = false;
+
+  void _toggleTheme() {
+    setState(() {
+      _isDarkMode = !_isDarkMode;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,13 +35,24 @@ class _MyAppState extends State<MyApp> {
         ),
         fontFamily: 'ArmedLemon',
       ),
-      home: CarouselSampleScreen(),
+      themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      home: CarouselSampleScreen(
+        onThemeToggle: _toggleTheme,
+        isDarkMode: _isDarkMode,
+      ),
     );
   }
 }
 
 class CarouselSampleScreen extends StatefulWidget {
-  const CarouselSampleScreen({super.key});
+  final VoidCallback onThemeToggle;
+  final bool isDarkMode;
+
+  const CarouselSampleScreen({
+    super.key,
+    required this.onThemeToggle,
+    required this.isDarkMode,
+  });
 
   @override
   State<CarouselSampleScreen> createState() => _CarouselSampleScreenState();
@@ -82,40 +101,39 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
                 itemCount: null,
                 clipBehavior: Clip.none,
                 itemBuilder: (context, index) {
-              final itemIndex = index % _recipeBooks.length;
+                  final itemIndex = index % _recipeBooks.length;
 
-              // ★変更点：ここからアニメーションのロジックを戻します
-              return AnimatedBuilder(
-                animation: _pageController,
-                builder: (context, child) {
-                  final currentPage = _pageController.position.haveDimensions
-                      ? _pageController.page!
-                      : _pageController.initialPage.toDouble();
-                  
-                  final difference = (currentPage - index).abs();
-                  final scale = (1 - (difference * 0.2)).clamp(0.8, 1.0);
+                  // ★変更点：ここからアニメーションのロジックを戻します
+                  return AnimatedBuilder(
+                    animation: _pageController,
+                    builder: (context, child) {
+                      final currentPage =
+                          _pageController.position.haveDimensions
+                              ? _pageController.page!
+                              : _pageController.initialPage.toDouble();
 
-                  return Transform.scale(scale: scale, child: child);
+                      final difference = (currentPage - index).abs();
+                      final scale = (1 - (difference * 0.2)).clamp(0.8, 1.0);
+
+                      return Transform.scale(scale: scale, child: child);
+                    },
+                    // 上のbuilderにchildとして渡されるウィジェット
+                    child: _buildCarouselItem(
+                      context,
+                      _recipeBooks[itemIndex],
+                      cardHeight,
+                    ),
+                  );
+                  // ★変更点：ここまでがアニメーションのロジックです
                 },
-                // 上のbuilderにchildとして渡されるウィジェット
-                child: _buildCarouselItem(
-                  context,
-                  _recipeBooks[itemIndex],
-                  cardHeight,
-                ),
-              );
-              // ★変更点：ここまでがアニメーションのロジックです
-              },
+              ),
             ),
           ),
+          // ランプUI
           Positioned(
-            top: 50,
+            top: 40,
             right: 20,
-            child: Image.asset(
-              'assets/images/furniture/lamp.png',
-              width: 40,
-              height: 40,
-            ),
+            child: _buildLampWidget(),
           ),
         ],
       ),
@@ -168,6 +186,55 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
         const SizedBox(height: 16),
         Text(title, style: TextStyle(fontSize: 16, color: Colors.grey[700])),
       ],
+    );
+  }
+
+  Widget _buildLampWidget() {
+    return GestureDetector(
+      onTap: widget.onThemeToggle,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 吊り下げ棒
+          Container(
+            width: 2,
+            height: 30,
+            color: widget.isDarkMode ? Colors.white70 : Colors.black54,
+          ),
+          // ランプ本体
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              // ランプ画像
+              Container(
+                width: 60,
+                height: 60,
+                child: Image.asset(
+                  'assets/images/furniture/lamp.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+              // ライトモード時の光エフェクト
+              if (!widget.isDarkMode)
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.yellow.withOpacity(0.6),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.yellow.withOpacity(0.4),
+                        blurRadius: 20,
+                        spreadRadius: 5,
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
