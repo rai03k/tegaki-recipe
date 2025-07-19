@@ -20,7 +20,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final PageController _pageController;
+  PageController? _pageController;
   List<RecipeBook> _recipeBooks = [];
   bool _isLoading = true;
 
@@ -31,10 +31,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 画面に戻ってきた時にデータを再読み込み
+    _loadRecipeBooks();
+  }
+
+  @override
   void dispose() {
-    if (_recipeBooks.isNotEmpty) {
-      _pageController.dispose();
-    }
+    _pageController?.dispose();
     super.dispose();
   }
 
@@ -46,8 +51,10 @@ class _HomeScreenState extends State<HomeScreen> {
         _isLoading = false;
       });
 
-      // レシピ本がある場合のみPageControllerを初期化
+      // PageControllerを初期化（必要に応じて再作成）
       if (_recipeBooks.isNotEmpty) {
+        // 既存のPageControllerがある場合は破棄
+        _pageController?.dispose();
         _pageController = PageController(
           viewportFraction: 0.5,
           initialPage: 0,
@@ -85,8 +92,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.push('/create-recipe-book');
+        onPressed: () async {
+          await context.push('/create-recipe-book');
+          // 画面から戻ってきたときにデータを再読み込み
+          _loadRecipeBooks();
         },
         backgroundColor:
             widget.isDarkMode ? Colors.grey[700] : Colors.deepPurple,
@@ -140,19 +149,19 @@ class _HomeScreenState extends State<HomeScreen> {
       child: SizedBox(
         height: cardHeight + 80,
         child: PageView.builder(
-          controller: _pageController,
+          controller: _pageController!,
           itemCount: _recipeBooks.length,
           clipBehavior: Clip.none,
           itemBuilder: (context, index) {
             final recipeBook = _recipeBooks[index];
 
             return AnimatedBuilder(
-              animation: _pageController,
+              animation: _pageController!,
               builder: (context, child) {
                 final currentPage =
-                    _pageController.position.haveDimensions
-                        ? _pageController.page!
-                        : _pageController.initialPage.toDouble();
+                    _pageController!.position.haveDimensions
+                        ? _pageController!.page!
+                        : _pageController!.initialPage.toDouble();
 
                 final difference = (currentPage - index).abs();
                 final scale = (1 - (difference * 0.2)).clamp(0.8, 1.0);
