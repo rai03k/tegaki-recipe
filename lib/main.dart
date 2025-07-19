@@ -90,7 +90,7 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
     final cardHeight = screenHeight / 3;
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: widget.isDarkMode ? Colors.grey[900] : Colors.grey[100],
       body: Stack(
         children: [
           Center(
@@ -156,12 +156,16 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
           height: cardHeight,
           margin: const EdgeInsets.symmetric(horizontal: 10.0),
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.grey.shade300),
+            color: widget.isDarkMode ? Colors.grey[800] : Colors.white,
+            border: Border.all(
+              color: widget.isDarkMode ? Colors.grey[600]! : Colors.grey.shade300,
+            ),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: widget.isDarkMode 
+                    ? Colors.black.withOpacity(0.3)
+                    : Colors.black.withOpacity(0.1),
                 spreadRadius: 1,
                 blurRadius: 8,
                 offset: const Offset(0, 4),
@@ -176,7 +180,7 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 26,
-                  color: Colors.grey[800],
+                  color: widget.isDarkMode ? Colors.grey[200] : Colors.grey[800],
                   height: 1.5,
                 ),
               ),
@@ -184,7 +188,13 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        Text(title, style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+        Text(
+          title, 
+          style: TextStyle(
+            fontSize: 16, 
+            color: widget.isDarkMode ? Colors.grey[300] : Colors.grey[700],
+          ),
+        ),
       ],
     );
   }
