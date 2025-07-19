@@ -169,7 +169,7 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                           lineColor: isDarkMode 
                               ? Colors.grey[700]!.withOpacity(0.3)
                               : Colors.grey[300]!.withOpacity(0.5),
-                          lineSpacing: 48.0,
+                          lineSpacing: 40.0, // テキストの行間に合わせて調整
                         ),
                       ),
                     ),
@@ -397,26 +397,30 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
   }
 
   Widget _buildSectionTitle(String title, bool isDarkMode, {bool required = false}) {
-    return Row(
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: isDarkMode ? Colors.white : Colors.black,
-          ),
-        ),
-        if (required)
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, top: 8, bottom: 4),
+      child: Row(
+        children: [
           Text(
-            ' *',
+            title,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.red,
+              color: isDarkMode ? Colors.white : Colors.black,
+              height: 1.2, // タイトルの行間を少し調整
             ),
           ),
-      ],
+          if (required)
+            Text(
+              ' *',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -437,7 +441,7 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
       style: TextStyle(
         color: isDarkMode ? Colors.white : Colors.black,
         fontSize: 16,
-        height: 1.5, // 行間を調整して横線に合わせる
+        height: 2.5, // 40pxの線間隔に合わせて行間を調整
       ),
       decoration: InputDecoration(
         hintText: hintText,
@@ -447,7 +451,7 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
         ),
         filled: true,
         fillColor: Colors.transparent, // 背景を透明にして横線を見せる
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(
