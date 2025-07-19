@@ -5,8 +5,6 @@ import 'package:hugeicons/hugeicons.dart';
 import '../services/image_service.dart';
 import '../view_models/recipe_book_view_model.dart';
 import '../view_models/theme_view_model.dart';
-import '../constants/app_strings.dart';
-import '../constants/ui_constants.dart';
 import 'dart:io';
 
 class CreateRecipeBookScreen extends ConsumerStatefulWidget {
@@ -44,7 +42,7 @@ class _CreateRecipeBookScreenState extends ConsumerState<CreateRecipeBookScreen>
   Future<void> _saveRecipeBook() async {
     if (_titleController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppStrings.titleRequired)),
+        const SnackBar(content: Text('タイトルを入力してください')),
       );
       return;
     }
@@ -57,12 +55,12 @@ class _CreateRecipeBookScreenState extends ConsumerState<CreateRecipeBookScreen>
     if (mounted) {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppStrings.recipeBookCreated)),
+          const SnackBar(content: Text('レシピ本を作成しました')),
         );
         context.pop();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppStrings.errorOccurred)),
+          const SnackBar(content: Text('エラーが発生しました')),
         );
       }
     }
@@ -74,10 +72,10 @@ class _CreateRecipeBookScreenState extends ConsumerState<CreateRecipeBookScreen>
     final recipeBookState = ref.watch(recipeBookNotifierProvider);
     
     return Scaffold(
-      backgroundColor: isDarkMode ? Color(ColorConstants.grey900) : Color(ColorConstants.grey100),
+      backgroundColor: isDarkMode ? Colors.grey[900] : Colors.grey[100],
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(UIConstants.paddingLarge),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -89,43 +87,43 @@ class _CreateRecipeBookScreenState extends ConsumerState<CreateRecipeBookScreen>
                     child: HugeIcon(
                       icon: HugeIcons.strokeRoundedArrowLeft01,
                       color: isDarkMode ? Colors.white : Colors.black,
-                      size: UIConstants.iconSizeSmall,
+                      size: 24.0,
                     ),
                   ),
-                  SizedBox(width: UIConstants.paddingMedium),
+                  const SizedBox(width: 16),
                   Text(
-                    AppStrings.createRecipeBook,
+                    'レシピ本作成',
                     style: TextStyle(
-                      fontSize: UIConstants.fontSizeXLarge,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: isDarkMode ? Colors.white : Colors.black,
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: UIConstants.paddingXLarge),
+              const SizedBox(height: 40),
 
               // 表紙画像選択
               Center(
                 child: GestureDetector(
                   onTap: _selectImage,
                   child: Container(
-                    width: UIConstants.recipeBookWidth,
-                    height: UIConstants.recipeBookHeight,
+                    width: 200,
+                    height: 267, // 3:4比率
                     decoration: BoxDecoration(
-                      color: isDarkMode ? Color(ColorConstants.grey800) : Colors.white,
+                      color: isDarkMode ? Colors.grey[800] : Colors.white,
                       border: Border.all(
                         color: isDarkMode
-                            ? Color(ColorConstants.grey600)
-                            : Color(ColorConstants.grey300),
+                            ? Colors.grey[600]!
+                            : Colors.grey[300]!,
                         width: 2,
                         style: BorderStyle.solid,
                       ),
-                      borderRadius: BorderRadius.circular(UIConstants.borderRadiusLarge),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: _selectedImagePath != null
                         ? ClipRRect(
-                            borderRadius: BorderRadius.circular(UIConstants.borderRadiusSmall),
+                            borderRadius: BorderRadius.circular(10),
                             child: Image.file(
                               File(_selectedImagePath!),
                               fit: BoxFit.cover,
@@ -137,18 +135,18 @@ class _CreateRecipeBookScreenState extends ConsumerState<CreateRecipeBookScreen>
                               HugeIcon(
                                 icon: HugeIcons.strokeRoundedImage01,
                                 color: isDarkMode
-                                    ? Color(ColorConstants.grey400)
-                                    : Color(ColorConstants.grey600),
-                                size: UIConstants.iconSizeMedium,
+                                    ? Colors.grey[400]!
+                                    : Colors.grey[600]!,
+                                size: 48.0,
                               ),
-                              SizedBox(height: UIConstants.paddingSmall),
+                              const SizedBox(height: 8),
                               Text(
-                                AppStrings.selectCoverImage,
+                                '表紙画像を選択',
                                 style: TextStyle(
                                   color: isDarkMode
-                                      ? Color(ColorConstants.grey400)
-                                      : Color(ColorConstants.grey600),
-                                  fontSize: UIConstants.fontSizeMedium,
+                                      ? Colors.grey[400]
+                                      : Colors.grey[600],
+                                  fontSize: 16,
                                 ),
                               ),
                             ],
@@ -156,49 +154,49 @@ class _CreateRecipeBookScreenState extends ConsumerState<CreateRecipeBookScreen>
                   ),
                 ),
               ),
-              SizedBox(height: UIConstants.paddingXLarge),
+              const SizedBox(height: 40),
 
               // タイトル入力
               Text(
-                AppStrings.recipeBookTitle,
+                'レシピ本タイトル',
                 style: TextStyle(
-                  fontSize: UIConstants.fontSizeLarge,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: isDarkMode ? Colors.white : Colors.black,
                 ),
               ),
-              SizedBox(height: UIConstants.paddingSmall),
+              const SizedBox(height: 12),
               TextField(
                 controller: _titleController,
                 style: TextStyle(
                   color: isDarkMode ? Colors.white : Colors.black,
-                  fontSize: UIConstants.fontSizeMedium,
+                  fontSize: 16,
                 ),
                 decoration: InputDecoration(
-                  hintText: AppStrings.enterRecipeBookTitle,
+                  hintText: 'レシピ本のタイトルを入力',
                   hintStyle: TextStyle(
-                    color: isDarkMode ? Color(ColorConstants.grey400) : Color(ColorConstants.grey600),
+                    color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                   ),
                   filled: true,
-                  fillColor: isDarkMode ? Color(ColorConstants.grey800) : Colors.white,
+                  fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(UIConstants.borderRadiusLarge),
+                    borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
                       color: isDarkMode
-                          ? Color(ColorConstants.grey600)
-                          : Color(ColorConstants.grey300),
+                          ? Colors.grey[600]!
+                          : Colors.grey[300]!,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(UIConstants.borderRadiusLarge),
+                    borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
                       color: isDarkMode
-                          ? Color(ColorConstants.grey600)
-                          : Color(ColorConstants.grey300),
+                          ? Colors.grey[600]!
+                          : Colors.grey[300]!,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(UIConstants.borderRadiusLarge),
+                    borderRadius: BorderRadius.circular(12),
                     borderSide: const BorderSide(
                       color: Colors.deepPurple,
                       width: 2,
@@ -217,24 +215,24 @@ class _CreateRecipeBookScreenState extends ConsumerState<CreateRecipeBookScreen>
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.deepPurple,
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: UIConstants.paddingMedium),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(UIConstants.borderRadiusLarge),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: recipeBookState.isLoading
-                      ? SizedBox(
-                          height: UIConstants.paddingLarge,
-                          width: UIConstants.paddingLarge,
-                          child: const CircularProgressIndicator(
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : Text(
-                          AppStrings.create,
+                      : const Text(
+                          '作成',
                           style: TextStyle(
-                            fontSize: UIConstants.fontSizeLarge,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

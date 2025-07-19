@@ -5,8 +5,6 @@ import 'package:hugeicons/hugeicons.dart';
 import '../models/database.dart';
 import '../view_models/recipe_book_view_model.dart';
 import '../view_models/theme_view_model.dart';
-import '../constants/app_strings.dart';
-import '../constants/ui_constants.dart';
 import 'dart:io';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -35,7 +33,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final cardHeight = screenHeight * UIConstants.cardHeightRatio;
+    final cardHeight = screenHeight / 3;
     final recipeBookState = ref.watch(recipeBookNotifierProvider);
     final themeNotifier = ref.read(themeNotifierProvider.notifier);
     final isDarkMode = ref.watch(themeNotifierProvider) == ThemeMode.dark;
@@ -43,13 +41,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // PageControllerの初期化
     if (recipeBookState.recipeBooks.isNotEmpty && _pageController == null) {
       _pageController = PageController(
-        viewportFraction: UIConstants.carouselViewportFraction,
+        viewportFraction: 0.5,
         initialPage: 0,
       );
     }
 
     return Scaffold(
-      backgroundColor: isDarkMode ? Color(ColorConstants.grey900) : Color(ColorConstants.grey100),
+      backgroundColor: isDarkMode ? Colors.grey[900] : Colors.grey[100],
       body: Stack(
         children: [
           // メインコンテンツ
@@ -62,14 +60,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
           // ランプUI
           Positioned(
-            top: UIConstants.lampTopPosition,
-            right: UIConstants.lampRightPosition,
+            top: 40,
+            right: 30,
             child: _buildLampWidget(isDarkMode, themeNotifier.toggleTheme),
           ),
           // 時計UI
           Positioned(
-            top: UIConstants.clockTopPosition,
-            left: UIConstants.clockLeftPosition,
+            top: 70,
+            left: 40,
             child: _buildClockWidget(isDarkMode),
           ),
         ],
@@ -80,7 +78,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // 画面から戻ってきたときにデータを再読み込み
           ref.read(recipeBookNotifierProvider.notifier).refresh();
         },
-        backgroundColor: isDarkMode ? Color(ColorConstants.grey700) : Colors.deepPurple,
+        backgroundColor: isDarkMode ? Colors.grey[700] : Colors.deepPurple,
         foregroundColor: Colors.white,
         child: const HugeIcon(
           icon: HugeIcons.strokeRoundedAdd01,
@@ -98,25 +96,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           HugeIcon(
             icon: HugeIcons.strokeRoundedBook02,
-            color: isDarkMode ? Color(ColorConstants.grey400) : Color(ColorConstants.grey600),
-            size: UIConstants.iconSizeLarge,
+            color: isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
+            size: 80.0,
           ),
-          const SizedBox(height: UIConstants.paddingLarge),
+          const SizedBox(height: 24),
           Text(
-            AppStrings.noRecipeBooksYet,
+            'レシピ本がまだないよ',
             style: TextStyle(
-              fontSize: UIConstants.fontSizeXLarge,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: isDarkMode ? Color(ColorConstants.grey300) : Color(ColorConstants.grey700),
+              color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
             ),
           ),
-          const SizedBox(height: UIConstants.paddingMedium),
+          const SizedBox(height: 16),
           Text(
-            AppStrings.createRecipeBookGuide,
+            '右下のボタンから\nレシピ本を作ってみよう！',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: UIConstants.fontSizeMedium,
-              color: isDarkMode ? Color(ColorConstants.grey400) : Color(ColorConstants.grey600),
+              fontSize: 16,
+              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
               height: 1.5,
             ),
           ),
@@ -129,7 +127,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildRecipeBooksCarousel(double cardHeight, bool isDarkMode, List<RecipeBook> recipeBooks) {
     return Center(
       child: SizedBox(
-        height: cardHeight + UIConstants.paddingXLarge * 2,
+        height: cardHeight + 80,
         child: PageView.builder(
           controller: _pageController!,
           itemCount: recipeBooks.length,
@@ -146,9 +144,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         : _pageController!.initialPage.toDouble();
 
                 final difference = (currentPage - index).abs();
-                final scale = (UIConstants.maxCarouselScale - 
-                    (difference * UIConstants.carouselScaleReduction))
-                    .clamp(UIConstants.minCarouselScale, UIConstants.maxCarouselScale);
+                final scale = (1 - (difference * 0.2)).clamp(0.8, 1.0);
 
                 return Transform.scale(scale: scale, child: child);
               },
@@ -166,7 +162,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     double cardHeight,
     bool isDarkMode,
   ) {
-    final cardWidth = cardHeight * UIConstants.aspectRatio3to4;
+    final cardWidth = cardHeight * (3 / 4);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -174,21 +170,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         Container(
           width: cardWidth,
           height: cardHeight,
-          margin: EdgeInsets.symmetric(horizontal: UIConstants.paddingSmall),
+          margin: const EdgeInsets.symmetric(horizontal: 10.0),
           decoration: BoxDecoration(
-            color: isDarkMode ? Color(ColorConstants.grey800) : Colors.white,
+            color: isDarkMode ? Colors.grey[800] : Colors.white,
             border: Border.all(
-              color: isDarkMode ? Color(ColorConstants.grey600) : Color(ColorConstants.grey300),
+              color: isDarkMode ? Colors.grey[600]! : Colors.grey.shade300,
             ),
-            borderRadius: BorderRadius.circular(UIConstants.borderRadiusMedium),
+            borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
                 color: isDarkMode 
-                    ? Colors.black.withOpacity(ColorConstants.opacityMedium)
-                    : Colors.black.withOpacity(ColorConstants.opacityLight),
-                spreadRadius: UIConstants.shadowSpreadRadius,
-                blurRadius: UIConstants.shadowBlurRadius,
-                offset: Offset(UIConstants.shadowOffsetDx, UIConstants.shadowOffsetDy),
+                    ? Colors.black.withOpacity(0.3)
+                    : Colors.black.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -198,7 +194,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   builder: (context, snapshot) {
                     if (snapshot.hasData && snapshot.data == true) {
                       return ClipRRect(
-                        borderRadius: BorderRadius.circular(UIConstants.borderRadiusSmall),
+                        borderRadius: BorderRadius.circular(6),
                         child: Image.file(
                           File(recipeBook.coverImagePath!),
                           fit: BoxFit.cover,
@@ -216,15 +212,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 )
               : _buildDefaultBookContent(recipeBook, isDarkMode),
         ),
-        SizedBox(height: UIConstants.paddingMedium),
+        const SizedBox(height: 16),
         // タイトルを下部に表示（画像がある場合）
         if (recipeBook.coverImagePath != null)
           Text(
             recipeBook.title,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: UIConstants.fontSizeMedium,
-              color: isDarkMode ? Color(ColorConstants.grey300) : Color(ColorConstants.grey700),
+              fontSize: 16,
+              color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
               fontWeight: FontWeight.w600,
             ),
             maxLines: 2,
@@ -240,8 +236,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       children: [
         // 吊り下げ棒
         Container(
-          width: UIConstants.lampHangingRodWidth,
-          height: UIConstants.lampHangingRodHeight,
+          width: 1,
+          height: 60,
           color: isDarkMode ? Colors.white70 : Colors.black54,
         ),
         // ランプ本体
@@ -256,7 +252,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.yellow.withOpacity(ColorConstants.opacityHigh),
+                    color: Colors.yellow.withOpacity(0.6),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
@@ -272,7 +268,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             GestureDetector(
               onTap: onThemeToggle,
               child: SizedBox(
-                height: UIConstants.lampHeight,
+                height: 70,
                 child: ColorFiltered(
                   colorFilter: isDarkMode
                       ? const ColorFilter.mode(
@@ -300,22 +296,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildDefaultBookContent(RecipeBook recipeBook, bool isDarkMode) {
     return Center(
       child: Padding(
-        padding: EdgeInsets.all(UIConstants.paddingMedium),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             HugeIcon(
               icon: HugeIcons.strokeRoundedBook02,
-              color: isDarkMode ? Color(ColorConstants.grey400) : Color(ColorConstants.grey600),
-              size: UIConstants.iconSizeMedium,
+              color: isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
+              size: 48.0,
             ),
-            SizedBox(height: UIConstants.paddingSmall),
+            const SizedBox(height: 8),
             Text(
               recipeBook.title,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: UIConstants.fontSizeLarge,
-                color: isDarkMode ? Color(ColorConstants.grey200) : Color(ColorConstants.grey800),
+                fontSize: 18,
+                color: isDarkMode ? Colors.grey[200] : Colors.grey[800],
                 height: 1.3,
               ),
               maxLines: 3,
@@ -329,7 +325,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildClockWidget(bool isDarkMode) {
     return SizedBox(
-      height: UIConstants.clockHeight,
+      height: 100,
       child: ColorFiltered(
         colorFilter: isDarkMode
             ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)

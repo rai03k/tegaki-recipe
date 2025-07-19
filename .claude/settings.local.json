@@ -12,7 +12,8 @@
       "Bash(mkdir:*)",
       "Bash(flutter packages pub run:*)",
       "Bash(dart run build_runner build:*)",
-      "Bash(flutter analyze:*)"
+      "Bash(flutter analyze:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

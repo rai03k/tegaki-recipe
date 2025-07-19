@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'routes/app_router.dart';
 import 'view_models/theme_view_model.dart';
-import 'constants/app_strings.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -16,7 +15,7 @@ class MyApp extends ConsumerWidget {
     final themeMode = ref.watch(themeNotifierProvider);
 
     return MaterialApp.router(
-      title: AppStrings.appTitle,
+      title: 'Tegaki Recipe',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         fontFamily: 'ArmedLemon',
