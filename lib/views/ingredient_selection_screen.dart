@@ -538,6 +538,7 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
   Widget _buildSuggestionsList(bool isDarkMode) {
     return Container(
       margin: const EdgeInsets.only(top: 8, bottom: 16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[800] : Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -556,102 +557,99 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Text(
-              _currentEditingType == 'seasoning' ? '候補の調味料' : '候補の食材',
-              style: TextStyle(
-                color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+          Text(
+            _currentEditingType == 'seasoning' ? '候補の調味料' : '候補の食材',
+            style: TextStyle(
+              color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          ...List.generate(_suggestions.length, (index) {
-            final ingredient = _suggestions[index];
-            return GestureDetector(
-              onTap: () => _selectIngredient(ingredient, _currentEditingIndex),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  border: index < _suggestions.length - 1
-                      ? Border(
-                          bottom: BorderSide(
-                            color: isDarkMode ? Colors.grey[700]! : Colors.grey[200]!,
-                            width: 1,
-                          ),
-                        )
-                      : null,
-                ),
-                child: Row(
-                  children: [
-                    // アイコン背景
-                    Stack(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
+          const SizedBox(height: 8),
+          // Chipスタイルの候補表示
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _suggestions.map((ingredient) {
+              return _buildIngredientChip(ingredient, isDarkMode);
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIngredientChip(Ingredient ingredient, bool isDarkMode) {
+    return GestureDetector(
+      onTap: () => _selectIngredient(ingredient, _currentEditingIndex),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isDarkMode ? Colors.grey[700] : Colors.grey[100],
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: ingredient.backgroundColor.withValues(alpha: 0.3),
+            width: 2,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 材料画像
+            Stack(
+              children: [
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      ingredient.iconPath,
+                      width: 24,
+                      height: 24,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        // 画像が見つからない場合はテキストで代替
+                        return Container(
+                          width: 24,
+                          height: 24,
                           decoration: BoxDecoration(
                             color: ingredient.backgroundColor,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        // TODO: 実際の画像アイコンを表示（アイコンファイルが存在する場合）
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Center(
                             child: Text(
                               ingredient.name.substring(0, 1),
-                              style: TextStyle(
-                                color: isDarkMode ? Colors.black : Colors.black87,
-                                fontSize: 16,
+                              style: const TextStyle(
+                                color: Colors.black87,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
-                    const SizedBox(width: 12),
-                    // 材料名
-                    Expanded(
-                      child: Text(
-                        ingredient.name,
-                        style: TextStyle(
-                          color: isDarkMode ? Colors.white : Colors.black,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                    // カテゴリ
-                    if (ingredient.category != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.deepPurple.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          ingredient.category!,
-                          style: const TextStyle(
-                            color: Colors.deepPurple,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                  ],
+                  ),
                 ),
+                // 選択時の色付きバッジ（今は表示せず、選択時のみ表示）
+              ],
+            ),
+            const SizedBox(width: 8),
+            // 材料名
+            Text(
+              ingredient.name,
+              style: TextStyle(
+                color: isDarkMode ? Colors.white : Colors.black,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
               ),
-            );
-          }),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

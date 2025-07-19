@@ -436,27 +436,88 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Row(
                       children: [
-                        // アイコン背景
-                        if (ingredient.backgroundColor != null)
-                          Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              color: ingredient.backgroundColor,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Center(
-                              child: Text(
-                                ingredient.name.substring(0, 1),
-                                style: const TextStyle(
-                                  color: Colors.black87,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                        // 材料画像と色付きバッジ
+                        if (ingredient.iconPath != null || ingredient.backgroundColor != null)
+                          Stack(
+                            children: [
+                              Container(
+                                width: 24,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
+                                child: ingredient.iconPath != null
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.asset(
+                                          ingredient.iconPath!,
+                                          width: 24,
+                                          height: 24,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            // 画像が見つからない場合はテキストで代替
+                                            return Container(
+                                              width: 24,
+                                              height: 24,
+                                              decoration: BoxDecoration(
+                                                color: ingredient.backgroundColor ?? Colors.grey[300],
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  ingredient.name.substring(0, 1),
+                                                  style: const TextStyle(
+                                                    color: Colors.black87,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      )
+                                    : Container(
+                                        width: 24,
+                                        height: 24,
+                                        decoration: BoxDecoration(
+                                          color: ingredient.backgroundColor,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            ingredient.name.substring(0, 1),
+                                            style: const TextStyle(
+                                              color: Colors.black87,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                               ),
-                            ),
+                              // 色付きバッジ（右下）
+                              if (ingredient.backgroundColor != null)
+                                Positioned(
+                                  right: 0,
+                                  bottom: 0,
+                                  child: Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: BoxDecoration(
+                                      color: ingredient.backgroundColor,
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: Border.all(
+                                        color: isDarkMode ? Colors.grey[800]! : Colors.white,
+                                        width: 1,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
-                        if (ingredient.backgroundColor != null) const SizedBox(width: 8),
+                        if (ingredient.iconPath != null || ingredient.backgroundColor != null) 
+                          const SizedBox(width: 8),
                         
                         // 材料名と分量
                         Expanded(
