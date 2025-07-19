@@ -219,9 +219,14 @@ class _CarouselSampleScreenState extends State<CarouselSampleScreen> {
               Container(
                 width: 60,
                 height: 60,
-                child: Image.asset(
-                  'assets/images/furniture/lamp.png',
-                  fit: BoxFit.contain,
+                child: ColorFiltered(
+                  colorFilter: widget.isDarkMode 
+                      ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                      : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
+                  child: Image.asset(
+                    'assets/images/furniture/lamp.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
               // ライトモード時の光エフェクト
