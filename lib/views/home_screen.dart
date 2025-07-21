@@ -67,6 +67,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           // 時計UI
           Positioned(top: 70, left: 40, child: _buildClockWidget(isDarkMode)),
+          
+          // 左下の家具エリア（メモ帳と棚）
+          Positioned(
+            bottom: 100,
+            left: 20,
+            child: _buildFurnitureWidgets(isDarkMode),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -354,6 +361,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           fit: BoxFit.contain,
         ),
       ),
+    );
+  }
+
+  Widget _buildFurnitureWidgets(bool isDarkMode) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // メモ帳
+        SizedBox(
+          height: 80,
+          child: ColorFiltered(
+            colorFilter: isDarkMode
+                ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                : const ColorFilter.mode(
+                    Colors.transparent,
+                    BlendMode.multiply,
+                  ),
+            child: Image.asset(
+              'assets/images/furniture/memo.png',
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        // 棚
+        SizedBox(
+          height: 90,
+          child: ColorFiltered(
+            colorFilter: isDarkMode
+                ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                : const ColorFilter.mode(
+                    Colors.transparent,
+                    BlendMode.multiply,
+                  ),
+            child: Image.asset(
+              'assets/images/furniture/tana.png',
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

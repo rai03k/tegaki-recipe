@@ -65,37 +65,65 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
     setState(() {
       _currentEditingIndex = index;
       _currentEditingType = type;
-      if (type == 'seasoning') {
-        // 調味料のみをフィルタリング
-        _suggestions = IngredientData.searchByName(value)
-            .where((ingredient) => ingredient.category == '調味料')
-            .toList();
+      
+      if (value.isEmpty) {
+        // 空の場合は候補を表示しない
+        _suggestions = [];
       } else {
-        // 調味料以外をフィルタリング
-        _suggestions = IngredientData.searchByName(value)
-            .where((ingredient) => ingredient.category != '調味料')
-            .toList();
+        // 入力値に基づいて候補を検索
+        final allResults = IngredientData.searchByName(value);
+        
+        if (type == 'seasoning') {
+          // 調味料のみをフィルタリング
+          _suggestions = allResults
+              .where((ingredient) => ingredient.category == '調味料')
+              .take(5) // 最大5件に制限
+              .toList();
+        } else {
+          // 調味料以外をフィルタリング
+          _suggestions = allResults
+              .where((ingredient) => ingredient.category != '調味料')
+              .take(5) // 最大5件に制限
+              .toList();
+        }
       }
     });
   }
 
   void _selectIngredient(Ingredient ingredient, int index) {
+    // 入力範囲チェック
+    if (_currentEditingType == 'seasoning') {
+      if (index >= _seasoningNameControllers.length) return;
+    } else {
+      if (index >= _nameControllers.length) return;
+    }
+    
     setState(() {
       if (_currentEditingType == 'seasoning') {
         _seasoningNameControllers[index].text = ingredient.name;
       } else {
         _nameControllers[index].text = ingredient.name;
       }
-      _suggestions = [];
+      
+      // 候補リストをクリア
+      _suggestions.clear();
       _currentEditingIndex = -1;
     });
     
-    // 候補リストが消えた後にフォーカスを移動
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (_currentEditingType == 'seasoning') {
-        _seasoningAmountFocusNodes[index].requestFocus();
-      } else {
-        _amountFocusNodes[index].requestFocus();
+    // 次のフィールドにフォーカスを移動
+    Future.delayed(const Duration(milliseconds: 150), () {
+      try {
+        if (_currentEditingType == 'seasoning') {
+          if (index < _seasoningAmountFocusNodes.length) {
+            _seasoningAmountFocusNodes[index].requestFocus();
+          }
+        } else {
+          if (index < _amountFocusNodes.length) {
+            _amountFocusNodes[index].requestFocus();
+          }
+        }
+      } catch (e) {
+        // フォーカス移動エラーは無視
       }
     });
   }
@@ -264,6 +292,7 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
             // メインコンテンツ
             Expanded(
               child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(), // スクロール物理特性を明示的に設定
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,10 +330,18 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
                         children: [
                           _buildIngredientRow(index, isDarkMode, 'ingredient'),
                           // 候補表示（このフィールドが編集中の場合）
-                          if (_suggestions.isNotEmpty && 
-                              _currentEditingIndex == index && 
-                              _currentEditingType == 'ingredient')
-                            _buildFullWidthSuggestionsList(isDarkMode),
+                          Builder(
+                            builder: (context) {
+                              final shouldShow = _suggestions.isNotEmpty && 
+                                  _currentEditingIndex == index && 
+                                  _currentEditingType == 'ingredient';
+                              
+                              if (shouldShow) {
+                                return _buildFullWidthSuggestionsList(isDarkMode);
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
                         ],
                       );
                     }),
@@ -323,10 +360,18 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
                         children: [
                           _buildIngredientRow(index, isDarkMode, 'seasoning'),
                           // 候補表示（このフィールドが編集中の場合）
-                          if (_suggestions.isNotEmpty && 
-                              _currentEditingIndex == index && 
-                              _currentEditingType == 'seasoning')
-                            _buildFullWidthSuggestionsList(isDarkMode),
+                          Builder(
+                            builder: (context) {
+                              final shouldShow = _suggestions.isNotEmpty && 
+                                  _currentEditingIndex == index && 
+                                  _currentEditingType == 'seasoning';
+                              
+                              if (shouldShow) {
+                                return _buildFullWidthSuggestionsList(isDarkMode);
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
                         ],
                       );
                     }),
@@ -445,7 +490,9 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       ),
-                      onChanged: (value) => _onIngredientNameChanged(value, index, type),
+                      onChanged: (value) {
+                        _onIngredientNameChanged(value, index, type);
+                      },
                       onTap: () {
                         setState(() {
                           _currentEditingIndex = index;
@@ -555,7 +602,7 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
     return Container(
       width: MediaQuery.of(context).size.width,
       margin: const EdgeInsets.only(top: 8, bottom: 16),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[800] : Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -582,16 +629,119 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 8),
-          // Chipスタイルの候補表示
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          const SizedBox(height: 12),
+          
+          // 候補リストを縦一列で表示
+          Column(
             children: _suggestions.map((ingredient) {
-              return _buildIngredientChip(ingredient, isDarkMode);
+              return _buildIngredientSuggestionItem(ingredient, isDarkMode);
             }).toList(),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildIngredientSuggestionItem(Ingredient ingredient, bool isDarkMode) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          // 確実に選択処理を実行
+          if (_currentEditingIndex >= 0) {
+            _selectIngredient(ingredient, _currentEditingIndex);
+          }
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          margin: const EdgeInsets.only(bottom: 4),
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: ingredient.backgroundColor.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              // 材料画像またはアイコン
+              _buildSuggestionIcon(ingredient),
+              const SizedBox(width: 12),
+              
+              // 材料名
+              Expanded(
+                child: Text(
+                  ingredient.name,
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              
+              // カテゴリ表示
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: ingredient.backgroundColor.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  ingredient.category,
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSuggestionIcon(Ingredient ingredient) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: ingredient.backgroundColor.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.asset(
+          ingredient.iconPath,
+          width: 32,
+          height: 32,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: ingredient.backgroundColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  ingredient.name.isNotEmpty ? ingredient.name.substring(0, 1) : '?',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -687,34 +837,45 @@ class _IngredientSelectionScreenState extends ConsumerState<IngredientSelectionS
     }
   }
 
+
   Widget _buildIngredientChip(Ingredient ingredient, bool isDarkMode) {
-    return GestureDetector(
-      onTap: () => _selectIngredient(ingredient, _currentEditingIndex),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isDarkMode ? Colors.grey[700] : Colors.grey[100],
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: ingredient.backgroundColor.withValues(alpha: 0.3),
-            width: 2,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 材料名
-            Text(
-              ingredient.name,
-              style: TextStyle(
-                color: isDarkMode ? Colors.white : Colors.black,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          print('🎯 Chip tapped: ${ingredient.name}');
+          print('  - Current editing index: $_currentEditingIndex');
+          print('  - Current editing type: $_currentEditingType');
+          _selectIngredient(ingredient, _currentEditingIndex);
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: isDarkMode ? Colors.grey[700] : Colors.grey[100],
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: ingredient.backgroundColor.withValues(alpha: 0.3),
+              width: 2,
             ),
-            // 材料画像（右側、画像がある場合のみ）
-            _buildIngredientImage(ingredient),
-          ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 材料名
+              Text(
+                ingredient.name,
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              // 材料画像（右側、画像がある場合のみ）
+              // 一時的に画像を無効化してテスト
+              // _buildIngredientImage(ingredient),
+            ],
+          ),
         ),
       ),
     );
