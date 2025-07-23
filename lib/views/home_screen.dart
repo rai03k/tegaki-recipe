@@ -73,11 +73,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Positioned(
             top: 0, // ステータスバーから開始
             right: 30,
-            child: _buildLampWidget(isDarkMode, () => _onThemeToggle(themeNotifier)),
+            child: _buildLampWidget(
+              isDarkMode,
+              () => _onThemeToggle(themeNotifier),
+            ),
           ),
           // 時計UI
           Positioned(top: 70, left: 40, child: _buildClockWidget(isDarkMode)),
-          
+
           // 左下の家具エリア（メモ帳と棚）
           Positioned(
             bottom: 100,
@@ -269,12 +272,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } catch (e) {
       // 音声再生エラーは無視して続行
     }
-    
+
     // 振動
     if (await Vibration.hasVibrator() ?? false) {
       Vibration.vibrate(duration: 100);
     }
-    
+
     // テーマ切り替え
     themeNotifier.toggleTheme();
   }
@@ -286,37 +289,60 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         final statusBarHeight = MediaQuery.of(context).padding.top;
         // 吊り下げ棒の長さをステータスバー + 余裕分に設定
         final rodHeight = statusBarHeight + 60;
-        
+
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // 吊り下げ棒（ステータスバーから伸びる）
             Container(
-              width: 2, // 少し太くして見やすく
+              width: 1, // 少し太くして見やすく
               height: rodHeight,
               color: isDarkMode ? Colors.white70 : Colors.black54,
             ),
             // ランプとの接続部分
             Container(
-              width: 8,
-              height: 4,
+              width: 4,
+              height: 2,
               decoration: BoxDecoration(
                 color: isDarkMode ? Colors.white70 : Colors.black54,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            // ランプ本体（固定サイズ）
+            // ランプ本体（レスポンシブサイズ）
             GestureDetector(
               onTap: onThemeToggle,
-              child: SizedBox(
-                width: 120,  // 固定幅
-                height: 120, // 固定高さ
-                child: Image.asset(
-                  isDarkMode 
-                    ? 'assets/images/furniture/lamp.png'
-                    : 'assets/images/furniture/lamp_on.png',
-                  fit: BoxFit.contain,
-                ),
+              child: Builder(
+                builder: (context) {
+                  final screenWidth = MediaQuery.of(context).size.width;
+                  final screenHeight = MediaQuery.of(context).size.height;
+                  
+                  // 端末サイズに応じてランプサイズを調整
+                  double lampSize;
+                  if (screenWidth < 400) {
+                    // 小さなスマホ
+                    lampSize = screenHeight * 0.08; // 画面高の8%
+                  } else if (screenWidth < 600) {
+                    // 通常のスマホ
+                    lampSize = screenHeight * 0.1; // 画面高の10%
+                  } else {
+                    // タブレット
+                    lampSize = screenHeight * 0.12; // 画面高の12%
+                  }
+                  
+                  // 最小・最大サイズを制限
+                  lampSize = lampSize.clamp(80.0, 180.0);
+                  
+                  return SizedBox(
+                    width: lampSize,
+                    height: lampSize,
+                    child: Image.asset(
+                      isDarkMode
+                          ? 'assets/images/furniture/lamp.png'
+                          : 'assets/images/furniture/lamp_on.png',
+                      fit: BoxFit.contain,
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -376,43 +402,64 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildFurnitureWidgets(bool isDarkMode) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // メモ帳
-        SizedBox(
-          height: 80,
-          child: ColorFiltered(
-            colorFilter: isDarkMode
-                ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
-                : const ColorFilter.mode(
-                    Colors.transparent,
-                    BlendMode.multiply,
-                  ),
-            child: Image.asset(
-              'assets/images/furniture/memo.png',
-              fit: BoxFit.contain,
+    return Builder(
+      builder: (context) {
+        final screenWidth = MediaQuery.of(context).size.width;
+        final screenHeight = MediaQuery.of(context).size.height;
+        
+        // 端末サイズに応じて家具サイズを調整
+        double furnitureSize;
+        if (screenWidth < 400) {
+          furnitureSize = screenHeight * 0.06; // 小さなスマホ
+        } else if (screenWidth < 600) {
+          furnitureSize = screenHeight * 0.08; // 通常のスマホ
+        } else {
+          furnitureSize = screenHeight * 0.1; // タブレット
+        }
+        
+        furnitureSize = furnitureSize.clamp(60.0, 120.0);
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // メモ帳
+            SizedBox(
+              height: furnitureSize,
+              child: ColorFiltered(
+                colorFilter:
+                    isDarkMode
+                        ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                        : const ColorFilter.mode(
+                          Colors.transparent,
+                          BlendMode.multiply,
+                        ),
+                child: Image.asset(
+                  'assets/images/furniture/memo.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
             ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        // 棚
-        SizedBox(
-          height: 90,
-          child: ColorFiltered(
-            colorFilter: isDarkMode
-                ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
-                : const ColorFilter.mode(
-                    Colors.transparent,
-                    BlendMode.multiply,
-                  ),
-            child: Image.asset(
-              'assets/images/furniture/tana.png',
-              fit: BoxFit.contain,
+            SizedBox(height: furnitureSize * 0.15),
+            // 棚
+            SizedBox(
+              height: furnitureSize * 1.1,
+              child: ColorFiltered(
+                colorFilter:
+                    isDarkMode
+                        ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                        : const ColorFilter.mode(
+                          Colors.transparent,
+                          BlendMode.multiply,
+                        ),
+                child: Image.asset(
+                  'assets/images/furniture/tana.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }
