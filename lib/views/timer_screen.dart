@@ -87,7 +87,23 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
   String _formatTime(int totalSeconds) {
     int minutes = totalSeconds ~/ 60;
     int seconds = totalSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    String minutesStr = minutes.toString().padLeft(2, '０');
+    String secondsStr = seconds.toString().padLeft(2, '０');
+    return '${_toFullWidth(minutesStr)}：${_toFullWidth(secondsStr)}';
+  }
+
+  String _toFullWidth(String halfWidth) {
+    return halfWidth
+        .replaceAll('0', '０')
+        .replaceAll('1', '１')
+        .replaceAll('2', '２')
+        .replaceAll('3', '３')
+        .replaceAll('4', '４')
+        .replaceAll('5', '５')
+        .replaceAll('6', '６')
+        .replaceAll('7', '７')
+        .replaceAll('8', '８')
+        .replaceAll('9', '９');
   }
 
   @override
@@ -210,7 +226,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
                 return Container(
                   alignment: Alignment.center,
                   child: Text(
-                    index.toString().padLeft(2, '0'),
+                    _toFullWidth(index.toString().padLeft(2, '０')),
                     style: TextStyle(
                       fontFamily: 'ArmedLemon',
                       fontSize: _minutes == index ? 40 : 24,
@@ -229,7 +245,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
         
         // コロン
         Text(
-          ':',
+          '：',
           style: TextStyle(
             fontFamily: 'ArmedLemon',
             fontSize: 40,
@@ -256,7 +272,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
                 return Container(
                   alignment: Alignment.center,
                   child: Text(
-                    index.toString().padLeft(2, '0'),
+                    _toFullWidth(index.toString().padLeft(2, '０')),
                     style: TextStyle(
                       fontFamily: 'ArmedLemon',
                       fontSize: _seconds == index ? 40 : 24,
