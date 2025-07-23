@@ -32,8 +32,10 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // 画面に戻ってきた時にデータを再読み込み
-    ref.read(recipeNotifierProvider.notifier).refresh(widget.recipeBook.id);
+    // 画面に戻ってきた時にデータを再読み込み（非同期で実行）
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(recipeNotifierProvider.notifier).refresh(widget.recipeBook.id);
+    });
   }
 
   @override

@@ -6,19 +6,19 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/database.dart';
 import '../view_models/theme_view_model.dart';
+import '../services/database_service.dart';
 
 // レシピの材料を取得するプロバイダー
 final recipeIngredientsProvider = FutureProvider.family<List<Ingredient>, int>((
   ref,
   recipeId,
 ) async {
-  final database = TegakiDatabase();
+  final database = DatabaseService.instance.database;
   final ingredients =
       await (database.select(database.ingredients)
             ..where((tbl) => tbl.recipeId.equals(recipeId))
             ..orderBy([(tbl) => OrderingTerm.asc(tbl.sortOrder)]))
           .get();
-  await database.close();
   return ingredients;
 });
 
