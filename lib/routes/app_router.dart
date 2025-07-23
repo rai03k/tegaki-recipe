@@ -6,6 +6,8 @@ import '../views/create_recipe_screen.dart';
 import '../views/ingredient_selection_screen.dart';
 import '../views/timer_screen.dart';
 import '../views/recipe_detail_screen.dart';
+import '../views/shopping_memo_screen.dart';
+import '../views/settings_screen.dart';
 import '../models/database.dart';
 
 class AppRouter {
@@ -47,6 +49,14 @@ class AppRouter {
           final recipe = state.extra as Recipe;
           return RecipeDetailScreen(recipe: recipe);
         },
+      ),
+      GoRoute(
+        path: '/shopping-memo',
+        builder: (context, state) => const ShoppingMemoScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );

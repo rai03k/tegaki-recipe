@@ -466,38 +466,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // メモ帳
-            SizedBox(
-              height: furnitureSize,
-              child: ColorFiltered(
-                colorFilter:
-                    isDarkMode
-                        ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
-                        : const ColorFilter.mode(
-                          Colors.transparent,
-                          BlendMode.multiply,
-                        ),
-                child: Image.asset(
-                  'assets/images/furniture/memo.png',
-                  fit: BoxFit.contain,
+            // メモ帳（タップで買い物メモ画面へ）
+            GestureDetector(
+              onTap: () => context.push('/shopping-memo'),
+              child: SizedBox(
+                height: furnitureSize,
+                child: ColorFiltered(
+                  colorFilter:
+                      isDarkMode
+                          ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                          : const ColorFilter.mode(
+                            Colors.transparent,
+                            BlendMode.multiply,
+                          ),
+                  child: Image.asset(
+                    'assets/images/furniture/memo.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
             ),
             SizedBox(height: furnitureSize * 0.15),
-            // 棚
-            SizedBox(
-              height: furnitureSize * 1.1,
-              child: ColorFiltered(
-                colorFilter:
-                    isDarkMode
-                        ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
-                        : const ColorFilter.mode(
-                          Colors.transparent,
-                          BlendMode.multiply,
-                        ),
-                child: Image.asset(
-                  'assets/images/furniture/tana.png',
-                  fit: BoxFit.contain,
+            // 棚（タップで設定画面へ）
+            GestureDetector(
+              onTap: () => context.push('/settings'),
+              child: SizedBox(
+                height: furnitureSize * 1.1,
+                child: ColorFiltered(
+                  colorFilter:
+                      isDarkMode
+                          ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                          : const ColorFilter.mode(
+                            Colors.transparent,
+                            BlendMode.multiply,
+                          ),
+                  child: Image.asset(
+                    'assets/images/furniture/tana.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
             ),
