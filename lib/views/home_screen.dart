@@ -252,65 +252,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildLampWidget(bool isDarkMode, VoidCallback onThemeToggle) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // 吊り下げ棒
-        Container(
-          width: 1,
-          height: 60,
-          color: isDarkMode ? Colors.white70 : Colors.black54,
-        ),
-        // ランプ本体
-        Stack(
-          alignment: Alignment.center,
+    return Builder(
+      builder: (context) {
+        final screenHeight = MediaQuery.of(context).size.height;
+        final lampHeight = screenHeight / 5;
+        
+        return Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // ライトモード時の光エフェクト
-            if (!isDarkMode)
-              Positioned(
-                top: 50,
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.yellow.withOpacity(0.6),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.yellow.withOpacity(0.4),
-                        blurRadius: 20,
-                        spreadRadius: 5,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            // ランプ画像
+            // 吊り下げ棒
+            Container(
+              width: 1,
+              height: 60,
+              color: isDarkMode ? Colors.white70 : Colors.black54,
+            ),
+            // ランプ本体
             GestureDetector(
               onTap: onThemeToggle,
               child: SizedBox(
-                height: 70,
-                child: ColorFiltered(
-                  colorFilter:
-                      isDarkMode
-                          ? const ColorFilter.mode(
-                            Colors.white,
-                            BlendMode.srcIn,
-                          )
-                          : const ColorFilter.mode(
-                            Colors.transparent,
-                            BlendMode.multiply,
-                          ),
-                  child: Image.asset(
-                    'assets/images/furniture/lamp.png',
-                    fit: BoxFit.contain,
-                  ),
+                height: lampHeight,
+                child: Image.asset(
+                  isDarkMode 
+                    ? 'assets/images/furniture/lamp.png'
+                    : 'assets/images/furniture/lamp_on.png',
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 
