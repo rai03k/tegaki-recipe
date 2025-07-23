@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:vibration/vibration.dart';
 import '../models/database.dart';
 import '../view_models/recipe_book_view_model.dart';
 import '../view_models/theme_view_model.dart';
@@ -16,6 +18,13 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   PageController? _pageController;
+  late AudioPlayer _audioPlayer;
+
+  @override
+  void initState() {
+    super.initState();
+    _audioPlayer = AudioPlayer();
+  }
 
   @override
   void didChangeDependencies() {
@@ -27,6 +36,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void dispose() {
     _pageController?.dispose();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -63,7 +73,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Positioned(
             top: 40,
             right: 30,
-            child: _buildLampWidget(isDarkMode, themeNotifier.toggleTheme),
+            child: _buildLampWidget(isDarkMode, () => _onThemeToggle(themeNotifier)),
           ),
           // 時計UI
           Positioned(top: 70, left: 40, child: _buildClockWidget(isDarkMode)),
@@ -251,37 +261,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  Future<void> _onThemeToggle(ThemeNotifier themeNotifier) async {
+    // 音声再生
+    try {
+      await _audioPlayer.setAsset('assets/se/switch.mp3');
+      await _audioPlayer.play();
+    } catch (e) {
+      // 音声再生エラーは無視して続行
+    }
+    
+    // 振動
+    if (await Vibration.hasVibrator() ?? false) {
+      Vibration.vibrate(duration: 100);
+    }
+    
+    // テーマ切り替え
+    themeNotifier.toggleTheme();
+  }
+
   Widget _buildLampWidget(bool isDarkMode, VoidCallback onThemeToggle) {
-    return Builder(
-      builder: (context) {
-        final screenHeight = MediaQuery.of(context).size.height;
-        final lampHeight = screenHeight / 5;
-        
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 吊り下げ棒
-            Container(
-              width: 1,
-              height: 60,
-              color: isDarkMode ? Colors.white70 : Colors.black54,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 吊り下げ棒
+        Container(
+          width: 1,
+          height: 60,
+          color: isDarkMode ? Colors.white70 : Colors.black54,
+        ),
+        // ランプ本体（固定サイズ）
+        GestureDetector(
+          onTap: onThemeToggle,
+          child: SizedBox(
+            width: 120,  // 固定幅
+            height: 120, // 固定高さ
+            child: Image.asset(
+              isDarkMode 
+                ? 'assets/images/furniture/lamp.png'
+                : 'assets/images/furniture/lamp_on.png',
+              fit: BoxFit.contain,
             ),
-            // ランプ本体
-            GestureDetector(
-              onTap: onThemeToggle,
-              child: SizedBox(
-                height: lampHeight,
-                child: Image.asset(
-                  isDarkMode 
-                    ? 'assets/images/furniture/lamp.png'
-                    : 'assets/images/furniture/lamp_on.png',
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 
