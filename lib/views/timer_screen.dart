@@ -44,7 +44,10 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
     setState(() {
       _isRunning = true;
       _isPickerMode = false;
-      _remainingSeconds = _totalSeconds;
+      // 初回開始時のみ残り時間を設定
+      if (_remainingSeconds == 0) {
+        _remainingSeconds = _totalSeconds;
+      }
     });
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -58,6 +61,22 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
         }
       });
     });
+  }
+
+  void _stopTimer() {
+    _timer?.cancel();
+    setState(() {
+      _isRunning = false;
+      // ピッカーモードには戻らず、停止状態を保持
+    });
+  }
+
+  void _toggleTimer() {
+    if (_isRunning) {
+      _stopTimer();
+    } else {
+      _startTimer();
+    }
   }
 
   void _resetTimer() {
@@ -172,23 +191,23 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
                   
                   const SizedBox(width: 16),
                   
-                  // スタートボタン
+                  // スタート/ストップボタン
                   GestureDetector(
-                    onTap: _isRunning ? null : _startTimer,
+                    onTap: _totalSeconds == 0 ? null : _toggleTimer,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       decoration: BoxDecoration(
-                        color: _isRunning 
+                        color: _totalSeconds == 0
                           ? (isDarkMode ? Colors.white24 : Colors.black12)
                           : (isDarkMode ? Colors.white : Colors.black),
                         borderRadius: BorderRadius.circular(25),
                       ),
                       child: Text(
-                        'スタート',
+                        _isRunning ? 'ストップ' : 'スタート',
                         style: TextStyle(
                           fontFamily: 'ArmedLemon',
                           fontSize: 16,
-                          color: _isRunning 
+                          color: _totalSeconds == 0
                             ? (isDarkMode ? Colors.white54 : Colors.black54)
                             : (isDarkMode ? Colors.black : Colors.white),
                         ),
