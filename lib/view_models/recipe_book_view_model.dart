@@ -14,8 +14,8 @@ class RecipeBookNotifier extends _$RecipeBookNotifier {
   @override
   RecipeBookState build() {
     _repository = RecipeBookRepository(DatabaseService.instance.database);
-    // 初期化時にレシピ本一覧を読み込み
-    _loadRecipeBooks();
+    // 初期化時にレシピ本一覧を読み込み（非同期で実行）
+    Future.microtask(() => _loadRecipeBooks());
     return const RecipeBookState();
   }
 

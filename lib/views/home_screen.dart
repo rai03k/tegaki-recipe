@@ -30,8 +30,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // 画面に戻ってきた時にデータを再読み込み
-    ref.read(recipeBookNotifierProvider.notifier).refresh();
+    // 画面に戻ってきた時にデータを再読み込み（非同期で実行）
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(recipeBookNotifierProvider.notifier).refresh();
+    });
   }
 
   @override
@@ -94,7 +96,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onPressed: () async {
           await context.push('/create-recipe-book');
           // 画面から戻ってきたときにデータを再読み込み
-          ref.read(recipeBookNotifierProvider.notifier).refresh();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.read(recipeBookNotifierProvider.notifier).refresh();
+          });
         },
         backgroundColor: isDarkMode ? Colors.grey[700] : Colors.deepPurple,
         foregroundColor: Colors.white,
