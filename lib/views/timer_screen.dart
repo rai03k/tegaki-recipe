@@ -296,13 +296,16 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
 
   Widget _buildTimerDisplay(bool isDarkMode) {
     return Center(
-      child: Text(
-        _formatTime(_remainingSeconds),
-        style: TextStyle(
-          fontFamily: 'ArmedLemon',
-          fontSize: 80,
-          color: isDarkMode ? Colors.white : Colors.black,
-          fontWeight: FontWeight.bold,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          _formatTime(_remainingSeconds),
+          style: TextStyle(
+            fontFamily: 'ArmedLemon',
+            fontSize: 60, // 80 → 60に縮小
+            color: isDarkMode ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
