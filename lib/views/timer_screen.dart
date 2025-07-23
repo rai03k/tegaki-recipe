@@ -210,7 +210,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
       children: [
         // 分のピッカー
         SizedBox(
-          width: 80,
+          width: 100, // 幅を広げて全角文字に対応
           height: 200,
           child: ListWheelScrollView.useDelegate(
             itemExtent: 60,
@@ -225,6 +225,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
                 if (index < 0 || index > 59) return null;
                 return Container(
                   alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
                     _toFullWidth(index.toString().padLeft(2, '０')),
                     style: TextStyle(
@@ -256,7 +257,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
         
         // 秒のピッカー
         SizedBox(
-          width: 80,
+          width: 100, // 幅を広げて全角文字に対応
           height: 200,
           child: ListWheelScrollView.useDelegate(
             itemExtent: 60,
@@ -271,6 +272,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
                 if (index < 0 || index > 59) return null;
                 return Container(
                   alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
                     _toFullWidth(index.toString().padLeft(2, '０')),
                     style: TextStyle(
