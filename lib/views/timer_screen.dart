@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:vibration/vibration.dart';
 import '../view_models/theme_view_model.dart';
-import 'dart:async';
+import '../view_models/timer_view_model.dart';
 
 class TimerScreen extends ConsumerStatefulWidget {
   const TimerScreen({super.key});
@@ -15,120 +13,36 @@ class TimerScreen extends ConsumerStatefulWidget {
 }
 
 class _TimerScreenState extends ConsumerState<TimerScreen> {
-  late AudioPlayer _audioPlayer;
-  Timer? _timer;
-  
-  int _minutes = 0;
-  int _seconds = 0;
-  int _totalSeconds = 0;
-  int _remainingSeconds = 0;
-  bool _isRunning = false;
-  bool _isPickerMode = true;
+  int _tempMinutes = 0;
+  int _tempSeconds = 0;
 
   @override
   void initState() {
     super.initState();
-    _audioPlayer = AudioPlayer();
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _audioPlayer.dispose();
-    super.dispose();
-  }
-
-  void _startTimer() {
-    if (_totalSeconds == 0) return;
-    
-    setState(() {
-      _isRunning = true;
-      _isPickerMode = false;
-      // 初回開始時のみ残り時間を設定
-      if (_remainingSeconds == 0) {
-        _remainingSeconds = _totalSeconds;
-      }
-    });
-
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    // 初期化時にグローバル状態から値を取得
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final timerData = ref.read(timerNotifierProvider);
       setState(() {
-        if (_remainingSeconds > 0) {
-          _remainingSeconds--;
-        } else {
-          _timer?.cancel();
-          _isRunning = false;
-          _onTimerComplete();
-        }
+        _tempMinutes = timerData.minutes;
+        _tempSeconds = timerData.seconds;
       });
     });
   }
 
-  void _stopTimer() {
-    _timer?.cancel();
-    setState(() {
-      _isRunning = false;
-      // ピッカーモードには戻らず、停止状態を保持
-    });
-  }
-
-  void _toggleTimer() {
-    if (_isRunning) {
-      _stopTimer();
-    } else {
-      _startTimer();
-    }
-  }
-
-  void _resetTimer() {
-    _timer?.cancel();
-    setState(() {
-      _isRunning = false;
-      _isPickerMode = true;
-      _remainingSeconds = 0;
-    });
-  }
-
-  Future<void> _onTimerComplete() async {
-    // 音声再生
-    try {
-      await _audioPlayer.setAsset('assets/se/switch.mp3');
-      await _audioPlayer.play();
-    } catch (e) {
-      // 音声再生エラーは無視
-    }
-    
-    // 振動
-    if (await Vibration.hasVibrator() ?? false) {
-      Vibration.vibrate(duration: 500);
-    }
-  }
-
-  String _formatTime(int totalSeconds) {
-    int minutes = totalSeconds ~/ 60;
-    int seconds = totalSeconds % 60;
-    String minutesStr = minutes.toString().padLeft(2, '０');
-    String secondsStr = seconds.toString().padLeft(2, '０');
-    return '${_toFullWidth(minutesStr)}：${_toFullWidth(secondsStr)}';
-  }
-
-  String _toFullWidth(String halfWidth) {
-    return halfWidth
-        .replaceAll('0', '０')
-        .replaceAll('1', '１')
-        .replaceAll('2', '２')
-        .replaceAll('3', '３')
-        .replaceAll('4', '４')
-        .replaceAll('5', '５')
-        .replaceAll('6', '６')
-        .replaceAll('7', '７')
-        .replaceAll('8', '８')
-        .replaceAll('9', '９');
+  void _updateTime() {
+    final timerNotifier = ref.read(timerNotifierProvider.notifier);
+    timerNotifier.setTime(_tempMinutes, _tempSeconds);
   }
 
   @override
   Widget build(BuildContext context) {
     final themeNotifier = ref.watch(themeNotifierProvider.notifier);
     final isDarkMode = ref.watch(themeNotifierProvider) == ThemeMode.dark;
+    final timerData = ref.watch(timerNotifierProvider);
+    final timerNotifier = ref.read(timerNotifierProvider.notifier);
+    
+    final isPickerMode = timerData.state == TimerState.stopped && timerData.totalSeconds == 0;
+    final isRunning = timerData.state == TimerState.running;
     
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.white,
@@ -161,7 +75,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
               const Spacer(),
               
               // タイマー表示部分
-              _isPickerMode ? _buildTimePicker(isDarkMode) : _buildTimerDisplay(isDarkMode),
+              isPickerMode ? _buildTimePicker(isDarkMode) : _buildTimerDisplay(isDarkMode, timerData),
               
               const Spacer(),
               
@@ -171,7 +85,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
                 children: [
                   // リセットボタン
                   GestureDetector(
-                    onTap: _resetTimer,
+                    onTap: () => timerNotifier.resetTimer(),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       decoration: BoxDecoration(
@@ -193,21 +107,26 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
                   
                   // スタート/ストップボタン
                   GestureDetector(
-                    onTap: _totalSeconds == 0 ? null : _toggleTimer,
+                    onTap: () {
+                      if (isPickerMode) {
+                        _updateTime(); // まず時間を設定
+                      }
+                      timerNotifier.toggleTimer();
+                    },
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       decoration: BoxDecoration(
-                        color: _totalSeconds == 0
+                        color: (isPickerMode && _tempMinutes == 0 && _tempSeconds == 0)
                           ? (isDarkMode ? Colors.white24 : Colors.black12)
                           : (isDarkMode ? Colors.white : Colors.black),
                         borderRadius: BorderRadius.circular(25),
                       ),
                       child: Text(
-                        _isRunning ? 'ストップ' : 'スタート',
+                        _getButtonText(timerData.state, isPickerMode),
                         style: TextStyle(
                           fontFamily: 'ArmedLemon',
                           fontSize: 16,
-                          color: _totalSeconds == 0
+                          color: (isPickerMode && _tempMinutes == 0 && _tempSeconds == 0)
                             ? (isDarkMode ? Colors.white54 : Colors.black54)
                             : (isDarkMode ? Colors.black : Colors.white),
                         ),
@@ -223,6 +142,21 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
     );
   }
 
+  String _getButtonText(TimerState state, bool isPickerMode) {
+    if (isPickerMode) return 'スタート';
+    
+    switch (state) {
+      case TimerState.running:
+        return 'ストップ';
+      case TimerState.paused:
+        return 'スタート';
+      case TimerState.completed:
+        return 'リセット';
+      case TimerState.stopped:
+        return 'スタート';
+    }
+  }
+
   Widget _buildTimePicker(bool isDarkMode) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -235,8 +169,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
             itemExtent: 60,
             onSelectedItemChanged: (index) {
               setState(() {
-                _minutes = index;
-                _totalSeconds = _minutes * 60 + _seconds;
+                _tempMinutes = index;
               });
             },
             childDelegate: ListWheelChildBuilderDelegate(
@@ -249,11 +182,11 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
                     _toFullWidth(index.toString().padLeft(2, '０')),
                     style: TextStyle(
                       fontFamily: 'ArmedLemon',
-                      fontSize: _minutes == index ? 40 : 24,
-                      color: _minutes == index 
+                      fontSize: _tempMinutes == index ? 40 : 24,
+                      color: _tempMinutes == index 
                         ? (isDarkMode ? Colors.white : Colors.black)
                         : (isDarkMode ? Colors.white54 : Colors.black54),
-                      fontWeight: _minutes == index ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: _tempMinutes == index ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
                 );
@@ -282,8 +215,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
             itemExtent: 60,
             onSelectedItemChanged: (index) {
               setState(() {
-                _seconds = index;
-                _totalSeconds = _minutes * 60 + _seconds;
+                _tempSeconds = index;
               });
             },
             childDelegate: ListWheelChildBuilderDelegate(
@@ -296,11 +228,11 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
                     _toFullWidth(index.toString().padLeft(2, '０')),
                     style: TextStyle(
                       fontFamily: 'ArmedLemon',
-                      fontSize: _seconds == index ? 40 : 24,
-                      color: _seconds == index 
+                      fontSize: _tempSeconds == index ? 40 : 24,
+                      color: _tempSeconds == index 
                         ? (isDarkMode ? Colors.white : Colors.black)
                         : (isDarkMode ? Colors.white54 : Colors.black54),
-                      fontWeight: _seconds == index ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: _tempSeconds == index ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
                 );
@@ -313,12 +245,13 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
     );
   }
 
-  Widget _buildTimerDisplay(bool isDarkMode) {
+  Widget _buildTimerDisplay(bool isDarkMode, TimerData timerData) {
+    final timerNotifier = ref.read(timerNotifierProvider.notifier);
     return Center(
       child: FittedBox(
         fit: BoxFit.scaleDown,
         child: Text(
-          _formatTime(_remainingSeconds),
+          timerNotifier.formatTime(timerData.remainingSeconds),
           style: TextStyle(
             fontFamily: 'ArmedLemon',
             fontSize: 60, // 80 → 60に縮小
@@ -328,5 +261,19 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
         ),
       ),
     );
+  }
+
+  String _toFullWidth(String halfWidth) {
+    return halfWidth
+        .replaceAll('0', '０')
+        .replaceAll('1', '１')
+        .replaceAll('2', '２')
+        .replaceAll('3', '３')
+        .replaceAll('4', '４')
+        .replaceAll('5', '５')
+        .replaceAll('6', '６')
+        .replaceAll('7', '７')
+        .replaceAll('8', '８')
+        .replaceAll('9', '９');
   }
 }

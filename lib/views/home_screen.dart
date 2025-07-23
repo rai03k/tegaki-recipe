@@ -7,6 +7,7 @@ import 'package:vibration/vibration.dart';
 import '../models/database.dart';
 import '../view_models/recipe_book_view_model.dart';
 import '../view_models/theme_view_model.dart';
+import '../view_models/timer_view_model.dart';
 import 'dart:io';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -382,24 +383,61 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildClockWidget(bool isDarkMode) {
-    return GestureDetector(
-      onTap: () => context.push('/timer'),
-      child: SizedBox(
-        height: 100,
-        child: ColorFiltered(
-          colorFilter:
-              isDarkMode
-                  ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
-                  : const ColorFilter.mode(
-                    Colors.transparent,
-                    BlendMode.multiply,
+    return Consumer(
+      builder: (context, ref, child) {
+        final timerData = ref.watch(timerNotifierProvider);
+        final timerNotifier = ref.read(timerNotifierProvider.notifier);
+        final isTimerActive = timerData.state == TimerState.running || 
+                             timerData.state == TimerState.paused;
+        
+        return GestureDetector(
+          onTap: () => context.push('/timer'),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                height: 100,
+                child: ColorFiltered(
+                  colorFilter:
+                      isDarkMode
+                          ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                          : const ColorFilter.mode(
+                            Colors.transparent,
+                            BlendMode.multiply,
+                          ),
+                  child: Image.asset(
+                    'assets/images/furniture/clock.png',
+                    fit: BoxFit.contain,
                   ),
-          child: Image.asset(
-            'assets/images/furniture/clock.png',
-            fit: BoxFit.contain,
+                ),
+              ),
+              // タイマー実行中の表示
+              if (isTimerActive)
+                Positioned(
+                  bottom: -5,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: timerData.state == TimerState.running
+                        ? (isDarkMode ? Colors.green[400] : Colors.green[600])
+                        : (isDarkMode ? Colors.orange[400] : Colors.orange[600]),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      timerNotifier.formatTime(timerData.remainingSeconds),
+                      style: TextStyle(
+                        fontFamily: 'ArmedLemon',
+                        fontSize: 10,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
