@@ -315,7 +315,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 builder: (context) {
                   final screenWidth = MediaQuery.of(context).size.width;
                   final screenHeight = MediaQuery.of(context).size.height;
-                  
+
                   // 端末サイズに応じてランプサイズを調整
                   double lampSize;
                   if (screenWidth < 400) {
@@ -328,12 +328,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     // タブレット
                     lampSize = screenHeight * 0.12; // 画面高の12%
                   }
-                  
+
                   // 最小・最大サイズを制限
                   lampSize = lampSize.clamp(80.0, 180.0);
-                  
+
                   return SizedBox(
-                    width: lampSize,
                     height: lampSize,
                     child: Image.asset(
                       isDarkMode
@@ -383,19 +382,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildClockWidget(bool isDarkMode) {
-    return SizedBox(
-      height: 100,
-      child: ColorFiltered(
-        colorFilter:
-            isDarkMode
-                ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
-                : const ColorFilter.mode(
-                  Colors.transparent,
-                  BlendMode.multiply,
-                ),
-        child: Image.asset(
-          'assets/images/furniture/clock.png',
-          fit: BoxFit.contain,
+    return GestureDetector(
+      onTap: () => context.push('/timer'),
+      child: SizedBox(
+        height: 100,
+        child: ColorFiltered(
+          colorFilter:
+              isDarkMode
+                  ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                  : const ColorFilter.mode(
+                    Colors.transparent,
+                    BlendMode.multiply,
+                  ),
+          child: Image.asset(
+            'assets/images/furniture/clock.png',
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     );
@@ -406,7 +408,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       builder: (context) {
         final screenWidth = MediaQuery.of(context).size.width;
         final screenHeight = MediaQuery.of(context).size.height;
-        
+
         // 端末サイズに応じて家具サイズを調整
         double furnitureSize;
         if (screenWidth < 400) {
@@ -416,9 +418,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         } else {
           furnitureSize = screenHeight * 0.1; // タブレット
         }
-        
+
         furnitureSize = furnitureSize.clamp(60.0, 120.0);
-        
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

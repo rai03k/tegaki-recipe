@@ -4,6 +4,7 @@ import '../views/create_recipe_book_screen.dart';
 import '../views/table_of_contents_screen.dart';
 import '../views/create_recipe_screen.dart';
 import '../views/ingredient_selection_screen.dart';
+import '../views/timer_screen.dart';
 import '../models/database.dart';
 
 class AppRouter {
@@ -34,6 +35,10 @@ class AppRouter {
       GoRoute(
         path: '/ingredient-selection',
         builder: (context, state) => const IngredientSelectionScreen(),
+      ),
+      GoRoute(
+        path: '/timer',
+        builder: (context, state) => const TimerScreen(),
       ),
     ],
   );
