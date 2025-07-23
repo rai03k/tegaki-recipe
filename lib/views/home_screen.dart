@@ -69,9 +69,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               recipeBookState.recipeBooks,
             ),
 
-          // ランプUI
+          // ランプUI（ステータスバーから伸びる）
           Positioned(
-            top: 40,
+            top: 0, // ステータスバーから開始
             right: 30,
             child: _buildLampWidget(isDarkMode, () => _onThemeToggle(themeNotifier)),
           ),
@@ -280,30 +280,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildLampWidget(bool isDarkMode, VoidCallback onThemeToggle) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // 吊り下げ棒
-        Container(
-          width: 1,
-          height: 60,
-          color: isDarkMode ? Colors.white70 : Colors.black54,
-        ),
-        // ランプ本体（固定サイズ）
-        GestureDetector(
-          onTap: onThemeToggle,
-          child: SizedBox(
-            width: 120,  // 固定幅
-            height: 120, // 固定高さ
-            child: Image.asset(
-              isDarkMode 
-                ? 'assets/images/furniture/lamp.png'
-                : 'assets/images/furniture/lamp_on.png',
-              fit: BoxFit.contain,
+    return Builder(
+      builder: (context) {
+        // ステータスバーの高さを取得
+        final statusBarHeight = MediaQuery.of(context).padding.top;
+        // 吊り下げ棒の長さをステータスバー + 余裕分に設定
+        final rodHeight = statusBarHeight + 60;
+        
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 吊り下げ棒（ステータスバーから伸びる）
+            Container(
+              width: 2, // 少し太くして見やすく
+              height: rodHeight,
+              color: isDarkMode ? Colors.white70 : Colors.black54,
             ),
-          ),
-        ),
-      ],
+            // ランプとの接続部分
+            Container(
+              width: 8,
+              height: 4,
+              decoration: BoxDecoration(
+                color: isDarkMode ? Colors.white70 : Colors.black54,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            // ランプ本体（固定サイズ）
+            GestureDetector(
+              onTap: onThemeToggle,
+              child: SizedBox(
+                width: 120,  // 固定幅
+                height: 120, // 固定高さ
+                child: Image.asset(
+                  isDarkMode 
+                    ? 'assets/images/furniture/lamp.png'
+                    : 'assets/images/furniture/lamp_on.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

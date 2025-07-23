@@ -1,10 +1,17 @@
 PODS:
+  - audio_session (0.0.1):
+    - Flutter
+  - device_info_plus (0.0.1):
+    - Flutter
   - Flutter (1.0.0)
   - image_cropper (0.0.4):
     - Flutter
     - TOCropViewController (~> 2.7.4)
   - image_picker_ios (0.0.1):
     - Flutter
+  - just_audio (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -33,14 +40,20 @@ PODS:
   - TOCropViewController (2.7.4)
   - url_launcher_ios (0.0.1):
     - Flutter
+  - vibration (1.7.5):
+    - Flutter
 
 DEPENDENCIES:
+  - audio_session (from `.symlinks/plugins/audio_session/ios`)
+  - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
   - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
+  - just_audio (from `.symlinks/plugins/just_audio/darwin`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+  - vibration (from `.symlinks/plugins/vibration/ios`)
 
 SPEC REPOS:
   trunk:
@@ -48,28 +61,40 @@ SPEC REPOS:
     - TOCropViewController
 
 EXTERNAL SOURCES:
+  audio_session:
+    :path: ".symlinks/plugins/audio_session/ios"
+  device_info_plus:
+    :path: ".symlinks/plugins/device_info_plus/ios"
   Flutter:
     :path: Flutter
   image_cropper:
     :path: ".symlinks/plugins/image_cropper/ios"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
+  just_audio:
+    :path: ".symlinks/plugins/just_audio/darwin"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   sqlite3_flutter_libs:
     :path: ".symlinks/plugins/sqlite3_flutter_libs/darwin"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
+  vibration:
+    :path: ".symlinks/plugins/vibration/ios"
 
 SPEC CHECKSUMS:
+  audio_session: 9bb7f6c970f21241b19f5a3658097ae459681ba0
+  device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   image_cropper: c4326ea50132b1e1564499e5d32a84f01fb03537
   image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
+  just_audio: 4e391f57b79cad2b0674030a00453ca5ce817eed
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   sqlite3: 3e82a2daae39ba3b41ae6ee84a130494585460fc
   sqlite3_flutter_libs: 52ecc4dfaae71f496da86159263dbce5d23a051a
   TOCropViewController: 80b8985ad794298fb69d3341de183f33d1853654
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
+  vibration: 8e2f50fc35bb736f9eecb7dd9f7047fbb6a6e888
 
 PODFILE CHECKSUM: 4305caec6b40dde0ae97be1573c53de1882a07e5
 
