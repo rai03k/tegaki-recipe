@@ -5,6 +5,7 @@ import '../views/table_of_contents_screen.dart';
 import '../views/create_recipe_screen.dart';
 import '../views/ingredient_selection_screen.dart';
 import '../views/timer_screen.dart';
+import '../views/recipe_detail_screen.dart';
 import '../models/database.dart';
 
 class AppRouter {
@@ -39,6 +40,13 @@ class AppRouter {
       GoRoute(
         path: '/timer',
         builder: (context, state) => const TimerScreen(),
+      ),
+      GoRoute(
+        path: '/recipe-detail/:recipeId',
+        builder: (context, state) {
+          final recipe = state.extra as Recipe;
+          return RecipeDetailScreen(recipe: recipe);
+        },
       ),
     ],
   );

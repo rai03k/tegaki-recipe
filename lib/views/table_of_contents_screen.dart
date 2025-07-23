@@ -236,8 +236,7 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: GestureDetector(
             onTap: () {
-              // TODO: レシピ詳細画面への遷移
-              // context.push('/recipe-detail/${recipe.id}');
+              context.push('/recipe-detail/${recipe.id}', extra: recipe);
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
