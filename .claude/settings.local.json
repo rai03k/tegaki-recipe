@@ -13,7 +13,9 @@
       "Bash(flutter packages pub run:*)",
       "Bash(dart run build_runner build:*)",
       "Bash(flutter analyze:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(gemini -p \"Flutter widget refactoring: Should I separate memo and shelf widgets from _buildFurnitureWidgets method in home_screen.dart? The current method has two furniture items (memo and shelf) with similar structure but different onTap actions and image assets. What''s the best practice for widget separation and naming conventions for furniture widgets in a Flutter app?\")",
+      "Bash(gemini -p \"Flutter navigation animation: User wants ''シュワン'' (swoosh-like) transition animation instead of default slide animations for navigation. Currently using context.push() with GoRouter. What are the best transition animation options in Flutter? Should I use custom PageTransition, GoRouter''s pageBuilder, or another approach? Looking for smooth fade/scale animations that feel organic and pleasant.\")"
     ],
     "deny": []
   }

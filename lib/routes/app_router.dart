@@ -9,54 +9,91 @@ import '../views/recipe_detail_screen.dart';
 import '../views/shopping_memo_screen.dart';
 import '../views/settings_screen.dart';
 import '../models/database.dart';
+import '../utils/page_transitions.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => const HomeScreen(),
+        pageBuilder: (context, state) => PageTransitions.fadeScaleTransition(
+          context,
+          state,
+          const HomeScreen(),
+        ),
       ),
       GoRoute(
         path: '/create-recipe-book',
-        builder: (context, state) => const CreateRecipeBookScreen(),
+        pageBuilder: (context, state) => PageTransitions.fadeSlideTransition(
+          context,
+          state,
+          const CreateRecipeBookScreen(),
+        ),
       ),
       GoRoute(
         path: '/table-of-contents/:recipeBookId',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final recipeBook = state.extra as RecipeBook;
-          return TableOfContentsScreen(recipeBook: recipeBook);
+          return PageTransitions.fadeScaleTransition(
+            context,
+            state,
+            TableOfContentsScreen(recipeBook: recipeBook),
+          );
         },
       ),
       GoRoute(
         path: '/create-recipe/:recipeBookId',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final recipeBook = state.extra as RecipeBook;
-          return CreateRecipeScreen(recipeBook: recipeBook);
+          return PageTransitions.fadeSlideTransition(
+            context,
+            state,
+            CreateRecipeScreen(recipeBook: recipeBook),
+          );
         },
       ),
       GoRoute(
         path: '/ingredient-selection',
-        builder: (context, state) => const IngredientSelectionScreen(),
+        pageBuilder: (context, state) => PageTransitions.rippleTransition(
+          context,
+          state,
+          const IngredientSelectionScreen(),
+        ),
       ),
       GoRoute(
         path: '/timer',
-        builder: (context, state) => const TimerScreen(),
+        pageBuilder: (context, state) => PageTransitions.fadeTransition(
+          context,
+          state,
+          const TimerScreen(),
+        ),
       ),
       GoRoute(
         path: '/recipe-detail/:recipeId',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final recipe = state.extra as Recipe;
-          return RecipeDetailScreen(recipe: recipe);
+          return PageTransitions.fadeScaleTransition(
+            context,
+            state,
+            RecipeDetailScreen(recipe: recipe),
+          );
         },
       ),
       GoRoute(
         path: '/shopping-memo',
-        builder: (context, state) => const ShoppingMemoScreen(),
+        pageBuilder: (context, state) => PageTransitions.fadeSlideTransition(
+          context,
+          state,
+          const ShoppingMemoScreen(),
+        ),
       ),
       GoRoute(
         path: '/settings',
-        builder: (context, state) => const SettingsScreen(),
+        pageBuilder: (context, state) => PageTransitions.fadeSlideTransition(
+          context,
+          state,
+          const SettingsScreen(),
+        ),
       ),
     ],
   );
