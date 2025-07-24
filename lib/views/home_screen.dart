@@ -340,11 +340,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   return SizedBox(
                     height: lampSize,
                     child: ColorFiltered(
-                      colorFilter: isDarkMode
-                          ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
-                          : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
+                      colorFilter:
+                          isDarkMode
+                              ? const ColorFilter.mode(
+                                Colors.white,
+                                BlendMode.srcIn,
+                              )
+                              : const ColorFilter.mode(
+                                Colors.transparent,
+                                BlendMode.multiply,
+                              ),
                       child: Image.asset(
-                        'assets/images/furniture/lamp_on.png',
+                        isDarkMode
+                            ? 'assets/images/furniture/lamp.png'
+                            : 'assets/images/furniture/lamp_on.png',
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -394,9 +403,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       builder: (context, ref, child) {
         final timerData = ref.watch(timerNotifierProvider);
         final timerNotifier = ref.read(timerNotifierProvider.notifier);
-        final isTimerActive = timerData.state == TimerState.running || 
-                             timerData.state == TimerState.paused;
-        
+        final isTimerActive =
+            timerData.state == TimerState.running ||
+            timerData.state == TimerState.paused;
+
         return GestureDetector(
           onTap: () => context.push('/timer'),
           child: Stack(
@@ -407,7 +417,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: ColorFiltered(
                   colorFilter:
                       isDarkMode
-                          ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                          ? const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          )
                           : const ColorFilter.mode(
                             Colors.transparent,
                             BlendMode.multiply,
@@ -423,11 +436,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Positioned(
                   bottom: -5,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
-                      color: timerData.state == TimerState.running
-                        ? (isDarkMode ? Colors.green[400] : Colors.green[600])
-                        : (isDarkMode ? Colors.orange[400] : Colors.orange[600]),
+                      color:
+                          timerData.state == TimerState.running
+                              ? (isDarkMode
+                                  ? Colors.green[400]
+                                  : Colors.green[600])
+                              : (isDarkMode
+                                  ? Colors.orange[400]
+                                  : Colors.orange[600]),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -477,7 +498,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: ColorFiltered(
                   colorFilter:
                       isDarkMode
-                          ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                          ? const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          )
                           : const ColorFilter.mode(
                             Colors.transparent,
                             BlendMode.multiply,
@@ -498,7 +522,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: ColorFiltered(
                   colorFilter:
                       isDarkMode
-                          ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                          ? const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          )
                           : const ColorFilter.mode(
                             Colors.transparent,
                             BlendMode.multiply,
