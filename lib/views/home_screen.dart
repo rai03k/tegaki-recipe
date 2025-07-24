@@ -82,7 +82,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           // 時計UI
-          Positioned(top: 60, left: 40, child: _buildClockWidget(isDarkMode)),
+          Positioned(top: 70, left: 40, child: _buildClockWidget(isDarkMode)),
 
           // 左下の家具エリア（メモ帳と棚）
           Positioned(
@@ -299,18 +299,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // 吊り下げ棒（ステータスバーから伸びる）
-            Container(
-              width: 1, // 少し太くして見やすく
-              height: rodHeight,
-              color: isDarkMode ? Colors.white : Colors.black54,
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: Container(
+                width: 1, // 少し太くして見やすく
+                height: rodHeight,
+                color: isDarkMode ? Colors.grey[300]! : Colors.black54,
+              ),
             ),
             // ランプとの接続部分
-            Container(
-              width: 4,
-              height: 2,
-              decoration: BoxDecoration(
-                color: isDarkMode ? Colors.white : Colors.black54,
-                borderRadius: BorderRadius.circular(2),
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: Container(
+                width: 4,
+                height: 2,
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.grey[300]! : Colors.black54,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
             // ランプ本体（レスポンシブサイズ）
@@ -342,8 +348,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: ColorFiltered(
                       colorFilter:
                           isDarkMode
-                              ? const ColorFilter.mode(
-                                Colors.white,
+                              ? ColorFilter.mode(
+                                Colors.grey[300]!,
                                 BlendMode.srcIn,
                               )
                               : const ColorFilter.mode(
@@ -411,7 +417,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return GestureDetector(
           onTap: () => context.push('/timer'),
           child: SizedBox(
-            height: 120, // タイマー表示のための余裕を追加
+            height: 110, // タイマー表示のための余裕を追加
             child: Stack(
               alignment: Alignment.center,
               children: [
@@ -420,8 +426,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: ColorFiltered(
                     colorFilter:
                         isDarkMode
-                            ? const ColorFilter.mode(
-                              Colors.white,
+                            ? ColorFilter.mode(
+                              Colors.grey[300]!,
                               BlendMode.srcIn,
                             )
                             : const ColorFilter.mode(
@@ -434,44 +440,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                 ),
-              // タイマー実行中の表示
-              if (isTimerActive)
-                Positioned(
-                  bottom: -15,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color:
-                          timerData.state == TimerState.running
-                              ? (isDarkMode
-                                  ? Colors.green[400]
-                                  : Colors.green[600])
-                              : (isDarkMode
-                                  ? Colors.orange[400]
-                                  : Colors.orange[600]),
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
+                // タイマー実行中の表示
+                if (isTimerActive)
+                  Positioned(
+                    bottom: 5,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            timerData.state == TimerState.running
+                                ? (isDarkMode
+                                    ? Colors.green[400]
+                                    : Colors.green[600])
+                                : (isDarkMode
+                                    ? Colors.orange[400]
+                                    : Colors.orange[600]),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        timerNotifier.formatTime(timerData.remainingSeconds),
+                        style: TextStyle(
+                          fontFamily: 'ArmedLemon',
+                          fontSize: 11,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
-                    child: Text(
-                      timerNotifier.formatTime(timerData.remainingSeconds),
-                      style: TextStyle(
-                        fontFamily: 'ArmedLemon',
-                        fontSize: 11,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -538,7 +544,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: ColorFiltered(
           colorFilter:
               isDarkMode
-                  ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                  ? ColorFilter.mode(Colors.grey[300]!, BlendMode.srcIn)
                   : const ColorFilter.mode(
                     Colors.transparent,
                     BlendMode.multiply,
