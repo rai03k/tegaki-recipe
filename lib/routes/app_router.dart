@@ -81,7 +81,7 @@ class AppRouter {
       ),
       GoRoute(
         path: '/shopping-memo',
-        pageBuilder: (context, state) => PageTransitions.fadeSlideTransition(
+        pageBuilder: (context, state) => PageTransitions.fadeTransition(
           context,
           state,
           const ShoppingMemoScreen(),
@@ -89,7 +89,7 @@ class AppRouter {
       ),
       GoRoute(
         path: '/settings',
-        pageBuilder: (context, state) => PageTransitions.fadeSlideTransition(
+        pageBuilder: (context, state) => PageTransitions.fadeTransition(
           context,
           state,
           const SettingsScreen(),

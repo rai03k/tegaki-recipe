@@ -76,14 +76,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // ランプUI（ステータスバーから伸びる）
           Positioned(
             top: 0, // ステータスバーから開始
-            right: 30,
+            right: 40.wpu(context),
             child: _buildLampWidget(
               isDarkMode,
               () => _onThemeToggle(themeNotifier),
             ),
           ),
           // 時計UI
-          Positioned(top: 60, left: 40, child: _buildClockWidget(isDarkMode)),
+          Positioned(
+            top: 60.hfpu(context),
+            left: 40.wpu(context),
+            child: _buildClockWidget(isDarkMode),
+          ),
 
           // 左下の家具エリア（メモ帳と棚）
           Positioned(
@@ -294,7 +298,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         // ステータスバーの高さを取得
         final statusBarHeight = MediaQuery.of(context).padding.top;
         // 吊り下げ棒の長さをステータスバー + 余裕分に設定
-        final rodHeight = statusBarHeight + 60;
+        final rodHeight = statusBarHeight + 60.hfpu(context);
 
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -327,7 +331,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 builder: (context) {
                   // ランプサイズを画面高さの比率で計算
                   final screenHeight = MediaQuery.of(context).size.height;
-                  final lampSize = screenHeight / 4; // 画面高の1/4
+                  final lampSize = screenHeight / 10; // 画面高の1/4
 
                   return SizedBox(
                     height: lampSize,
@@ -479,7 +483,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         // 画面縦幅（高さ）の比率で家具サイズを計算
         final screenHeight = MediaQuery.of(context).size.height;
         final memoSize = screenHeight / 10; // 画面高の1/10
-        final shelfSize = screenHeight / 4;  // 画面高の1/4
+        final shelfSize = screenHeight / 4; // 画面高の1/4
 
         // Stackの全体サイズを計算（棚のサイズ + メモ帳の少しの余裕）
         final stackHeight = shelfSize * 1.3;
