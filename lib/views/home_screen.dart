@@ -325,8 +325,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               onTap: onThemeToggle,
               child: Builder(
                 builder: (context) {
-                  // レスポンシブサイズでランプサイズを計算
-                  final lampSize = 100.wpu(context); // 横幅ベースで100px相当
+                  // レスポンシブサイズでランプサイズを計算（高さベース）
+                  final lampSize = 100.hfpu(context); // 高さベースで100px相当
 
                   return SizedBox(
                     height: lampSize,
@@ -402,12 +402,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return GestureDetector(
           onTap: () => context.push('/timer'),
           child: SizedBox(
-            height: 110.wpu(context), // レスポンシブサイズでタイマー表示のための余裕を追加
+            height: 110.hfpu(context), // 高さベースレスポンシブサイズでタイマー表示のための余裕を追加
             child: Stack(
               alignment: Alignment.center,
               children: [
                 SizedBox(
-                  height: 100.wpu(context), // レスポンシブサイズで時計サイズ
+                  height: 100.hfpu(context), // 高さベースレスポンシブサイズで時計サイズ
                   child: ColorFiltered(
                     colorFilter:
                         isDarkMode
@@ -475,9 +475,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildFurnitureWidgets(bool isDarkMode) {
     return Builder(
       builder: (context) {
-        // レスポンシブサイズで家具サイズを計算
-        final memoSize = 50.wpu(context); // 横幅ベースで50px相当
-        final shelfSize = 120.wpu(context); // 横幅ベースで120px相当
+        // レスポンシブサイズで家具サイズを計算（高さベース）
+        final memoSize = 50.hfpu(context); // 高さベースで50px相当
+        final shelfSize = 120.hfpu(context); // 高さベースで120px相当
 
         // Stackの全体サイズを計算（棚のサイズ + メモ帳の少しの余裕）
         final stackHeight = shelfSize * 1.3;
