@@ -475,9 +475,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildFurnitureWidgets(bool isDarkMode) {
     return Builder(
       builder: (context) {
-        // レスポンシブサイズで家具サイズを計算（高さベース）
-        final memoSize = 50.hfpu(context); // 高さベースで50px相当
-        final shelfSize = 120.hfpu(context); // 高さベースで120px相当
+        // 画面縦幅（高さ）の比率で家具サイズを計算
+        final screenHeight = MediaQuery.of(context).size.height;
+        final memoSize = screenHeight / 10; // 画面高の1/10
+        final shelfSize = screenHeight / 4;  // 画面高の1/4
 
         // Stackの全体サイズを計算（棚のサイズ + メモ帳の少しの余裕）
         final stackHeight = shelfSize * 1.3;
