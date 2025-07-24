@@ -82,12 +82,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           // 時計UI
-          Positioned(top: 70, left: 40, child: _buildClockWidget(isDarkMode)),
+          Positioned(top: 60, left: 40, child: _buildClockWidget(isDarkMode)),
 
           // 左下の家具エリア（メモ帳と棚）
           Positioned(
-            bottom: 100,
-            left: 20,
+            bottom: 20,
+            left: 0,
             child: _buildFurnitureWidgets(isDarkMode),
           ),
         ],
@@ -398,6 +398,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  // 時計
   Widget _buildClockWidget(bool isDarkMode) {
     return Consumer(
       builder: (context, ref, child) {
@@ -409,36 +410,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
         return GestureDetector(
           onTap: () => context.push('/timer'),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox(
-                height: 100,
-                child: ColorFiltered(
-                  colorFilter:
-                      isDarkMode
-                          ? const ColorFilter.mode(
-                            Colors.white,
-                            BlendMode.srcIn,
-                          )
-                          : const ColorFilter.mode(
-                            Colors.transparent,
-                            BlendMode.multiply,
-                          ),
-                  child: Image.asset(
-                    'assets/images/furniture/clock.png',
-                    fit: BoxFit.contain,
+          child: SizedBox(
+            height: 120, // タイマー表示のための余裕を追加
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  height: 100,
+                  child: ColorFiltered(
+                    colorFilter:
+                        isDarkMode
+                            ? const ColorFilter.mode(
+                              Colors.white,
+                              BlendMode.srcIn,
+                            )
+                            : const ColorFilter.mode(
+                              Colors.transparent,
+                              BlendMode.multiply,
+                            ),
+                    child: Image.asset(
+                      'assets/images/furniture/clock.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
-              ),
               // タイマー実行中の表示
               if (isTimerActive)
                 Positioned(
-                  bottom: -5,
+                  bottom: -15,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
+                      horizontal: 8,
+                      vertical: 3,
                     ),
                     decoration: BoxDecoration(
                       color:
@@ -449,20 +452,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               : (isDarkMode
                                   ? Colors.orange[400]
                                   : Colors.orange[600]),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Text(
                       timerNotifier.formatTime(timerData.remainingSeconds),
                       style: TextStyle(
                         fontFamily: 'ArmedLemon',
-                        fontSize: 10,
+                        fontSize: 11,
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -477,7 +488,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
         // 個別に家具サイズを計算
         final memoSize = screenHeight / 10; // 画面高の1/10
-        final shelfSize = screenHeight / 5;  // 画面高の1/5
+        final shelfSize = screenHeight / 4; // 画面高の1/5
 
         // Stackの全体サイズを計算（棚のサイズ + メモ帳の少しの余裕）
         final stackHeight = shelfSize * 1.3;
@@ -491,13 +502,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // 棚（背景）
               Positioned(
                 bottom: 0,
-                left: 0,
+                left: -30,
                 child: _buildShelfWidget(isDarkMode, shelfSize),
               ),
               // メモ帳（前景）
               Positioned(
-                top: stackHeight * 0.1, // 上から10%の位置
-                left: stackWidth * 0.1,  // 左から10%の位置
+                top: stackHeight * 0.2, // 上から10%の位置
+                left: stackWidth * 0.15, // 左から10%の位置
                 child: _buildMemoWidget(isDarkMode, memoSize),
               ),
             ],
@@ -525,19 +536,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         width: width,
         height: height,
         child: ColorFiltered(
-          colorFilter: isDarkMode
-              ? const ColorFilter.mode(
-                  Colors.white,
-                  BlendMode.srcIn,
-                )
-              : const ColorFilter.mode(
-                  Colors.transparent,
-                  BlendMode.multiply,
-                ),
-          child: Image.asset(
-            assetPath,
-            fit: BoxFit.contain,
-          ),
+          colorFilter:
+              isDarkMode
+                  ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                  : const ColorFilter.mode(
+                    Colors.transparent,
+                    BlendMode.multiply,
+                  ),
+          child: Image.asset(assetPath, fit: BoxFit.contain),
         ),
       ),
     );
