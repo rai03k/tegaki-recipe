@@ -473,27 +473,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildFurnitureWidgets(bool isDarkMode) {
     return Builder(
       builder: (context) {
-        final screenWidth = MediaQuery.of(context).size.width;
         final screenHeight = MediaQuery.of(context).size.height;
 
-        // 端末サイズに応じて家具サイズを調整
-        double furnitureSize;
-        if (screenWidth < 400) {
-          furnitureSize = screenHeight * 0.06; // 小さなスマホ
-        } else if (screenWidth < 600) {
-          furnitureSize = screenHeight * 0.08; // 通常のスマホ
-        } else {
-          furnitureSize = screenHeight * 0.1; // タブレット
-        }
-
-        furnitureSize = furnitureSize.clamp(60.0, 120.0);
+        // 個別に家具サイズを計算
+        final memoSize = screenHeight / 10; // 画面高の1/10
+        final shelfSize = screenHeight / 5;  // 画面高の1/5
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildMemoWidget(isDarkMode, furnitureSize),
-            SizedBox(height: furnitureSize * 0.15),
-            _buildShelfWidget(isDarkMode, furnitureSize),
+            _buildMemoWidget(isDarkMode, memoSize),
+            SizedBox(height: memoSize * 0.15),
+            _buildShelfWidget(isDarkMode, shelfSize),
           ],
         );
       },
@@ -507,11 +498,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required double size,
     required bool isDarkMode,
     double heightMultiplier = 1.0,
+    double aspectRatio = 1.0, // アスペクト比を追加
   }) {
+    final height = size * heightMultiplier;
+    final width = height * aspectRatio; // 高さに基づいて幅を計算
+
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
-        height: size * heightMultiplier,
+        width: width,
+        height: height,
         child: ColorFiltered(
           colorFilter: isDarkMode
               ? const ColorFilter.mode(
@@ -538,6 +534,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       onTap: () => context.push('/shopping-memo'),
       size: furnitureSize,
       isDarkMode: isDarkMode,
+      aspectRatio: 0.7, // メモ帳は縦長（幅：高さ = 0.7：1）
     );
   }
 
@@ -549,6 +546,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       size: furnitureSize,
       isDarkMode: isDarkMode,
       heightMultiplier: 1.1,
+      aspectRatio: 1.2, // 棚は横長（幅：高さ = 1.2：1）
     );
   }
 }
