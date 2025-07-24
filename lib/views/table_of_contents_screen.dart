@@ -196,7 +196,9 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
             extra: widget.recipeBook,
           );
           // レシピ作成画面から戻ってきたときにデータを再読み込み
-          ref.read(recipeNotifierProvider.notifier).refresh(widget.recipeBook.id);
+          ref
+              .read(recipeNotifierProvider.notifier)
+              .refresh(widget.recipeBook.id);
         },
         backgroundColor: isDarkMode ? Colors.grey[700] : Colors.deepPurple,
         foregroundColor: Colors.white,
@@ -330,7 +332,9 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
 
   // 編集ダイアログを表示
   void _showEditDialog(BuildContext context, bool isDarkMode) {
-    final titleController = TextEditingController(text: widget.recipeBook.title);
+    final titleController = TextEditingController(
+      text: widget.recipeBook.title,
+    );
     String? selectedImagePath = widget.recipeBook.coverImagePath;
 
     showDialog(
@@ -367,18 +371,25 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                       decoration: InputDecoration(
                         hintText: 'レシピ本のタイトルを入力',
                         hintStyle: TextStyle(
-                          color: isDarkMode ? Colors.grey[500] : Colors.grey[400],
+                          color:
+                              isDarkMode ? Colors.grey[500] : Colors.grey[400],
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide(
-                            color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
+                            color:
+                                isDarkMode
+                                    ? Colors.grey[600]!
+                                    : Colors.grey[300]!,
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide(
-                            color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
+                            color:
+                                isDarkMode
+                                    ? Colors.grey[600]!
+                                    : Colors.grey[300]!,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -389,7 +400,8 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                           ),
                         ),
                         filled: true,
-                        fillColor: isDarkMode ? Colors.grey[700] : Colors.grey[50],
+                        fillColor:
+                            isDarkMode ? Colors.grey[700] : Colors.grey[50],
                       ),
                       style: TextStyle(
                         color: isDarkMode ? Colors.white : Colors.black,
@@ -408,30 +420,34 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    
+
                     // 現在の画像プレビュー
                     Container(
                       width: double.infinity,
                       height: 200,
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
+                          color:
+                              isDarkMode
+                                  ? Colors.grey[600]!
+                                  : Colors.grey[300]!,
                         ),
                         borderRadius: BorderRadius.circular(8),
                         color: isDarkMode ? Colors.grey[700] : Colors.grey[50],
                       ),
-                      child: selectedImagePath != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(7),
-                              child: Image.file(
-                                File(selectedImagePath!),
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return _buildImagePlaceholder(isDarkMode);
-                                },
-                              ),
-                            )
-                          : _buildImagePlaceholder(isDarkMode),
+                      child:
+                          selectedImagePath != null
+                              ? ClipRRect(
+                                borderRadius: BorderRadius.circular(7),
+                                child: Image.file(
+                                  File(selectedImagePath!),
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return _buildImagePlaceholder(isDarkMode);
+                                  },
+                                ),
+                              )
+                              : _buildImagePlaceholder(isDarkMode),
                     ),
                     const SizedBox(height: 12),
 
@@ -440,23 +456,33 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: () => _pickImage(setState, (path) {
-                              selectedImagePath = path;
-                            }),
+                            onPressed:
+                                () => _pickImage(setState, (path) {
+                                  selectedImagePath = path;
+                                }),
                             icon: HugeIcon(
                               icon: HugeIcons.strokeRoundedImage01,
-                              color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                              color:
+                                  isDarkMode
+                                      ? Colors.grey[300]!
+                                      : Colors.grey[700]!,
                               size: 16,
                             ),
                             label: Text(
                               '画像を選択',
                               style: TextStyle(
-                                color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                                color:
+                                    isDarkMode
+                                        ? Colors.grey[300]
+                                        : Colors.grey[700],
                               ),
                             ),
                             style: OutlinedButton.styleFrom(
                               side: BorderSide(
-                                color: isDarkMode ? Colors.grey[600]! : Colors.grey[400]!,
+                                color:
+                                    isDarkMode
+                                        ? Colors.grey[600]!
+                                        : Colors.grey[400]!,
                               ),
                             ),
                           ),
@@ -471,7 +497,7 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                             },
                             icon: HugeIcon(
                               icon: HugeIcons.strokeRoundedDelete02,
-                              color: Colors.red[400],
+                              color: Colors.red[400]!,
                               size: 16,
                             ),
                             label: Text(
@@ -499,11 +525,12 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () => _saveChanges(
-                    context,
-                    titleController.text.trim(),
-                    selectedImagePath,
-                  ),
+                  onPressed:
+                      () => _saveChanges(
+                        context,
+                        titleController.text.trim(),
+                        selectedImagePath,
+                      ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.deepPurple,
                     foregroundColor: Colors.white,
@@ -526,7 +553,7 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
         children: [
           HugeIcon(
             icon: HugeIcons.strokeRoundedImage01,
-            color: isDarkMode ? Colors.grey[500] : Colors.grey[400],
+            color: isDarkMode ? Colors.grey[500]! : Colors.grey[400]!,
             size: 48,
           ),
           const SizedBox(height: 8),
@@ -543,8 +570,14 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
   }
 
   // 画像選択
-  Future<void> _pickImage(StateSetter setState, Function(String?) onImageSelected) async {
+  Future<void> _pickImage(
+    StateSetter setState,
+    Function(String?) onImageSelected,
+  ) async {
     final ImagePicker picker = ImagePicker();
+    // BuildContextを保存
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    
     try {
       final XFile? image = await picker.pickImage(
         source: ImageSource.gallery,
@@ -552,7 +585,7 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
         maxHeight: 800,
         imageQuality: 85,
       );
-      
+
       if (image != null) {
         setState(() {
           onImageSelected(image.path);
@@ -561,7 +594,7 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
     } catch (e) {
       // エラーハンドリング
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           const SnackBar(content: Text('画像の選択に失敗しました')),
         );
       }
@@ -569,30 +602,38 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
   }
 
   // 変更を保存
-  Future<void> _saveChanges(BuildContext context, String title, String? imagePath) async {
+  Future<void> _saveChanges(
+    BuildContext context,
+    String title,
+    String? imagePath,
+  ) async {
     if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('タイトルを入力してください')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('タイトルを入力してください')));
       return;
     }
 
-    try {
-      // RecipeBookを更新
-      final updatedRecipeBook = widget.recipeBook.copyWith(
-        title: title,
-        coverImagePath: imagePath,
-      );
+    // BuildContextを保存
+    final navigator = Navigator.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
 
+    try {
       // データベースを更新
-      await ref.read(recipeBookNotifierProvider.notifier).updateRecipeBook(updatedRecipeBook);
+      await ref
+          .read(recipeBookNotifierProvider.notifier)
+          .updateRecipeBook(
+            id: widget.recipeBook.id,
+            title: title,
+            coverImagePath: imagePath,
+          );
 
       if (mounted) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
+        navigator.pop();
+        scaffoldMessenger.showSnackBar(
           const SnackBar(content: Text('レシピ本を更新しました')),
         );
-        
+
         // 画面を再構築
         setState(() {
           // widgetのrecipeBookを更新（画面表示用）
@@ -602,8 +643,8 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
+        navigator.pop();
+        scaffoldMessenger.showSnackBar(
           const SnackBar(content: Text('更新に失敗しました')),
         );
       }

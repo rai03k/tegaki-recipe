@@ -66,6 +66,32 @@ class RecipeBookNotifier extends _$RecipeBookNotifier {
     }
   }
 
+  /// レシピ本を更新
+  Future<bool> updateRecipeBook({
+    required int id,
+    String? title,
+    String? coverImagePath,
+  }) async {
+    try {
+      state = state.copyWith(isLoading: true, errorMessage: null);
+      await _repository.updateRecipeBook(
+        id: id,
+        title: title,
+        coverImagePath: coverImagePath,
+      );
+      // 更新後に一覧を再読み込み
+      await _loadRecipeBooks();
+      return true;
+    } catch (e) {
+      debugPrint('レシピ本の更新に失敗しました: $e');
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'レシピ本の更新に失敗しました',
+      );
+      return false;
+    }
+  }
+
   /// レシピ本を削除
   Future<bool> deleteRecipeBook(int id) async {
     try {

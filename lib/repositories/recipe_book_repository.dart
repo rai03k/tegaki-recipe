@@ -39,16 +39,16 @@ class RecipeBookRepository {
     String? title,
     String? coverImagePath,
   }) async {
-    final companion = RecipeBooksCompanion(
+    var companion = RecipeBooksCompanion(
       id: Value(id),
       updatedAt: Value(DateTime.now()),
     );
 
     if (title != null) {
-      companion.copyWith(title: Value(title));
+      companion = companion.copyWith(title: Value(title));
     }
     if (coverImagePath != null) {
-      companion.copyWith(coverImagePath: Value(coverImagePath));
+      companion = companion.copyWith(coverImagePath: Value(coverImagePath));
     }
 
     return await _database.update(_database.recipeBooks).replace(companion);
