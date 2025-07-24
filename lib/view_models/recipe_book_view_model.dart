@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../models/database.dart';
 import '../models/recipe_book_state.dart';
 import '../repositories/recipe_book_repository.dart';
 import '../services/database_service.dart';
@@ -40,6 +41,16 @@ class RecipeBookNotifier extends _$RecipeBookNotifier {
   /// レシピ本一覧を再読み込みする（画面復帰時など）
   Future<void> refresh() async {
     await _loadRecipeBooks();
+  }
+
+  /// 指定されたIDのレシピ本を取得
+  Future<RecipeBook?> getRecipeBookById(int id) async {
+    try {
+      return await _repository.getRecipeBookById(id);
+    } catch (e) {
+      debugPrint('レシピ本の取得に失敗しました: $e');
+      return null;
+    }
   }
 
   /// 新しいレシピ本を作成

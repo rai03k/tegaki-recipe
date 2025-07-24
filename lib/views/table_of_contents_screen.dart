@@ -19,14 +19,17 @@ class TableOfContentsScreen extends ConsumerStatefulWidget {
 }
 
 class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
+  late RecipeBook _currentRecipeBook;
+
   @override
   void initState() {
     super.initState();
+    _currentRecipeBook = widget.recipeBook;
     // 画面初期化時にレシピ一覧を読み込み
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref
           .read(recipeNotifierProvider.notifier)
-          .loadRecipesByBookId(widget.recipeBook.id);
+          .loadRecipesByBookId(_currentRecipeBook.id);
     });
   }
 
@@ -35,8 +38,23 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
     super.didChangeDependencies();
     // 画面に戻ってきた時にデータを再読み込み（非同期で実行）
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(recipeNotifierProvider.notifier).refresh(widget.recipeBook.id);
+      ref.read(recipeNotifierProvider.notifier).refresh(_currentRecipeBook.id);
     });
+  }
+
+  // RecipeBookの最新データを取得して画面を更新
+  Future<void> _refreshRecipeBookData() async {
+    final updatedRecipeBook = await ref
+        .read(recipeBookNotifierProvider.notifier)
+        .getRecipeBookById(_currentRecipeBook.id);
+    
+    if (updatedRecipeBook != null && mounted) {
+      setState(() {
+        _currentRecipeBook = updatedRecipeBook;
+      });
+      // レシピ本一覧も再読み込み
+      ref.read(recipeBookNotifierProvider.notifier).refresh();
+    }
   }
 
   @override
@@ -68,11 +86,11 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                     child: Row(
                       children: [
                         // レシピ本の小さな表紙画像
-                        if (widget.recipeBook.coverImagePath != null)
+                        if (_currentRecipeBook.coverImagePath != null)
                           FutureBuilder<bool>(
                             future:
                                 File(
-                                  widget.recipeBook.coverImagePath!,
+                                  _currentRecipeBook.coverImagePath!,
                                 ).exists(),
                             builder: (context, snapshot) {
                               if (snapshot.hasData && snapshot.data == true) {
@@ -91,7 +109,7 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(3),
                                     child: Image.file(
-                                      File(widget.recipeBook.coverImagePath!),
+                                      File(_currentRecipeBook.coverImagePath!),
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -128,7 +146,7 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            widget.recipeBook.title,
+                            _currentRecipeBook.title,
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -145,11 +163,11 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                   GestureDetector(
                     onTap: () async {
                       await context.push(
-                        '/edit-recipe-book/${widget.recipeBook.id}',
-                        extra: widget.recipeBook,
+                        '/edit-recipe-book/${_currentRecipeBook.id}',
+                        extra: _currentRecipeBook,
                       );
-                      // 編集画面から戻ってきた時にデータを再読み込み
-                      ref.read(recipeBookNotifierProvider.notifier).refresh();
+                      // 編集画面から戻ってきた時に最新のRecipeBookデータを取得
+                      await _refreshRecipeBookData();
                     },
                     child: HugeIcon(
                       icon: HugeIcons.strokeRoundedEdit02,
@@ -198,13 +216,13 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await context.push(
-            '/create-recipe/${widget.recipeBook.id}',
-            extra: widget.recipeBook,
+            '/create-recipe/${_currentRecipeBook.id}',
+            extra: _currentRecipeBook,
           );
           // レシピ作成画面から戻ってきたときにデータを再読み込み
           ref
               .read(recipeNotifierProvider.notifier)
-              .refresh(widget.recipeBook.id);
+              .refresh(_currentRecipeBook.id);
         },
         backgroundColor: isDarkMode ? Colors.grey[700] : Colors.deepPurple,
         foregroundColor: Colors.white,
