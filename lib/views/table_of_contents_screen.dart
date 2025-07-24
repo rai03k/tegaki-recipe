@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/database.dart';
 import '../view_models/recipe_view_model.dart';
+import '../view_models/recipe_book_view_model.dart';
 import '../view_models/theme_view_model.dart';
 import 'dart:io';
 
@@ -51,7 +53,7 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 戻るボタンとレシピ本情報
+              // 戻るボタンとレシピ本情報、編集ボタン
               Row(
                 children: [
                   GestureDetector(
@@ -138,6 +140,15 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                  // 編集ボタン
+                  GestureDetector(
+                    onTap: () => _showEditDialog(context, isDarkMode),
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedEdit02,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                      size: 24.0,
                     ),
                   ),
                 ],
@@ -315,6 +326,288 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
         ),
       ],
     );
+  }
+
+  // 編集ダイアログを表示
+  void _showEditDialog(BuildContext context, bool isDarkMode) {
+    final titleController = TextEditingController(text: widget.recipeBook.title);
+    String? selectedImagePath = widget.recipeBook.coverImagePath;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: isDarkMode ? Colors.grey[800] : Colors.white,
+              title: Text(
+                'レシピ本を編集',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // タイトル編集
+                    Text(
+                      'タイトル',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: titleController,
+                      decoration: InputDecoration(
+                        hintText: 'レシピ本のタイトルを入力',
+                        hintStyle: TextStyle(
+                          color: isDarkMode ? Colors.grey[500] : Colors.grey[400],
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(
+                            color: Colors.deepPurple,
+                            width: 2,
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: isDarkMode ? Colors.grey[700] : Colors.grey[50],
+                      ),
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
+                      maxLines: 2,
+                    ),
+                    const SizedBox(height: 24),
+
+                    // 表紙画像編集
+                    Text(
+                      '表紙画像',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    
+                    // 現在の画像プレビュー
+                    Container(
+                      width: double.infinity,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        color: isDarkMode ? Colors.grey[700] : Colors.grey[50],
+                      ),
+                      child: selectedImagePath != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(7),
+                              child: Image.file(
+                                File(selectedImagePath!),
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return _buildImagePlaceholder(isDarkMode);
+                                },
+                              ),
+                            )
+                          : _buildImagePlaceholder(isDarkMode),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // 画像選択ボタン
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => _pickImage(setState, (path) {
+                              selectedImagePath = path;
+                            }),
+                            icon: HugeIcon(
+                              icon: HugeIcons.strokeRoundedImage01,
+                              color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                              size: 16,
+                            ),
+                            label: Text(
+                              '画像を選択',
+                              style: TextStyle(
+                                color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: isDarkMode ? Colors.grey[600]! : Colors.grey[400]!,
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (selectedImagePath != null) ...[
+                          const SizedBox(width: 8),
+                          OutlinedButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                selectedImagePath = null;
+                              });
+                            },
+                            icon: HugeIcon(
+                              icon: HugeIcons.strokeRoundedDelete02,
+                              color: Colors.red[400],
+                              size: 16,
+                            ),
+                            label: Text(
+                              '削除',
+                              style: TextStyle(color: Colors.red[400]),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: Colors.red[400]!),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(
+                    'キャンセル',
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () => _saveChanges(
+                    context,
+                    titleController.text.trim(),
+                    selectedImagePath,
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('保存'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // 画像プレースホルダー
+  Widget _buildImagePlaceholder(bool isDarkMode) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          HugeIcon(
+            icon: HugeIcons.strokeRoundedImage01,
+            color: isDarkMode ? Colors.grey[500] : Colors.grey[400],
+            size: 48,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '画像を選択してください',
+            style: TextStyle(
+              color: isDarkMode ? Colors.grey[500] : Colors.grey[400],
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 画像選択
+  Future<void> _pickImage(StateSetter setState, Function(String?) onImageSelected) async {
+    final ImagePicker picker = ImagePicker();
+    try {
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
+      
+      if (image != null) {
+        setState(() {
+          onImageSelected(image.path);
+        });
+      }
+    } catch (e) {
+      // エラーハンドリング
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('画像の選択に失敗しました')),
+        );
+      }
+    }
+  }
+
+  // 変更を保存
+  Future<void> _saveChanges(BuildContext context, String title, String? imagePath) async {
+    if (title.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('タイトルを入力してください')),
+      );
+      return;
+    }
+
+    try {
+      // RecipeBookを更新
+      final updatedRecipeBook = widget.recipeBook.copyWith(
+        title: title,
+        coverImagePath: imagePath,
+      );
+
+      // データベースを更新
+      await ref.read(recipeBookNotifierProvider.notifier).updateRecipeBook(updatedRecipeBook);
+
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('レシピ本を更新しました')),
+        );
+        
+        // 画面を再構築
+        setState(() {
+          // widgetのrecipeBookを更新（画面表示用）
+          // Note: 実際はGoRouterのextraで渡されたオブジェクトなので、
+          // 親画面に戻った時に最新データが反映される
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('更新に失敗しました')),
+        );
+      }
+    }
   }
 }
 
