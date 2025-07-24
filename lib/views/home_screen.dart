@@ -469,6 +469,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  // 家具エリア全体のレイアウト管理
   Widget _buildFurnitureWidgets(bool isDarkMode) {
     return Builder(
       builder: (context) {
@@ -490,56 +491,64 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // メモ帳（タップで買い物メモ画面へ）
-            GestureDetector(
-              onTap: () => context.push('/shopping-memo'),
-              child: SizedBox(
-                height: furnitureSize,
-                child: ColorFiltered(
-                  colorFilter:
-                      isDarkMode
-                          ? const ColorFilter.mode(
-                            Colors.white,
-                            BlendMode.srcIn,
-                          )
-                          : const ColorFilter.mode(
-                            Colors.transparent,
-                            BlendMode.multiply,
-                          ),
-                  child: Image.asset(
-                    'assets/images/furniture/memo.png',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            ),
+            _buildMemoWidget(isDarkMode, furnitureSize),
             SizedBox(height: furnitureSize * 0.15),
-            // 棚（タップで設定画面へ）
-            GestureDetector(
-              onTap: () => context.push('/settings'),
-              child: SizedBox(
-                height: furnitureSize * 1.1,
-                child: ColorFiltered(
-                  colorFilter:
-                      isDarkMode
-                          ? const ColorFilter.mode(
-                            Colors.white,
-                            BlendMode.srcIn,
-                          )
-                          : const ColorFilter.mode(
-                            Colors.transparent,
-                            BlendMode.multiply,
-                          ),
-                  child: Image.asset(
-                    'assets/images/furniture/tana.png',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            ),
+            _buildShelfWidget(isDarkMode, furnitureSize),
           ],
         );
       },
+    );
+  }
+
+  // 共通の家具アイテム構築ヘルパー
+  Widget _buildFurnitureItem({
+    required String assetPath,
+    required VoidCallback onTap,
+    required double size,
+    required bool isDarkMode,
+    double heightMultiplier = 1.0,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        height: size * heightMultiplier,
+        child: ColorFiltered(
+          colorFilter: isDarkMode
+              ? const ColorFilter.mode(
+                  Colors.white,
+                  BlendMode.srcIn,
+                )
+              : const ColorFilter.mode(
+                  Colors.transparent,
+                  BlendMode.multiply,
+                ),
+          child: Image.asset(
+            assetPath,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // メモ帳ウィジェット（買い物メモ画面へ遷移）
+  Widget _buildMemoWidget(bool isDarkMode, double furnitureSize) {
+    return _buildFurnitureItem(
+      assetPath: 'assets/images/furniture/memo.png',
+      onTap: () => context.push('/shopping-memo'),
+      size: furnitureSize,
+      isDarkMode: isDarkMode,
+    );
+  }
+
+  // 棚ウィジェット（設定画面へ遷移）
+  Widget _buildShelfWidget(bool isDarkMode, double furnitureSize) {
+    return _buildFurnitureItem(
+      assetPath: 'assets/images/furniture/tana.png',
+      onTap: () => context.push('/settings'),
+      size: furnitureSize,
+      isDarkMode: isDarkMode,
+      heightMultiplier: 1.1,
     );
   }
 }
