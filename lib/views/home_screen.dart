@@ -325,8 +325,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               onTap: onThemeToggle,
               child: Builder(
                 builder: (context) {
-                  // レスポンシブサイズでランプサイズを計算（高さベース）
-                  final lampSize = 100.hfpu(context); // 高さベースで100px相当
+                  // ランプサイズを画面高さの比率で計算
+                  final screenHeight = MediaQuery.of(context).size.height;
+                  final lampSize = screenHeight / 4; // 画面高の1/4
 
                   return SizedBox(
                     height: lampSize,
