@@ -479,12 +479,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         final memoSize = screenHeight / 10; // 画面高の1/10
         final shelfSize = screenHeight / 5;  // 画面高の1/5
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        return Stack(
           children: [
-            _buildMemoWidget(isDarkMode, memoSize),
-            SizedBox(height: memoSize * 0.15),
-            _buildShelfWidget(isDarkMode, shelfSize),
+            // 棚（背景）
+            Positioned(
+              bottom: 0,
+              left: 0,
+              child: _buildShelfWidget(isDarkMode, shelfSize),
+            ),
+            // メモ帳（前景）
+            Positioned(
+              top: 0,
+              left: 10,
+              child: _buildMemoWidget(isDarkMode, memoSize),
+            ),
           ],
         );
       },
