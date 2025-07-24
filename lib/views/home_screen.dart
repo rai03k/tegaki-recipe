@@ -81,8 +81,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               () => _onThemeToggle(themeNotifier),
             ),
           ),
-          // 時計UI
-          Positioned(top: 70, left: 40, child: _buildClockWidget(isDarkMode)),
+          // 時計UI（ランプ本体の高さに合わせる）
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 60, // ステータスバー + 吊り下げ棒の長さ
+            left: 40, 
+            child: _buildClockWidget(isDarkMode)
+          ),
 
           // 左下の家具エリア（メモ帳と棚）
           Positioned(
