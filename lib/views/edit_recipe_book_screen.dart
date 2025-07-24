@@ -84,12 +84,18 @@ class _EditRecipeBookScreenState extends ConsumerState<EditRecipeBookScreen> {
     
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.grey[900] : Colors.grey[100],
+      resizeToAvoidBottomInset: true, // キーボード対応
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height - 
+                         MediaQuery.of(context).padding.top - 40,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               // 戻るボタン
               Row(
                 children: [
@@ -198,7 +204,7 @@ class _EditRecipeBookScreenState extends ConsumerState<EditRecipeBookScreen> {
                 ),
               ),
 
-              const Spacer(),
+              const SizedBox(height: 40), // Spacerの代わりに固定高さ
 
               // 更新ボタン
               SizedBox(
@@ -231,7 +237,8 @@ class _EditRecipeBookScreenState extends ConsumerState<EditRecipeBookScreen> {
                         ),
                 ),
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
