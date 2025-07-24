@@ -302,14 +302,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Container(
               width: 1, // 少し太くして見やすく
               height: rodHeight,
-              color: isDarkMode ? Colors.white70 : Colors.black54,
+              color: isDarkMode ? Colors.white : Colors.black54,
             ),
             // ランプとの接続部分
             Container(
               width: 4,
               height: 2,
               decoration: BoxDecoration(
-                color: isDarkMode ? Colors.white70 : Colors.black54,
+                color: isDarkMode ? Colors.white : Colors.black54,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
