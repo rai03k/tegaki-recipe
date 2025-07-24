@@ -339,11 +339,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                   return SizedBox(
                     height: lampSize,
-                    child: Image.asset(
-                      isDarkMode
-                          ? 'assets/images/furniture/lamp.png'
-                          : 'assets/images/furniture/lamp_on.png',
-                      fit: BoxFit.contain,
+                    child: ColorFiltered(
+                      colorFilter: isDarkMode
+                          ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                          : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
+                      child: Image.asset(
+                        'assets/images/furniture/lamp_on.png',
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   );
                 },
