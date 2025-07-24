@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import '../views/home_screen.dart';
 import '../views/create_recipe_book_screen.dart';
+import '../views/edit_recipe_book_screen.dart';
 import '../views/table_of_contents_screen.dart';
 import '../views/create_recipe_screen.dart';
 import '../views/ingredient_selection_screen.dart';
@@ -29,6 +30,17 @@ class AppRouter {
           state,
           const CreateRecipeBookScreen(),
         ),
+      ),
+      GoRoute(
+        path: '/edit-recipe-book/:recipeBookId',
+        pageBuilder: (context, state) {
+          final recipeBook = state.extra as RecipeBook;
+          return PageTransitions.fadeSlideTransition(
+            context,
+            state,
+            EditRecipeBookScreen(recipeBook: recipeBook),
+          );
+        },
       ),
       GoRoute(
         path: '/table-of-contents/:recipeBookId',
