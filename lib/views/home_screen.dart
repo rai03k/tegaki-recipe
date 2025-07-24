@@ -8,6 +8,7 @@ import '../models/database.dart';
 import '../view_models/recipe_book_view_model.dart';
 import '../view_models/theme_view_model.dart';
 import '../view_models/timer_view_model.dart';
+import '../utils/responsive_size.dart';
 import 'dart:io';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -81,12 +82,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               () => _onThemeToggle(themeNotifier),
             ),
           ),
-          // 時計UI（ランプ本体の高さに合わせる）
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 60, // ステータスバー + 吊り下げ棒の長さ
-            left: 40, 
-            child: _buildClockWidget(isDarkMode)
-          ),
+          // 時計UI
+          Positioned(top: 60, left: 40, child: _buildClockWidget(isDarkMode)),
 
           // 左下の家具エリア（メモ帳と棚）
           Positioned(
@@ -328,24 +325,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               onTap: onThemeToggle,
               child: Builder(
                 builder: (context) {
-                  final screenWidth = MediaQuery.of(context).size.width;
-                  final screenHeight = MediaQuery.of(context).size.height;
-
-                  // 端末サイズに応じてランプサイズを調整
-                  double lampSize;
-                  if (screenWidth < 400) {
-                    // 小さなスマホ
-                    lampSize = screenHeight * 0.08; // 画面高の8%
-                  } else if (screenWidth < 600) {
-                    // 通常のスマホ
-                    lampSize = screenHeight * 0.1; // 画面高の10%
-                  } else {
-                    // タブレット
-                    lampSize = screenHeight * 0.12; // 画面高の12%
-                  }
-
-                  // 最小・最大サイズを制限
-                  lampSize = lampSize.clamp(80.0, 180.0);
+                  // レスポンシブサイズでランプサイズを計算
+                  final lampSize = 100.wpu(context); // 横幅ベースで100px相当
 
                   return SizedBox(
                     height: lampSize,
@@ -421,12 +402,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return GestureDetector(
           onTap: () => context.push('/timer'),
           child: SizedBox(
-            height: 110, // タイマー表示のための余裕を追加
+            height: 110.wpu(context), // レスポンシブサイズでタイマー表示のための余裕を追加
             child: Stack(
               alignment: Alignment.center,
               children: [
                 SizedBox(
-                  height: 100,
+                  height: 100.wpu(context), // レスポンシブサイズで時計サイズ
                   child: ColorFiltered(
                     colorFilter:
                         isDarkMode
@@ -494,11 +475,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildFurnitureWidgets(bool isDarkMode) {
     return Builder(
       builder: (context) {
-        final screenHeight = MediaQuery.of(context).size.height;
-
-        // 個別に家具サイズを計算
-        final memoSize = screenHeight / 10; // 画面高の1/10
-        final shelfSize = screenHeight / 4; // 画面高の1/5
+        // レスポンシブサイズで家具サイズを計算
+        final memoSize = 50.wpu(context); // 横幅ベースで50px相当
+        final shelfSize = 120.wpu(context); // 横幅ベースで120px相当
 
         // Stackの全体サイズを計算（棚のサイズ + メモ帳の少しの余裕）
         final stackHeight = shelfSize * 1.3;
