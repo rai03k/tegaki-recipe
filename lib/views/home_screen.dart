@@ -28,6 +28,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     _audioPlayer = AudioPlayer();
     _setupAudioSession();
+    
+    // 音声ファイルを事前に準備（エラーは無視）
+    _audioPlayer.setAsset('assets/se/switch.mp3', preload: false).catchError((error) {
+      print('❌ 音声ファイル事前準備エラー: $error');
+      return null;
+    });
+    
     print('🎵 AudioPlayer 初期化完了');
   }
 
@@ -304,44 +311,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _onThemeToggle(ThemeNotifier themeNotifier) async {
     print('🎯 テーマ切り替えタップ開始');
     
-    // 音声再生（新しいAudioPlayerを毎回作成）
-    AudioPlayer? tempPlayer;
+    // クラス変数の_audioPlayerを使用（タイマーViewModelと同じ方法）
     try {
-      print('🔊 新しいAudioPlayer作成');
-      tempPlayer = AudioPlayer();
-      
-      print('🔊 音声ファイル読み込み開始');
-      await tempPlayer.setAudioSource(AudioSource.asset('assets/se/switch.mp3'));
-      print('🔊 音声ファイル読み込み完了');
-      
       print('🔊 音声再生開始');
-      await tempPlayer.play();
-      print('🔊 音声再生完了');
       
-      // 少し待ってから破棄（音声が確実に再生されるように）
-      await Future.delayed(const Duration(milliseconds: 100));
-      await tempPlayer.dispose();
-      tempPlayer = null;
-    } catch (e) {
-      print('❌ 音声再生エラー: $e');
-      // エラー時もリソース解放
-      if (tempPlayer != null) {
-        try {
-          await tempPlayer.dispose();
-        } catch (disposeError) {
-          print('❌ AudioPlayer破棄エラー: $disposeError');
-        }
+      // 再生位置をリセット
+      await _audioPlayer.seek(Duration.zero);
+      
+      // 音声ファイルを設定（既に設定済みの場合はスキップ）
+      if (_audioPlayer.audioSource == null) {
+        await _audioPlayer.setAsset('assets/se/switch.mp3');
       }
+      
+      // 音声再生（エラーを無視して継続）
+      await _audioPlayer.play().catchError((error) {
+        print('❌ 音声再生エラー: $error');
+        return null;
+      });
+      
+      print('🔊 音声再生完了');
+    } catch (e) {
+      print('❌ 音声再生設定エラー: $e');
+      // 音声再生エラーは無視してアプリ続行
     }
 
-    // 振動（音声と並行実行）
+    // 振動（複数回実行）
     try {
       print('📳 バイブレーションチェック開始');
       final hasVibrator = await Vibration.hasVibrator();
       print('📳 バイブレーター有無: $hasVibrator');
       
       if (hasVibrator == true) {
-        Vibration.vibrate(duration: 100); // awaitを外して非同期で実行
+        // 複数回バイブレーション（パターン: 振動100ms → 休憩50ms → 振動100ms）
+        await Vibration.vibrate(duration: 100);
+        await Future.delayed(const Duration(milliseconds: 50));
+        await Vibration.vibrate(duration: 100);
         print('📳 バイブレーション実行完了');
       } else {
         print('📳 バイブレーターなし');
