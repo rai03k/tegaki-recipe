@@ -26,17 +26,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
-    _preloadAudio();
     print('🎵 AudioPlayer 初期化完了');
-  }
-
-  Future<void> _preloadAudio() async {
-    try {
-      await _audioPlayer.setAsset('assets/se/switch.mp3');
-      print('🎵 音声ファイル事前読み込み完了');
-    } catch (e) {
-      print('❌ 音声ファイル事前読み込みエラー: $e');
-    }
   }
 
   @override
@@ -290,22 +280,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     
     // 音声再生
     try {
+      print('🔊 音声ファイル読み込み開始');
+      await _audioPlayer.setAsset('assets/se/switch.mp3');
+      print('🔊 音声ファイル読み込み完了');
+      
       print('🔊 音声再生開始');
-      await _audioPlayer.seek(Duration.zero); // 音声を最初から再生
-      await _audioPlayer.play();
-      print('🔊 音声再生完了');
+      _audioPlayer.play(); // awaitを外して非同期で実行
+      print('🔊 音声再生コマンド実行完了');
     } catch (e) {
       print('❌ 音声再生エラー: $e');
     }
 
-    // 振動
+    // 振動（音声と並行実行）
     try {
       print('📳 バイブレーションチェック開始');
       final hasVibrator = await Vibration.hasVibrator();
       print('📳 バイブレーター有無: $hasVibrator');
       
       if (hasVibrator == true) {
-        await Vibration.vibrate(duration: 100);
+        Vibration.vibrate(duration: 100); // awaitを外して非同期で実行
         print('📳 バイブレーション実行完了');
       } else {
         print('📳 バイブレーターなし');
