@@ -26,6 +26,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
+    _preloadAudio();
+    print('🎵 AudioPlayer 初期化完了');
+  }
+
+  Future<void> _preloadAudio() async {
+    try {
+      await _audioPlayer.setAsset('assets/se/switch.mp3');
+      print('🎵 音声ファイル事前読み込み完了');
+    } catch (e) {
+      print('❌ 音声ファイル事前読み込みエラー: $e');
+    }
   }
 
   @override
@@ -275,21 +286,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _onThemeToggle(ThemeNotifier themeNotifier) async {
+    print('🎯 テーマ切り替えタップ開始');
+    
     // 音声再生
     try {
-      await _audioPlayer.setAsset('assets/se/switch.mp3');
+      print('🔊 音声再生開始');
+      await _audioPlayer.seek(Duration.zero); // 音声を最初から再生
       await _audioPlayer.play();
+      print('🔊 音声再生完了');
     } catch (e) {
-      // 音声再生エラーは無視して続行
+      print('❌ 音声再生エラー: $e');
     }
 
     // 振動
-    if (await Vibration.hasVibrator() ?? false) {
-      Vibration.vibrate(duration: 100);
+    try {
+      print('📳 バイブレーションチェック開始');
+      final hasVibrator = await Vibration.hasVibrator();
+      print('📳 バイブレーター有無: $hasVibrator');
+      
+      if (hasVibrator == true) {
+        await Vibration.vibrate(duration: 100);
+        print('📳 バイブレーション実行完了');
+      } else {
+        print('📳 バイブレーターなし');
+      }
+    } catch (e) {
+      print('❌ バイブレーションエラー: $e');
     }
 
     // テーマ切り替え
     themeNotifier.toggleTheme();
+    print('🎯 テーマ切り替え完了');
   }
 
   Widget _buildLampWidget(bool isDarkMode, VoidCallback onThemeToggle) {
