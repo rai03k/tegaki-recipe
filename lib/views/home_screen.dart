@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:audio_session/audio_session.dart';
 import 'package:vibration/vibration.dart';
 import '../models/database.dart';
 import '../view_models/recipe_book_view_model.dart';
@@ -26,21 +27,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
-    _initializeAudioSession();
+    _setupAudioSession();
     print('🎵 AudioPlayer 初期化完了');
   }
 
-  Future<void> _initializeAudioSession() async {
+  Future<void> _setupAudioSession() async {
     try {
-      // Just AudioのAudioSessionマネージャーを使用
-      // これによりiOSでの適切なAudioSession設定が行われる
-      await _audioPlayer.setAudioSource(
-        AudioSource.asset('assets/se/switch.mp3'),
-        preload: false, // 事前読み込みしない
-      );
-      print('🎵 AudioSession初期化完了');
+      final session = await AudioSession.instance;
+      // 音声再生専用の設定
+      await session.configure(const AudioSessionConfiguration(
+        avAudioSessionCategory: AVAudioSessionCategory.playback,
+        avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.none,
+        avAudioSessionMode: AVAudioSessionMode.defaultMode,
+        avAudioSessionRouteSharingPolicy: AVAudioSessionRouteSharingPolicy.defaultPolicy,
+        avAudioSessionSetActiveOptions: AVAudioSessionSetActiveOptions.none,
+        androidAudioAttributes: AndroidAudioAttributes(
+          contentType: AndroidAudioContentType.sonification,
+          flags: AndroidAudioFlags.none,
+          usage: AndroidAudioUsage.media,
+        ),
+        androidAudioFocusGainType: AndroidAudioFocusGainType.gain,
+        androidWillPauseWhenDucked: false,
+      ));
+      print('🎵 AudioSession 設定完了');
     } catch (e) {
-      print('❌ AudioSession初期化エラー: $e');
+      print('❌ AudioSession 設定エラー: $e');
     }
   }
 
@@ -293,30 +304,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _onThemeToggle(ThemeNotifier themeNotifier) async {
     print('🎯 テーマ切り替えタップ開始');
     
-    // 音声再生（改善版）
+    // 音声再生（新しいAudioPlayerを毎回作成）
+    AudioPlayer? tempPlayer;
     try {
+      print('🔊 新しいAudioPlayer作成');
+      tempPlayer = AudioPlayer();
+      
+      print('🔊 音声ファイル読み込み開始');
+      await tempPlayer.setAudioSource(AudioSource.asset('assets/se/switch.mp3'));
+      print('🔊 音声ファイル読み込み完了');
+      
       print('🔊 音声再生開始');
+      await tempPlayer.play();
+      print('🔊 音声再生完了');
       
-      // 既に読み込まれている場合は再読み込みしない
-      if (_audioPlayer.audioSource == null) {
-        print('🔊 音声ファイル読み込み開始');
-        await _audioPlayer.setAsset('assets/se/switch.mp3');
-        print('🔊 音声ファイル読み込み完了');
-      }
-      
-      // 再生位置を最初にリセット
-      await _audioPlayer.seek(Duration.zero);
-      
-      // 音声再生（non-blocking）
-      _audioPlayer.play().catchError((error) {
-        print('❌ 音声再生エラー: $error');
-        return null; // エラーを無視して続行
-      });
-      
-      print('🔊 音声再生コマンド実行完了');
+      // 少し待ってから破棄（音声が確実に再生されるように）
+      await Future.delayed(const Duration(milliseconds: 100));
+      await tempPlayer.dispose();
+      tempPlayer = null;
     } catch (e) {
       print('❌ 音声再生エラー: $e');
-      // エラーが発生してもアプリの動作は継続
+      // エラー時もリソース解放
+      if (tempPlayer != null) {
+        try {
+          await tempPlayer.dispose();
+        } catch (disposeError) {
+          print('❌ AudioPlayer破棄エラー: $disposeError');
+        }
+      }
     }
 
     // 振動（音声と並行実行）
