@@ -59,6 +59,12 @@ class TimerNotifier extends _$TimerNotifier {
     
     _audioPlayer = AudioPlayer();
     
+    // 音声ファイルを事前に準備（エラーは無視）
+    _audioPlayer!.setAsset('assets/se/switch.mp3', preload: false).catchError((error) {
+      print('❌ タイマー音声ファイル事前準備エラー: $error');
+      return null;
+    });
+    
     return const TimerData(
       totalSeconds: 0,
       remainingSeconds: 0,
@@ -132,17 +138,35 @@ class TimerNotifier extends _$TimerNotifier {
   }
 
   Future<void> _onTimerComplete() async {
-    // 音声再生
+    // 音声再生（改善版）
     try {
-      await _audioPlayer?.setAsset('assets/se/switch.mp3');
-      await _audioPlayer?.play();
+      if (_audioPlayer != null) {
+        // 事前に音声ファイルを設定してない場合のみ設定
+        if (_audioPlayer!.audioSource == null) {
+          await _audioPlayer!.setAsset('assets/se/switch.mp3');
+        }
+        
+        // 再生位置をリセット
+        await _audioPlayer!.seek(Duration.zero);
+        
+        // 音声再生（エラーを無視して継続）
+        _audioPlayer!.play().catchError((error) {
+          print('❌ タイマー音声再生エラー: $error');
+          return null;
+        });
+      }
     } catch (e) {
-      // 音声再生エラーは無視
+      print('❌ タイマー音声再生設定エラー: $e');
+      // 音声再生エラーは無視してアプリ続行
     }
     
     // 振動
-    if (await Vibration.hasVibrator() ?? false) {
-      Vibration.vibrate(duration: 500);
+    try {
+      if (await Vibration.hasVibrator() ?? false) {
+        Vibration.vibrate(duration: 500);
+      }
+    } catch (e) {
+      print('❌ タイマー振動エラー: $e');
     }
   }
 

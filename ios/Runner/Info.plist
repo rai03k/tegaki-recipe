@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>このアプリは音声再生機能を使用します。</string>
 </dict>
 </plist>

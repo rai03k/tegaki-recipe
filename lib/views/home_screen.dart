@@ -26,7 +26,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
+    _initializeAudioSession();
     print('🎵 AudioPlayer 初期化完了');
+  }
+
+  Future<void> _initializeAudioSession() async {
+    try {
+      // Just AudioのAudioSessionマネージャーを使用
+      // これによりiOSでの適切なAudioSession設定が行われる
+      await _audioPlayer.setAudioSource(
+        AudioSource.asset('assets/se/switch.mp3'),
+        preload: false, // 事前読み込みしない
+      );
+      print('🎵 AudioSession初期化完了');
+    } catch (e) {
+      print('❌ AudioSession初期化エラー: $e');
+    }
   }
 
   @override
@@ -278,17 +293,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _onThemeToggle(ThemeNotifier themeNotifier) async {
     print('🎯 テーマ切り替えタップ開始');
     
-    // 音声再生
+    // 音声再生（改善版）
     try {
-      print('🔊 音声ファイル読み込み開始');
-      await _audioPlayer.setAsset('assets/se/switch.mp3');
-      print('🔊 音声ファイル読み込み完了');
-      
       print('🔊 音声再生開始');
-      _audioPlayer.play(); // awaitを外して非同期で実行
+      
+      // 既に読み込まれている場合は再読み込みしない
+      if (_audioPlayer.audioSource == null) {
+        print('🔊 音声ファイル読み込み開始');
+        await _audioPlayer.setAsset('assets/se/switch.mp3');
+        print('🔊 音声ファイル読み込み完了');
+      }
+      
+      // 再生位置を最初にリセット
+      await _audioPlayer.seek(Duration.zero);
+      
+      // 音声再生（non-blocking）
+      _audioPlayer.play().catchError((error) {
+        print('❌ 音声再生エラー: $error');
+        return null; // エラーを無視して続行
+      });
+      
       print('🔊 音声再生コマンド実行完了');
     } catch (e) {
       print('❌ 音声再生エラー: $e');
+      // エラーが発生してもアプリの動作は継続
     }
 
     // 振動（音声と並行実行）
