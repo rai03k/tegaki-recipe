@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:audio_session/audio_session.dart';
-import 'package:vibration/vibration.dart';
 import '../models/database.dart';
 import '../view_models/recipe_book_view_model.dart';
 import '../view_models/theme_view_model.dart';
@@ -21,46 +18,12 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   PageController? _pageController;
-  late AudioPlayer _audioPlayer;
 
   @override
   void initState() {
     super.initState();
-    _audioPlayer = AudioPlayer();
-    _setupAudioSession();
-    
-    // 音声ファイルを事前に準備（エラーは無視）
-    _audioPlayer.setAsset('assets/se/switch.mp3', preload: false).catchError((error) {
-      print('❌ 音声ファイル事前準備エラー: $error');
-      return null;
-    });
-    
-    print('🎵 AudioPlayer 初期化完了');
   }
 
-  Future<void> _setupAudioSession() async {
-    try {
-      final session = await AudioSession.instance;
-      // 音声再生専用の設定
-      await session.configure(const AudioSessionConfiguration(
-        avAudioSessionCategory: AVAudioSessionCategory.playback,
-        avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.none,
-        avAudioSessionMode: AVAudioSessionMode.defaultMode,
-        avAudioSessionRouteSharingPolicy: AVAudioSessionRouteSharingPolicy.defaultPolicy,
-        avAudioSessionSetActiveOptions: AVAudioSessionSetActiveOptions.none,
-        androidAudioAttributes: AndroidAudioAttributes(
-          contentType: AndroidAudioContentType.sonification,
-          flags: AndroidAudioFlags.none,
-          usage: AndroidAudioUsage.media,
-        ),
-        androidAudioFocusGainType: AndroidAudioFocusGainType.gain,
-        androidWillPauseWhenDucked: false,
-      ));
-      print('🎵 AudioSession 設定完了');
-    } catch (e) {
-      print('❌ AudioSession 設定エラー: $e');
-    }
-  }
 
   @override
   void didChangeDependencies() {
@@ -74,7 +37,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void dispose() {
     _pageController?.dispose();
-    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -308,55 +270,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Future<void> _onThemeToggle(ThemeNotifier themeNotifier) async {
-    print('🎯 テーマ切り替えタップ開始');
-    
-    // クラス変数の_audioPlayerを使用（タイマーViewModelと同じ方法）
-    try {
-      print('🔊 音声再生開始');
-      
-      // 再生位置をリセット
-      await _audioPlayer.seek(Duration.zero);
-      
-      // 音声ファイルを設定（既に設定済みの場合はスキップ）
-      if (_audioPlayer.audioSource == null) {
-        await _audioPlayer.setAsset('assets/se/switch.mp3');
-      }
-      
-      // 音声再生（エラーを無視して継続）
-      await _audioPlayer.play().catchError((error) {
-        print('❌ 音声再生エラー: $error');
-        return null;
-      });
-      
-      print('🔊 音声再生完了');
-    } catch (e) {
-      print('❌ 音声再生設定エラー: $e');
-      // 音声再生エラーは無視してアプリ続行
-    }
-
-    // 振動（複数回実行）
-    try {
-      print('📳 バイブレーションチェック開始');
-      final hasVibrator = await Vibration.hasVibrator();
-      print('📳 バイブレーター有無: $hasVibrator');
-      
-      if (hasVibrator == true) {
-        // 複数回バイブレーション（パターン: 振動100ms → 休憩50ms → 振動100ms）
-        await Vibration.vibrate(duration: 100);
-        await Future.delayed(const Duration(milliseconds: 50));
-        await Vibration.vibrate(duration: 100);
-        print('📳 バイブレーション実行完了');
-      } else {
-        print('📳 バイブレーターなし');
-      }
-    } catch (e) {
-      print('❌ バイブレーションエラー: $e');
-    }
-
-    // テーマ切り替え
+  void _onThemeToggle(ThemeNotifier themeNotifier) {
+    // テーマ切り替えのみ
     themeNotifier.toggleTheme();
-    print('🎯 テーマ切り替え完了');
   }
 
   Widget _buildLampWidget(bool isDarkMode, VoidCallback onThemeToggle) {
