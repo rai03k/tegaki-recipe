@@ -61,22 +61,27 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   }
 
   // 画像が存在するかどうかを判定
-  bool hasImage(Recipe recipe) => recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
+  bool hasImage(Recipe recipe) =>
+      recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final isDarkMode = ref.watch(themeNotifierProvider) == ThemeMode.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600;
 
     // レシピ本の全レシピを取得
-    final recipesAsync = ref.watch(recipeBookRecipesProvider(widget.recipe.recipeBookId));
+    final recipesAsync = ref.watch(
+      recipeBookRecipesProvider(widget.recipe.recipeBookId),
+    );
 
     return recipesAsync.when(
       data: (recipes) {
         // 現在のレシピの索引を取得
-        final currentIndex = recipes.indexWhere((r) => r.id == widget.recipe.id);
-        
+        final currentIndex = recipes.indexWhere(
+          (r) => r.id == widget.recipe.id,
+        );
+
         // PageControllerを初期化（一度だけ）
         if (_pageController == null && currentIndex != -1) {
           _pageController = PageController(initialPage: currentIndex);
@@ -104,24 +109,30 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                         : _buildPhoneLayout(context, isDarkMode, recipe);
                   },
                 ),
-                
-                // ページインジケーター（上部右）
+
+                // ページインジケーター（画面下部中央）
                 if (recipes.length > 1)
                   Positioned(
-                    top: 20,
-                    right: 20,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        '${_currentIndex + 1} / ${recipes.length}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                    bottom: 30,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '${_currentIndex + 1} / ${recipes.length}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -131,23 +142,30 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           ),
         );
       },
-      loading: () => Scaffold(
-        backgroundColor: isDarkMode ? Colors.black : Colors.white,
-        body: const Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, stack) => Scaffold(
-        backgroundColor: isDarkMode ? Colors.black : Colors.white,
-        body: SafeArea(
-          child: isTablet
-              ? _buildTabletLayout(context, isDarkMode, widget.recipe)
-              : _buildPhoneLayout(context, isDarkMode, widget.recipe),
-        ),
-      ),
+      loading:
+          () => Scaffold(
+            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            body: const Center(child: CircularProgressIndicator()),
+          ),
+      error:
+          (error, stack) => Scaffold(
+            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            body: SafeArea(
+              child:
+                  isTablet
+                      ? _buildTabletLayout(context, isDarkMode, widget.recipe)
+                      : _buildPhoneLayout(context, isDarkMode, widget.recipe),
+            ),
+          ),
     );
   }
 
   // スマホ（縦1カラム）レイアウト
-  Widget _buildPhoneLayout(BuildContext context, bool isDarkMode, Recipe recipe) {
+  Widget _buildPhoneLayout(
+    BuildContext context,
+    bool isDarkMode,
+    Recipe recipe,
+  ) {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -214,7 +232,11 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   }
 
   // タブレット（横2カラム）レイアウト
-  Widget _buildTabletLayout(BuildContext context, bool isDarkMode, Recipe recipe) {
+  Widget _buildTabletLayout(
+    BuildContext context,
+    bool isDarkMode,
+    Recipe recipe,
+  ) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -256,7 +278,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                         _buildRecipeImage(recipe),
                         const SizedBox(height: 20),
                       ],
-                      
+
                       // 作り方
                       Expanded(
                         child: SingleChildScrollView(
