@@ -22,13 +22,46 @@ final recipeIngredientsProvider = FutureProvider.family<List<Ingredient>, int>((
   return ingredients;
 });
 
-class RecipeDetailScreen extends ConsumerWidget {
+// レシピ本の全レシピを取得するプロバイダー
+final recipeBookRecipesProvider = FutureProvider.family<List<Recipe>, int>((
+  ref,
+  recipeBookId,
+) async {
+  final database = DatabaseService.instance.database;
+  final recipes =
+      await (database.select(database.recipes)
+            ..where((tbl) => tbl.recipeBookId.equals(recipeBookId))
+            ..orderBy([(tbl) => OrderingTerm.asc(tbl.id)]))
+          .get();
+  return recipes;
+});
+
+class RecipeDetailScreen extends ConsumerStatefulWidget {
   final Recipe recipe;
 
   const RecipeDetailScreen({super.key, required this.recipe});
 
+  @override
+  ConsumerState<RecipeDetailScreen> createState() => _RecipeDetailScreenState();
+}
+
+class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
+  PageController? _pageController;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _pageController?.dispose();
+    super.dispose();
+  }
+
   // 画像が存在するかどうかを判定
-  bool get hasImage => recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
+  bool hasImage(Recipe recipe) => recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,19 +69,85 @@ class RecipeDetailScreen extends ConsumerWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600;
 
-    return Scaffold(
-      backgroundColor: isDarkMode ? Colors.black : Colors.white,
-      body: SafeArea(
-        child:
-            isTablet
-                ? _buildTabletLayout(context, isDarkMode)
-                : _buildPhoneLayout(context, isDarkMode),
+    // レシピ本の全レシピを取得
+    final recipesAsync = ref.watch(recipeBookRecipesProvider(widget.recipe.recipeBookId));
+
+    return recipesAsync.when(
+      data: (recipes) {
+        // 現在のレシピの索引を取得
+        final currentIndex = recipes.indexWhere((r) => r.id == widget.recipe.id);
+        
+        // PageControllerを初期化（一度だけ）
+        if (_pageController == null && currentIndex != -1) {
+          _pageController = PageController(initialPage: currentIndex);
+          _currentIndex = currentIndex;
+        }
+
+        return Scaffold(
+          backgroundColor: isDarkMode ? Colors.black : Colors.white,
+          body: SafeArea(
+            child: Stack(
+              children: [
+                // PageViewでレシピをスライド表示
+                PageView.builder(
+                  controller: _pageController,
+                  itemCount: recipes.length,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    final recipe = recipes[index];
+                    return isTablet
+                        ? _buildTabletLayout(context, isDarkMode, recipe)
+                        : _buildPhoneLayout(context, isDarkMode, recipe);
+                  },
+                ),
+                
+                // ページインジケーター（上部右）
+                if (recipes.length > 1)
+                  Positioned(
+                    top: 20,
+                    right: 20,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Text(
+                        '${_currentIndex + 1} / ${recipes.length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+      loading: () => Scaffold(
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stack) => Scaffold(
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        body: SafeArea(
+          child: isTablet
+              ? _buildTabletLayout(context, isDarkMode, widget.recipe)
+              : _buildPhoneLayout(context, isDarkMode, widget.recipe),
+        ),
       ),
     );
   }
 
   // スマホ（縦1カラム）レイアウト
-  Widget _buildPhoneLayout(BuildContext context, bool isDarkMode) {
+  Widget _buildPhoneLayout(BuildContext context, bool isDarkMode, Recipe recipe) {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -61,36 +160,36 @@ class RecipeDetailScreen extends ConsumerWidget {
             const SizedBox(height: 20),
 
             // 料理画像（画像がある場合のみ表示）
-            if (hasImage) ...[
-              _buildRecipeImage(),
+            if (hasImage(recipe)) ...[
+              _buildRecipeImage(recipe),
               const SizedBox(height: 20),
             ],
 
             // 料理名
-            _buildRecipeTitle(isDarkMode),
+            _buildRecipeTitle(isDarkMode, recipe),
 
             // 所要時間
             if ((recipe.cookingTimeMinutes ?? 0) > 0) ...[
               const SizedBox(height: 4),
-              _buildCookingTime(isDarkMode),
+              _buildCookingTime(isDarkMode, recipe),
               const SizedBox(height: 8),
             ],
 
             // メモ
             if (recipe.memo != null && recipe.memo!.isNotEmpty) ...[
-              _buildMemo(isDarkMode),
+              _buildMemo(isDarkMode, recipe),
               const SizedBox(height: 20),
             ],
 
             const SizedBox(height: 8),
 
             // 材料
-            _buildIngredientsSection(isDarkMode),
+            _buildIngredientsSection(isDarkMode, recipe),
 
             const SizedBox(height: 20),
 
             // 作り方
-            _buildInstructionsSection(isDarkMode),
+            _buildInstructionsSection(isDarkMode, recipe),
 
             const SizedBox(height: 20),
 
@@ -105,7 +204,7 @@ class RecipeDetailScreen extends ConsumerWidget {
                   decoration: TextDecoration.underline,
                 ),
               ),
-              _buildReferenceUrl(isDarkMode),
+              _buildReferenceUrl(isDarkMode, recipe),
               const SizedBox(height: 20),
             ],
           ],
@@ -115,7 +214,7 @@ class RecipeDetailScreen extends ConsumerWidget {
   }
 
   // タブレット（横2カラム）レイアウト
-  Widget _buildTabletLayout(BuildContext context, bool isDarkMode) {
+  Widget _buildTabletLayout(BuildContext context, bool isDarkMode, Recipe recipe) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -129,12 +228,12 @@ class RecipeDetailScreen extends ConsumerWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildRecipeTitle(isDarkMode),
+              _buildRecipeTitle(isDarkMode, recipe),
               const SizedBox(height: 10),
-              _buildCookingTime(isDarkMode),
+              _buildCookingTime(isDarkMode, recipe),
               if (recipe.memo != null && recipe.memo!.isNotEmpty) ...[
                 const SizedBox(height: 15),
-                _buildMemo(isDarkMode),
+                _buildMemo(isDarkMode, recipe),
               ],
             ],
           ),
@@ -153,8 +252,8 @@ class RecipeDetailScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // 画像（画像がある場合のみ表示）
-                      if (hasImage) ...[
-                        _buildRecipeImage(),
+                      if (hasImage(recipe)) ...[
+                        _buildRecipeImage(recipe),
                         const SizedBox(height: 20),
                       ],
                       
@@ -164,11 +263,11 @@ class RecipeDetailScreen extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildInstructionsSection(isDarkMode),
+                              _buildInstructionsSection(isDarkMode, recipe),
                               if (recipe.referenceUrl != null &&
                                   recipe.referenceUrl!.isNotEmpty) ...[
                                 const SizedBox(height: 20),
-                                _buildReferenceUrl(isDarkMode),
+                                _buildReferenceUrl(isDarkMode, recipe),
                               ],
                             ],
                           ),
@@ -184,7 +283,7 @@ class RecipeDetailScreen extends ConsumerWidget {
                 Expanded(
                   flex: 1,
                   child: SingleChildScrollView(
-                    child: _buildIngredientsSection(isDarkMode),
+                    child: _buildIngredientsSection(isDarkMode, recipe),
                   ),
                 ),
               ],
@@ -213,7 +312,7 @@ class RecipeDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildRecipeImage() {
+  Widget _buildRecipeImage(Recipe recipe) {
     return Container(
       width: double.infinity,
       height: 200,
@@ -253,7 +352,7 @@ class RecipeDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildRecipeTitle(bool isDarkMode) {
+  Widget _buildRecipeTitle(bool isDarkMode, Recipe recipe) {
     return Text(
       recipe.title,
       style: TextStyle(
@@ -266,7 +365,7 @@ class RecipeDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildCookingTime(bool isDarkMode) {
+  Widget _buildCookingTime(bool isDarkMode, Recipe recipe) {
     return Row(
       children: [
         HugeIcon(
@@ -286,7 +385,7 @@ class RecipeDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMemo(bool isDarkMode) {
+  Widget _buildMemo(bool isDarkMode, Recipe recipe) {
     return Text(
       recipe.memo ?? '',
       style: TextStyle(
@@ -296,7 +395,7 @@ class RecipeDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildIngredientsSection(bool isDarkMode) {
+  Widget _buildIngredientsSection(bool isDarkMode, Recipe recipe) {
     return Consumer(
       builder: (context, ref, child) {
         final ingredientsAsync = ref.watch(
@@ -392,7 +491,7 @@ class RecipeDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildInstructionsSection(bool isDarkMode) {
+  Widget _buildInstructionsSection(bool isDarkMode, Recipe recipe) {
     final instructions = (recipe.instructions ?? '').split('\n');
 
     return Column(
@@ -454,7 +553,7 @@ class RecipeDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildReferenceUrl(bool isDarkMode) {
+  Widget _buildReferenceUrl(bool isDarkMode, Recipe recipe) {
     return GestureDetector(
       onTap: () => _launchUrl(recipe.referenceUrl ?? ''),
       child: Text(
