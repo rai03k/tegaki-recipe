@@ -13,10 +13,7 @@ import 'dart:io';
 class CreateRecipeScreen extends ConsumerStatefulWidget {
   final RecipeBook recipeBook;
 
-  const CreateRecipeScreen({
-    super.key,
-    required this.recipeBook,
-  });
+  const CreateRecipeScreen({super.key, required this.recipeBook});
 
   @override
   ConsumerState<CreateRecipeScreen> createState() => _CreateRecipeScreenState();
@@ -30,7 +27,7 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
   final _instructionsController = TextEditingController();
   final _referenceUrlController = TextEditingController();
   final _imageService = ImageService();
-  
+
   String? _selectedImagePath;
   List<RecipeIngredient> _selectedIngredients = [];
 
@@ -50,7 +47,7 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
       context: context,
       isDarkMode: isDarkMode,
     );
-    
+
     if (imagePath != null) {
       setState(() {
         _selectedImagePath = imagePath;
@@ -64,9 +61,9 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
     }
 
     if (_titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('料理名を入力してください')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('料理名を入力してください')));
       return;
     }
 
@@ -76,26 +73,37 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
       cookingTimeMinutes = int.tryParse(_cookingTimeController.text.trim());
     }
 
-    final success = await ref.read(recipeNotifierProvider.notifier).createRecipe(
-      recipeBookId: widget.recipeBook.id,
-      title: _titleController.text.trim(),
-      imagePath: _selectedImagePath,
-      cookingTimeMinutes: cookingTimeMinutes,
-      memo: _memoController.text.trim().isNotEmpty ? _memoController.text.trim() : null,
-      instructions: _instructionsController.text.trim().isNotEmpty ? _instructionsController.text.trim() : null,
-      referenceUrl: _referenceUrlController.text.trim().isNotEmpty ? _referenceUrlController.text.trim() : null,
-    );
+    final success = await ref
+        .read(recipeNotifierProvider.notifier)
+        .createRecipe(
+          recipeBookId: widget.recipeBook.id,
+          title: _titleController.text.trim(),
+          imagePath: _selectedImagePath,
+          cookingTimeMinutes: cookingTimeMinutes,
+          memo:
+              _memoController.text.trim().isNotEmpty
+                  ? _memoController.text.trim()
+                  : null,
+          instructions:
+              _instructionsController.text.trim().isNotEmpty
+                  ? _instructionsController.text.trim()
+                  : null,
+          referenceUrl:
+              _referenceUrlController.text.trim().isNotEmpty
+                  ? _referenceUrlController.text.trim()
+                  : null,
+        );
 
     if (mounted) {
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('レシピを作成しました')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('レシピを作成しました')));
         context.pop();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('レシピの作成に失敗しました')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('レシピの作成に失敗しました')));
       }
     }
   }
@@ -107,16 +115,16 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('URLを開けませんでした')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('URLを開けませんでした')));
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('無効なURLです')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('無効なURLです')));
       }
     }
   }
@@ -170,44 +178,57 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                         onTap: _selectImage,
                         child: Container(
                           width: double.infinity,
-                          height: (MediaQuery.of(context).size.width - 40) * 3 / 4, // 4:3比率
+                          height:
+                              (MediaQuery.of(context).size.width - 40) *
+                              3 /
+                              4, // 4:3比率
                           decoration: BoxDecoration(
                             color: isDarkMode ? Colors.grey[800] : Colors.white,
                             border: Border.all(
-                              color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
+                              color:
+                                  isDarkMode
+                                      ? Colors.grey[600]!
+                                      : Colors.grey[300]!,
                               width: 2,
                               style: BorderStyle.solid,
                             ),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: _selectedImagePath != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.file(
-                                    File(_selectedImagePath!),
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  ),
-                                )
-                              : Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    HugeIcon(
-                                      icon: HugeIcons.strokeRoundedImage01,
-                                      color: isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
-                                      size: 48.0,
+                          child:
+                              _selectedImagePath != null
+                                  ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.file(
+                                      File(_selectedImagePath!),
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: double.infinity,
                                     ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      '料理画像を選択',
-                                      style: TextStyle(
-                                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                                        fontSize: 16,
+                                  )
+                                  : Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      HugeIcon(
+                                        icon: HugeIcons.strokeRoundedImage01,
+                                        color:
+                                            isDarkMode
+                                                ? Colors.grey[400]!
+                                                : Colors.grey[600]!,
+                                        size: 48.0,
                                       ),
-                                    ),
-                                  ],
-                                ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        '料理画像を選択',
+                                        style: TextStyle(
+                                          color:
+                                              isDarkMode
+                                                  ? Colors.grey[400]
+                                                  : Colors.grey[600],
+                                          fontSize: 20,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                         ),
                       ),
                       const SizedBox(height: 32),
@@ -227,41 +248,40 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
 
   Widget _buildNotePaperSection(bool isDarkMode) {
     final recipeState = ref.watch(recipeNotifierProvider);
-    
+
     return LayoutBuilder(
       builder: (context, constraints) {
         return CustomPaint(
           painter: NotePaperPainter(
-            lineColor: isDarkMode 
-                ? Colors.grey[700]!.withValues(alpha: 0.3)
-                : Colors.grey[300]!.withValues(alpha: 0.5),
+            lineColor:
+                isDarkMode
+                    ? Colors.grey[700]!.withValues(alpha: 0.3)
+                    : Colors.grey[300]!.withValues(alpha: 0.5),
             lineSpacing: 40.0,
           ),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 料理名
                 _buildSectionTitle('料理名', isDarkMode, required: true),
-                const SizedBox(height: 8),
                 _buildTextField(
                   controller: _titleController,
                   hintText: '料理名を入力してください',
                   isDarkMode: isDarkMode,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return '料理名を入力してください';
-                    }
-                    return null;
-                  },
+                  // validator: (value) {
+                  //   if (value == null || value.trim().isEmpty) {
+                  //     return '料理名を入力してください';
+                  //   }
+                  //   return null;
+                  // },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
 
                 // 所要時間
                 _buildSectionTitle('所要時間', isDarkMode),
-                const SizedBox(height: 8),
                 _buildTextField(
                   controller: _cookingTimeController,
                   hintText: '調理時間を入力（分）',
@@ -269,59 +289,42 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                   keyboardType: TextInputType.number,
                   suffixText: '分',
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
 
                 // メモ
                 _buildSectionTitle('メモ', isDarkMode),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 _buildTextField(
                   controller: _memoController,
                   hintText: 'メモを入力してください',
                   isDarkMode: isDarkMode,
-                  maxLines: 3,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
 
                 // 材料
                 _buildSectionTitle('材料', isDarkMode),
                 const SizedBox(height: 8),
                 _buildIngredientsSection(isDarkMode),
-                const SizedBox(height: 24),
+                const SizedBox(height: 54),
 
                 // 作り方
                 _buildSectionTitle('作り方', isDarkMode),
-                const SizedBox(height: 8),
                 _buildTextField(
                   controller: _instructionsController,
                   hintText: '作り方を入力してください',
                   isDarkMode: isDarkMode,
-                  maxLines: 6,
+                  maxLines: 5,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 42),
 
                 // 参考URL
                 _buildSectionTitle('参考URL', isDarkMode),
-                const SizedBox(height: 8),
                 _buildTextField(
                   controller: _referenceUrlController,
                   hintText: '参考URLを入力してください',
                   isDarkMode: isDarkMode,
                   keyboardType: TextInputType.url,
                 ),
-                if (_referenceUrlController.text.trim().isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: GestureDetector(
-                      onTap: () => _launchUrl(_referenceUrlController.text.trim()),
-                      child: Text(
-                        _referenceUrlController.text.trim(),
-                        style: const TextStyle(
-                          color: Colors.blue,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ),
                 const SizedBox(height: 32),
 
                 // 保存ボタン
@@ -337,22 +340,25 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: recipeState.isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    child:
+                        recipeState.isLoading
+                            ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                            : const Text(
+                              '作成',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          )
-                        : const Text(
-                            '作成',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -384,7 +390,10 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
               color: Colors.transparent,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: isDarkMode ? Colors.grey[600]!.withValues(alpha: 0.3) : Colors.grey[400]!.withValues(alpha: 0.3),
+                color:
+                    isDarkMode
+                        ? Colors.grey[600]!.withValues(alpha: 0.3)
+                        : Colors.grey[400]!.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -408,14 +417,17 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
             ),
           ),
         ),
-        
+
         // 選択された材料一覧
         if (_selectedIngredients.isNotEmpty)
           Container(
             margin: const EdgeInsets.only(top: 12),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isDarkMode ? Colors.grey[800]!.withValues(alpha: 0.3) : Colors.grey[100]!.withValues(alpha: 0.5),
+              color:
+                  isDarkMode
+                      ? Colors.grey[800]!.withValues(alpha: 0.3)
+                      : Colors.grey[100]!.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -437,7 +449,8 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                     child: Row(
                       children: [
                         // 材料画像と色付きバッジ
-                        if (ingredient.iconPath != null || ingredient.backgroundColor != null)
+                        if (ingredient.iconPath != null ||
+                            ingredient.backgroundColor != null)
                           Stack(
                             children: [
                               Container(
@@ -446,55 +459,72 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: ingredient.iconPath != null
-                                    ? ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Image.asset(
-                                          ingredient.iconPath!,
-                                          width: 24,
-                                          height: 24,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) {
-                                            // 画像が見つからない場合はテキストで代替
-                                            return Container(
-                                              width: 24,
-                                              height: 24,
-                                              decoration: BoxDecoration(
-                                                color: ingredient.backgroundColor ?? Colors.grey[300],
-                                                borderRadius: BorderRadius.circular(12),
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  ingredient.name.substring(0, 1),
-                                                  style: const TextStyle(
-                                                    color: Colors.black87,
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.bold,
+                                child:
+                                    ingredient.iconPath != null
+                                        ? ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          child: Image.asset(
+                                            ingredient.iconPath!,
+                                            width: 24,
+                                            height: 24,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (
+                                              context,
+                                              error,
+                                              stackTrace,
+                                            ) {
+                                              // 画像が見つからない場合はテキストで代替
+                                              return Container(
+                                                width: 24,
+                                                height: 24,
+                                                decoration: BoxDecoration(
+                                                  color:
+                                                      ingredient
+                                                          .backgroundColor ??
+                                                      Colors.grey[300],
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    ingredient.name.substring(
+                                                      0,
+                                                      1,
+                                                    ),
+                                                    style: const TextStyle(
+                                                      color: Colors.black87,
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
                                                   ),
                                                 ),
+                                              );
+                                            },
+                                          ),
+                                        )
+                                        : Container(
+                                          width: 24,
+                                          height: 24,
+                                          decoration: BoxDecoration(
+                                            color: ingredient.backgroundColor,
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              ingredient.name.substring(0, 1),
+                                              style: const TextStyle(
+                                                color: Colors.black87,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
                                               ),
-                                            );
-                                          },
-                                        ),
-                                      )
-                                    : Container(
-                                        width: 24,
-                                        height: 24,
-                                        decoration: BoxDecoration(
-                                          color: ingredient.backgroundColor,
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            ingredient.name.substring(0, 1),
-                                            style: const TextStyle(
-                                              color: Colors.black87,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ),
-                                      ),
                               ),
                               // 色付きバッジ（右下）
                               if (ingredient.backgroundColor != null)
@@ -508,7 +538,10 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                                       color: ingredient.backgroundColor,
                                       borderRadius: BorderRadius.circular(5),
                                       border: Border.all(
-                                        color: isDarkMode ? Colors.grey[800]! : Colors.white,
+                                        color:
+                                            isDarkMode
+                                                ? Colors.grey[800]!
+                                                : Colors.white,
                                         width: 1,
                                       ),
                                     ),
@@ -516,9 +549,10 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                                 ),
                             ],
                           ),
-                        if (ingredient.iconPath != null || ingredient.backgroundColor != null) 
+                        if (ingredient.iconPath != null ||
+                            ingredient.backgroundColor != null)
                           const SizedBox(width: 8),
-                        
+
                         // 材料名と分量
                         Expanded(
                           child: Text(
@@ -540,25 +574,28 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title, bool isDarkMode, {bool required = false}) {
+  Widget _buildSectionTitle(
+    String title,
+    bool isDarkMode, {
+    bool required = false,
+  }) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16, top: 8, bottom: 4),
+      padding: const EdgeInsets.only(left: 16, top: 8, bottom: 2),
       child: Row(
         children: [
           Text(
             title,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: isDarkMode ? Colors.white : Colors.black,
-              height: 1.2, // タイトルの行間を少し調整
             ),
           ),
           if (required)
             Text(
               ' *',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.red,
               ),
@@ -584,8 +621,8 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
       validator: validator,
       style: TextStyle(
         color: isDarkMode ? Colors.white : Colors.black,
-        fontSize: 16,
-        height: 2.5, // 40pxの線間隔に合わせて行間を調整
+        fontSize: 18,
+        height: maxLines != null ? 2.1 : null,
       ),
       decoration: InputDecoration(
         hintText: hintText,
@@ -626,18 +663,15 @@ class NotePaperPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = lineColor
-      ..strokeWidth = lineHeight
-      ..style = PaintingStyle.stroke;
+    final paint =
+        Paint()
+          ..color = lineColor
+          ..strokeWidth = lineHeight
+          ..style = PaintingStyle.stroke;
 
     // 横線を描画（コンテンツの高さに応じて動的に調整）
     for (double y = lineSpacing; y < size.height; y += lineSpacing) {
-      canvas.drawLine(
-        Offset(0, y),
-        Offset(size.width, y),
-        paint,
-      );
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
     }
   }
 
@@ -645,8 +679,8 @@ class NotePaperPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     if (oldDelegate is NotePaperPainter) {
       return lineColor != oldDelegate.lineColor ||
-             lineSpacing != oldDelegate.lineSpacing ||
-             lineHeight != oldDelegate.lineHeight;
+          lineSpacing != oldDelegate.lineSpacing ||
+          lineHeight != oldDelegate.lineHeight;
     }
     return true;
   }

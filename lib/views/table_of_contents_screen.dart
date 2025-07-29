@@ -47,7 +47,7 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
     final updatedRecipeBook = await ref
         .read(recipeBookNotifierProvider.notifier)
         .getRecipeBookById(_currentRecipeBook.id);
-    
+
     if (updatedRecipeBook != null && mounted) {
       setState(() {
         _currentRecipeBook = updatedRecipeBook;
@@ -65,151 +65,184 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.grey[900] : Colors.grey[100],
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 戻るボタンとレシピ本情報、編集ボタン
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => context.pop(),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedArrowLeft01,
-                      color: isDarkMode ? Colors.white : Colors.black,
-                      size: 24.0,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 戻るボタンとレシピ本情報、編集ボタン
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => context.pop(),
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedArrowLeft01,
+                        color: isDarkMode ? Colors.white : Colors.black,
+                        size: 24.0,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Row(
-                      children: [
-                        // レシピ本の小さな表紙画像
-                        if (_currentRecipeBook.coverImagePath != null)
-                          FutureBuilder<bool>(
-                            future:
-                                File(
-                                  _currentRecipeBook.coverImagePath!,
-                                ).exists(),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData && snapshot.data == true) {
-                                return Container(
-                                  width: 40,
-                                  height: 53, // 3:4比率
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(4),
-                                    border: Border.all(
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          if (_currentRecipeBook.coverImagePath != null)
+                            FutureBuilder<bool>(
+                              future:
+                                  File(
+                                    _currentRecipeBook.coverImagePath!,
+                                  ).exists(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData && snapshot.data == true) {
+                                  return Container(
+                                    width: 40,
+                                    height: 53,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(4),
+                                      border: Border.all(
+                                        color:
+                                            isDarkMode
+                                                ? Colors.grey[600]!
+                                                : Colors.grey[300]!,
+                                      ),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(3),
+                                      child: Image.file(
+                                        File(
+                                          _currentRecipeBook.coverImagePath!,
+                                        ),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  return Container(
+                                    width: 40,
+                                    height: 53,
+                                    decoration: BoxDecoration(
                                       color:
                                           isDarkMode
-                                              ? Colors.grey[600]!
-                                              : Colors.grey[300]!,
+                                              ? Colors.grey[800]
+                                              : Colors.white,
+                                      borderRadius: BorderRadius.circular(4),
+                                      border: Border.all(
+                                        color:
+                                            isDarkMode
+                                                ? Colors.grey[600]!
+                                                : Colors.grey[300]!,
+                                      ),
                                     ),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(3),
-                                    child: Image.file(
-                                      File(_currentRecipeBook.coverImagePath!),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                );
-                              } else {
-                                return Container(
-                                  width: 40,
-                                  height: 53,
-                                  decoration: BoxDecoration(
-                                    color:
-                                        isDarkMode
-                                            ? Colors.grey[800]
-                                            : Colors.white,
-                                    borderRadius: BorderRadius.circular(4),
-                                    border: Border.all(
+                                    child: HugeIcon(
+                                      icon: HugeIcons.strokeRoundedBook02,
                                       color:
                                           isDarkMode
-                                              ? Colors.grey[600]!
-                                              : Colors.grey[300]!,
+                                              ? Colors.grey[400]!
+                                              : Colors.grey[600]!,
+                                      size: 20.0,
                                     ),
-                                  ),
-                                  child: HugeIcon(
-                                    icon: HugeIcons.strokeRoundedBook02,
-                                    color:
-                                        isDarkMode
-                                            ? Colors.grey[400]!
-                                            : Colors.grey[600]!,
-                                    size: 20.0,
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _currentRecipeBook.title,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white : Colors.black,
+                                  );
+                                }
+                              },
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              _currentRecipeBook.title,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode ? Colors.white : Colors.black,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        await context.push(
+                          '/edit-recipe-book/${_currentRecipeBook.id}',
+                          extra: _currentRecipeBook,
+                        );
+                        await _refreshRecipeBookData();
+                      },
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedEdit02,
+                        color: isDarkMode ? Colors.white : Colors.black,
+                        size: 24.0,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
+                // 目次タイトル
+                Text(
+                  '目次',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // サブタイトル
+                Text(
+                  '料理名をタップでそのレシピに移動できるよ',
+                  style: TextStyle(
+                    fontSize: 18,
+                    letterSpacing: -1.0,
+                    color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // レシピ一覧またはローディング・空状態
+                if (recipeState.isLoading)
+                  const Center(child: CircularProgressIndicator()),
+                if (!recipeState.isLoading && recipeState.recipes.isEmpty)
+                  _buildEmptyState(isDarkMode),
+                if (!recipeState.isLoading && recipeState.recipes.isNotEmpty)
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? Colors.grey[800] : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color:
+                            isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
+                      ),
+                    ),
+                    child: Column(
+                      children: List.generate(recipeState.recipes.length, (
+                        index,
+                      ) {
+                        final recipe = recipeState.recipes[index];
+                        final pageNumber = index + 1;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8.0,
+                            horizontal: 8.0,
+                          ),
+                          child: GestureDetector(
+                            onTap: () {
+                              context.push(
+                                '/recipe-detail/${recipe.id}',
+                                extra: recipe,
+                              );
+                            },
+                            child: _buildTableOfContentsRow(
+                              recipe.title,
+                              pageNumber,
+                              isDarkMode,
+                            ),
+                          ),
+                        );
+                      }),
                     ),
                   ),
-                  // 編集ボタン
-                  GestureDetector(
-                    onTap: () async {
-                      await context.push(
-                        '/edit-recipe-book/${_currentRecipeBook.id}',
-                        extra: _currentRecipeBook,
-                      );
-                      // 編集画面から戻ってきた時に最新のRecipeBookデータを取得
-                      await _refreshRecipeBookData();
-                    },
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedEdit02,
-                      color: isDarkMode ? Colors.white : Colors.black,
-                      size: 24.0,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-
-              // 目次タイトル
-              Text(
-                '目次',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : Colors.black,
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // サブタイトル
-              Text(
-                '料理名をタップでそのレシピに移動できるよ',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // レシピ一覧またはローディング・空状態
-              Expanded(
-                child:
-                    recipeState.isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : recipeState.recipes.isEmpty
-                        ? _buildEmptyState(isDarkMode)
-                        : _buildRecipeList(isDarkMode, recipeState.recipes),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -219,7 +252,6 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
             '/create-recipe/${_currentRecipeBook.id}',
             extra: _currentRecipeBook,
           );
-          // レシピ作成画面から戻ってきたときにデータを再読み込み
           ref
               .read(recipeNotifierProvider.notifier)
               .refresh(_currentRecipeBook.id);
@@ -263,41 +295,6 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
     );
   }
 
-  // レシピ一覧の表示
-  Widget _buildRecipeList(bool isDarkMode, List<Recipe> recipes) {
-    return ListView.builder(
-      itemCount: recipes.length,
-      itemBuilder: (context, index) {
-        final recipe = recipes[index];
-        final pageNumber = index + 1; // ページ番号は1から開始
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: GestureDetector(
-            onTap: () {
-              context.push('/recipe-detail/${recipe.id}', extra: recipe);
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: isDarkMode ? Colors.grey[800] : Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
-                ),
-              ),
-              child: _buildTableOfContentsRow(
-                recipe.title,
-                pageNumber,
-                isDarkMode,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   // 目次行の構築（・料理名.......ページ数）
   Widget _buildTableOfContentsRow(
     String recipeName,
@@ -306,33 +303,23 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
   ) {
     return Row(
       children: [
-        // ・マーク
-        Text(
-          '・',
-          style: TextStyle(
-            fontSize: 18,
-            color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
-          ),
-        ),
-        const SizedBox(width: 8),
-
-        // 料理名
-        Expanded(
+        // 料理名（幅を優先）
+        Flexible(
           child: Text(
             recipeName,
             style: TextStyle(
               fontSize: 18,
               color: isDarkMode ? Colors.white : Colors.black,
+              letterSpacing: -1.0,
             ),
             maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ),
 
-        // ドットリーダー（.......）
+        // ドットリーダー（残りの幅を自動調整）
         Expanded(
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 8),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
             child: CustomPaint(
               painter: DotLeaderPainter(
                 color: isDarkMode ? Colors.grey[500]! : Colors.grey[400]!,
@@ -343,11 +330,15 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
         ),
 
         // ページ数
-        Text(
-          pageNumber.toString(),
-          style: TextStyle(
-            fontSize: 18,
-            color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+        Container(
+          width: 10,
+          alignment: Alignment.centerRight,
+          child: Text(
+            pageNumber.toString(),
+            style: TextStyle(
+              fontSize: 18,
+              color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+            ),
           ),
         ),
       ],

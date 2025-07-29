@@ -76,7 +76,7 @@ class _IngredientSelectionScreenState
     print('  - value: "$value"');
     print('  - index: $index');
     print('  - type: $type');
-    
+
     setState(() {
       _currentEditingIndex = index;
       _currentEditingType = type;
@@ -107,10 +107,12 @@ class _IngredientSelectionScreenState
                   .toList();
           print('  - Ingredient suggestions: ${_suggestions.length}');
         }
-        
-        print('  - Final suggestions: ${_suggestions.map((e) => e.name).toList()}');
+
+        print(
+          '  - Final suggestions: ${_suggestions.map((e) => e.name).toList()}',
+        );
       }
-      
+
       print('  - _currentEditingIndex: $_currentEditingIndex');
       print('  - _currentEditingType: $_currentEditingType');
       print('  - _suggestions.length: ${_suggestions.length}');
@@ -359,113 +361,9 @@ class _IngredientSelectionScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 説明テキスト
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: isDarkMode ? Colors.grey[800] : Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color:
-                              isDarkMode
-                                  ? Colors.grey[600]!
-                                  : Colors.grey[300]!,
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        '材料名を入力すると候補が表示されます。\n分量も忘れずに入力してくださいね！',
-                        style: TextStyle(
-                          color:
-                              isDarkMode ? Colors.grey[300] : Colors.grey[700],
-                          fontSize: 14,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
                     // 食材セクション
                     _buildSectionTitle('食材', isDarkMode),
                     const SizedBox(height: 12),
-
-                    // 🚨 緊急テスト：直接コントローラーをテスト
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            '🚨 コントローラーテスト',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    print(
-                                      '🔥 TEST BUTTON PRESSED - Setting 玉ねぎ',
-                                    );
-                                    setState(() {
-                                      _nameControllers[0].text = '玉ねぎ';
-                                    });
-                                    print(
-                                      '🔥 Controller text after setting: ${_nameControllers[0].text}',
-                                    );
-                                  },
-                                  child: Text('玉ねぎをセット'),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    print('🔥 TEST BUTTON PRESSED - Setting 塩');
-                                    setState(() {
-                                      _seasoningNameControllers[0].text = '塩';
-                                    });
-                                    print(
-                                      '🔥 Seasoning controller text after setting: ${_seasoningNameControllers[0].text}',
-                                    );
-                                  },
-                                  child: Text('塩をセット'),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          ElevatedButton(
-                            onPressed: () {
-                              print('🔥 FORCE SUGGESTIONS TEST');
-                              setState(() {
-                                _currentEditingIndex = 0;
-                                _currentEditingType = 'ingredient';
-                                _suggestions =
-                                    IngredientData.predefinedIngredients
-                                        .take(3)
-                                        .toList();
-                              });
-                              print(
-                                '🔥 Forced suggestions: ${_suggestions.map((e) => e.name).toList()}',
-                              );
-                            },
-                            child: Text('強制的に候補表示'),
-                          ),
-                        ],
-                      ),
-                    ),
 
                     // 食材入力フォーム
                     ...List.generate(_nameControllers.length, (index) {
@@ -479,23 +377,6 @@ class _IngredientSelectionScreenState
                                   _suggestions.isNotEmpty &&
                                   _currentEditingIndex == index &&
                                   _currentEditingType == 'ingredient';
-
-                              print('🎭 Builder for ingredient $index:');
-                              print('  - shouldShow: $shouldShow');
-                              print(
-                                '  - _suggestions.length: ${_suggestions.length}',
-                              );
-                              print(
-                                '  - _currentEditingIndex: $_currentEditingIndex',
-                              );
-                              print(
-                                '  - _currentEditingType: $_currentEditingType',
-                              );
-
-                              // 🚨 緊急テスト：固定候補を表示してタップテスト
-                              if (_currentEditingIndex == index && _currentEditingType == 'ingredient') {
-                                return _buildEmergencyTestSuggestions(isDarkMode, index);
-                              }
 
                               if (shouldShow) {
                                 return _buildFullWidthSuggestionsList(
@@ -559,10 +440,9 @@ class _IngredientSelectionScreenState
     return Text(
       title,
       style: TextStyle(
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: FontWeight.bold,
         color: isDarkMode ? Colors.white : Colors.black,
-        fontFamily: 'ArmedLemon',
       ),
     );
   }
@@ -807,7 +687,7 @@ class _IngredientSelectionScreenState
     for (int i = 0; i < _suggestions.length; i++) {
       print('  - Suggestion $i: ${_suggestions[i].name}');
     }
-    
+
     return Container(
       width: MediaQuery.of(context).size.width,
       margin: const EdgeInsets.only(top: 8, bottom: 16),
@@ -834,7 +714,7 @@ class _IngredientSelectionScreenState
             _currentEditingType == 'seasoning' ? '候補の調味料' : '候補の食材',
             style: TextStyle(
               color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
-              fontSize: 14,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -932,7 +812,7 @@ class _IngredientSelectionScreenState
 
   Widget _buildEmergencyTestSuggestions(bool isDarkMode, int index) {
     print('🚨 Building EMERGENCY test suggestions for index $index');
-    
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 8, bottom: 16),
@@ -966,20 +846,24 @@ class _IngredientSelectionScreenState
     );
   }
 
-  Widget _buildEmergencyTestButton(String ingredientName, int index, bool isDarkMode) {
+  Widget _buildEmergencyTestButton(
+    String ingredientName,
+    int index,
+    bool isDarkMode,
+  ) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
         print('🚨🚨🚨 EMERGENCY BUTTON TAPPED: $ingredientName');
         print('  - index: $index');
         print('  - _currentEditingType: $_currentEditingType');
-        
+
         // 直接テキストを設定
         setState(() {
           _nameControllers[index].text = ingredientName;
           _currentEditingIndex = -1;
         });
-        
+
         print('  - Set text: ${_nameControllers[index].text}');
       },
       child: Container(
