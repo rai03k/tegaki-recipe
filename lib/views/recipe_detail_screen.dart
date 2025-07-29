@@ -27,6 +27,9 @@ class RecipeDetailScreen extends ConsumerWidget {
 
   const RecipeDetailScreen({super.key, required this.recipe});
 
+  // 画像が存在するかどうかを判定
+  bool get hasImage => recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDarkMode = ref.watch(themeNotifierProvider) == ThemeMode.dark;
@@ -57,10 +60,11 @@ class RecipeDetailScreen extends ConsumerWidget {
 
             const SizedBox(height: 20),
 
-            // 料理画像
-            _buildRecipeImage(),
-
-            const SizedBox(height: 20),
+            // 料理画像（画像がある場合のみ表示）
+            if (hasImage) ...[
+              _buildRecipeImage(),
+              const SizedBox(height: 20),
+            ],
 
             // 料理名
             _buildRecipeTitle(isDarkMode),
@@ -139,36 +143,43 @@ class RecipeDetailScreen extends ConsumerWidget {
 
           // 2カラムレイアウト
           Expanded(
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 左カラム: 画像・材料
+                // 画像（画像がある場合のみ表示）
+                if (hasImage) ...[
+                  _buildRecipeImage(),
+                  const SizedBox(height: 20),
+                ],
+                
+                // 材料と作り方の横並びレイアウト
                 Expanded(
-                  flex: 1,
-                  child: Column(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildRecipeImage(),
-                      const SizedBox(height: 20),
-                      _buildIngredientsSection(isDarkMode),
-                    ],
-                  ),
-                ),
+                      // 左カラム: 材料（1/3幅）
+                      Expanded(
+                        flex: 1,
+                        child: _buildIngredientsSection(isDarkMode),
+                      ),
 
-                const SizedBox(width: 30),
+                      const SizedBox(width: 30),
 
-                // 右カラム: 作り方・参考URL
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildInstructionsSection(isDarkMode),
-                      if (recipe.referenceUrl != null &&
-                          recipe.referenceUrl!.isNotEmpty) ...[
-                        const SizedBox(height: 20),
-                        _buildReferenceUrl(isDarkMode),
-                      ],
+                      // 右カラム: 作り方・参考URL（2/3幅）
+                      Expanded(
+                        flex: 2,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildInstructionsSection(isDarkMode),
+                            if (recipe.referenceUrl != null &&
+                                recipe.referenceUrl!.isNotEmpty) ...[
+                              const SizedBox(height: 20),
+                              _buildReferenceUrl(isDarkMode),
+                            ],
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
