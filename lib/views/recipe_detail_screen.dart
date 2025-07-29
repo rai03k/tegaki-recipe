@@ -143,44 +143,48 @@ class RecipeDetailScreen extends ConsumerWidget {
 
           // 2カラムレイアウト
           Expanded(
-            child: Column(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 画像（画像がある場合のみ表示）
-                if (hasImage) ...[
-                  _buildRecipeImage(),
-                  const SizedBox(height: 20),
-                ],
-                
-                // 材料と作り方の横並びレイアウト
+                // 左カラム: 画像・作り方・参考URL（2/3幅）
                 Expanded(
-                  child: Row(
+                  flex: 2,
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 左カラム: 材料（1/3幅）
+                      // 画像（画像がある場合のみ表示）
+                      if (hasImage) ...[
+                        _buildRecipeImage(),
+                        const SizedBox(height: 20),
+                      ],
+                      
+                      // 作り方
                       Expanded(
-                        flex: 1,
-                        child: _buildIngredientsSection(isDarkMode),
-                      ),
-
-                      const SizedBox(width: 30),
-
-                      // 右カラム: 作り方・参考URL（2/3幅）
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildInstructionsSection(isDarkMode),
-                            if (recipe.referenceUrl != null &&
-                                recipe.referenceUrl!.isNotEmpty) ...[
-                              const SizedBox(height: 20),
-                              _buildReferenceUrl(isDarkMode),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildInstructionsSection(isDarkMode),
+                              if (recipe.referenceUrl != null &&
+                                  recipe.referenceUrl!.isNotEmpty) ...[
+                                const SizedBox(height: 20),
+                                _buildReferenceUrl(isDarkMode),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
                       ),
                     ],
+                  ),
+                ),
+
+                const SizedBox(width: 30),
+
+                // 右カラム: 材料（1/3幅）
+                Expanded(
+                  flex: 1,
+                  child: SingleChildScrollView(
+                    child: _buildIngredientsSection(isDarkMode),
                   ),
                 ),
               ],
