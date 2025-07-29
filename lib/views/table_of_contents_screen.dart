@@ -7,6 +7,7 @@ import '../view_models/recipe_view_model.dart';
 import '../view_models/recipe_book_view_model.dart';
 import '../view_models/theme_view_model.dart';
 import 'dart:io';
+import 'dart:math' as math;
 
 class TableOfContentsScreen extends ConsumerStatefulWidget {
   final RecipeBook recipeBook;
@@ -301,47 +302,84 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
     int pageNumber,
     bool isDarkMode,
   ) {
-    return Row(
-      children: [
-        // 料理名（幅を優先）
-        Flexible(
-          child: Text(
-            recipeName,
-            style: TextStyle(
-              fontSize: 18,
-              color: isDarkMode ? Colors.white : Colors.black,
-              letterSpacing: -1.0,
-            ),
-            maxLines: 1,
-          ),
-        ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final textStyle = TextStyle(
+          fontSize: 18,
+          color: isDarkMode ? Colors.white : Colors.black,
+          letterSpacing: -1.0,
+        );
 
-        // ドットリーダー（残りの幅を自動調整）
-        Expanded(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            child: CustomPaint(
-              painter: DotLeaderPainter(
-                color: isDarkMode ? Colors.grey[500]! : Colors.grey[400]!,
+        final pageStyle = TextStyle(
+          fontSize: 18,
+          color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+        );
+
+        // 料理名の実際の幅を計算
+        final recipeTextPainter = TextPainter(
+          text: TextSpan(text: recipeName, style: textStyle),
+          textDirection: TextDirection.ltr,
+        );
+        recipeTextPainter.layout();
+
+        // ページ数の実際の幅を計算
+        final pageTextPainter = TextPainter(
+          text: TextSpan(text: pageNumber.toString(), style: pageStyle),
+          textDirection: TextDirection.ltr,
+        );
+        pageTextPainter.layout();
+
+        final availableWidth = constraints.maxWidth;
+        final margin = 16.0; // 左右のマージン
+
+        // 料理名が長すぎる場合は省略
+        final maxRecipeWidth =
+            availableWidth -
+            pageTextPainter.width -
+            margin -
+            10; // 60はドットのための最小幅
+        final actualRecipeWidth = math.min(
+          recipeTextPainter.width,
+          maxRecipeWidth,
+        );
+
+        return SizedBox(
+          height: 24,
+          child: Stack(
+            children: [
+              // 料理名（左端）
+              Positioned(
+                left: 0,
+                top: 2,
+                child: SizedBox(
+                  width: actualRecipeWidth,
+                  child: Text(recipeName, style: textStyle, maxLines: 1),
+                ),
               ),
-              child: const SizedBox(height: 20),
-            ),
-          ),
-        ),
 
-        // ページ数
-        Container(
-          width: 10,
-          alignment: Alignment.centerRight,
-          child: Text(
-            pageNumber.toString(),
-            style: TextStyle(
-              fontSize: 18,
-              color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
-            ),
+              // ドットリーダー（中央）
+              Positioned(
+                left: actualRecipeWidth + 4,
+                right: pageTextPainter.width + 2,
+                top: 4,
+                child: CustomPaint(
+                  painter: DotLeaderPainter(
+                    color: isDarkMode ? Colors.grey[500]! : Colors.grey[400]!,
+                  ),
+                  child: const SizedBox(height: 20),
+                ),
+              ),
+
+              // ページ数（右端固定）
+              Positioned(
+                right: 0,
+                top: 2,
+                child: Text(pageNumber.toString(), style: pageStyle),
+              ),
+            ],
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }

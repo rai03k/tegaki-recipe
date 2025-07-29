@@ -65,18 +65,20 @@ class RecipeDetailScreen extends ConsumerWidget {
             // 料理名
             _buildRecipeTitle(isDarkMode),
 
-            const SizedBox(height: 10),
-
             // 所要時間
-            _buildCookingTime(isDarkMode),
-
-            const SizedBox(height: 15),
+            if ((recipe.cookingTimeMinutes ?? 0) > 0) ...[
+              const SizedBox(height: 4),
+              _buildCookingTime(isDarkMode),
+              const SizedBox(height: 8),
+            ],
 
             // メモ
             if (recipe.memo != null && recipe.memo!.isNotEmpty) ...[
               _buildMemo(isDarkMode),
               const SizedBox(height: 20),
             ],
+
+            const SizedBox(height: 8),
 
             // 材料
             _buildIngredientsSection(isDarkMode),
@@ -91,6 +93,14 @@ class RecipeDetailScreen extends ConsumerWidget {
             // 参考URL
             if (recipe.referenceUrl != null &&
                 recipe.referenceUrl!.isNotEmpty) ...[
+              Text(
+                '参考URL',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
               _buildReferenceUrl(isDarkMode),
               const SizedBox(height: 20),
             ],
@@ -232,11 +242,11 @@ class RecipeDetailScreen extends ConsumerWidget {
     return Text(
       recipe.title,
       style: TextStyle(
-        fontFamily: 'ArmedLemon',
         fontSize: 32,
         fontWeight: FontWeight.bold,
         color: isDarkMode ? Colors.white : Colors.black,
-        height: 1.2,
+        height: 1.0,
+        letterSpacing: -1.0,
       ),
     );
   }
@@ -245,16 +255,15 @@ class RecipeDetailScreen extends ConsumerWidget {
     return Row(
       children: [
         HugeIcon(
-          icon: HugeIcons.strokeRoundedClock03,
+          icon: HugeIcons.strokeRoundedTimer01,
           color: isDarkMode ? Colors.white70 : Colors.black54,
-          size: 20,
+          size: 16,
         ),
         const SizedBox(width: 8),
         Text(
           '${recipe.cookingTimeMinutes ?? 0}分',
           style: TextStyle(
-            fontFamily: 'ArmedLemon',
-            fontSize: 18,
+            fontSize: 20,
             color: isDarkMode ? Colors.white70 : Colors.black54,
           ),
         ),
@@ -266,10 +275,8 @@ class RecipeDetailScreen extends ConsumerWidget {
     return Text(
       recipe.memo ?? '',
       style: TextStyle(
-        fontFamily: 'ArmedLemon',
-        fontSize: 14,
+        fontSize: 20,
         color: isDarkMode ? Colors.white60 : Colors.black45,
-        height: 1.4,
       ),
     );
   }
@@ -288,18 +295,17 @@ class RecipeDetailScreen extends ConsumerWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+                      horizontal: 8,
+                      vertical: 2,
                     ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF9BB8D3), // 青い背景色
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       '材料（1人分）',
                       style: TextStyle(
-                        fontFamily: 'ArmedLemon',
-                        fontSize: 16,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -313,8 +319,7 @@ class RecipeDetailScreen extends ConsumerWidget {
                     Text(
                       '材料が登録されていません',
                       style: TextStyle(
-                        fontFamily: 'ArmedLemon',
-                        fontSize: 14,
+                        fontSize: 20,
                         color: isDarkMode ? Colors.white60 : Colors.black45,
                       ),
                     )
@@ -379,16 +384,15 @@ class RecipeDetailScreen extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           decoration: BoxDecoration(
             color: const Color(0xFF9BB8D3), // 青い背景色
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
             '作り方',
             style: TextStyle(
-              fontFamily: 'ArmedLemon',
-              fontSize: 16,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -412,8 +416,7 @@ class RecipeDetailScreen extends ConsumerWidget {
                 Text(
                   '${index + 1}. ',
                   style: TextStyle(
-                    fontFamily: 'ArmedLemon',
-                    fontSize: 16,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: isDarkMode ? Colors.white : Colors.black,
                   ),
@@ -422,8 +425,7 @@ class RecipeDetailScreen extends ConsumerWidget {
                   child: Text(
                     instruction,
                     style: TextStyle(
-                      fontFamily: 'ArmedLemon',
-                      fontSize: 16,
+                      fontSize: 20,
                       color: isDarkMode ? Colors.white : Colors.black,
                       height: 1.5,
                     ),
@@ -442,12 +444,7 @@ class RecipeDetailScreen extends ConsumerWidget {
       onTap: () => _launchUrl(recipe.referenceUrl ?? ''),
       child: Text(
         recipe.referenceUrl ?? '',
-        style: TextStyle(
-          fontFamily: 'ArmedLemon',
-          fontSize: 14,
-          color: Colors.blue,
-          decoration: TextDecoration.underline,
-        ),
+        style: TextStyle(fontSize: 20, color: Colors.blue),
       ),
     );
   }
