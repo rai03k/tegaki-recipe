@@ -101,8 +101,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),
-          body:
-            child: Column(
+          body: Column(
               children: [
                 // PageViewでレシピをスライド表示（画面の大部分）
                 Expanded(
