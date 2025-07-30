@@ -102,41 +102,40 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
             ),
           ),
           body: Column(
-              children: [
-                // PageViewでレシピをスライド表示（画面の大部分）
-                Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: recipes.length,
-                    onPageChanged: (index) {
-                      setState(() {
-                        _currentIndex = index;
-                      });
-                    },
-                    itemBuilder: (context, index) {
-                      final recipe = recipes[index];
-                      return isTablet
-                          ? _buildTabletLayout(context, isDarkMode, recipe)
-                          : _buildPhoneLayout(context, isDarkMode, recipe);
-                    },
-                  ),
+            children: [
+              // PageViewでレシピをスライド表示（画面の大部分）
+              Expanded(
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: recipes.length,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    final recipe = recipes[index];
+                    return isTablet
+                        ? _buildTabletLayout(context, isDarkMode, recipe)
+                        : _buildPhoneLayout(context, isDarkMode, recipe);
+                  },
                 ),
+              ),
 
-                // ページインジケーター（画面最下部）
-                if (recipes.length > 1)
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Text(
-                      '${_currentIndex + 1}/${recipes.length}',
-                      style: TextStyle(
-                        color: isDarkMode ? Colors.white70 : Colors.black54,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
+              // ページインジケーター（画面最下部）
+              if (recipes.length > 1)
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
+                    '${_currentIndex + 1}/${recipes.length}',
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white70 : Colors.black54,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         );
       },
@@ -303,7 +302,6 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
       ),
     );
   }
-
 
   Widget _buildRecipeImage(Recipe recipe) {
     return Container(
