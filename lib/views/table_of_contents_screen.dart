@@ -307,11 +307,11 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
         final textStyle = TextStyle(
           fontSize: 18,
           color: isDarkMode ? Colors.white : Colors.black,
-          letterSpacing: -1.0,
+          letterSpacing: -1.5,
         );
 
         final pageStyle = TextStyle(
-          fontSize: 18,
+          fontSize: 20,
           color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
         );
 

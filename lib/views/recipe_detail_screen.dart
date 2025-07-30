@@ -90,7 +90,18 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
 
         return Scaffold(
           backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          body: SafeArea(
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                color: isDarkMode ? Colors.white : Colors.black,
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          body:
             child: Column(
               children: [
                 // PageViewでレシピをスライド表示（画面の大部分）
@@ -160,11 +171,6 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 戻るボタン
-            _buildBackButton(context, isDarkMode),
-
-            const SizedBox(height: 20),
-
             // 料理画像（画像がある場合のみ表示）
             if (hasImage(recipe)) ...[
               _buildRecipeImage(recipe),
@@ -229,11 +235,6 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
       padding: const EdgeInsets.all(20.0),
       child: Column(
         children: [
-          // 戻るボタン
-          Row(children: [_buildBackButton(context, isDarkMode)]),
-
-          const SizedBox(height: 20),
-
           // タイトルと所要時間
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,23 +305,6 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     );
   }
 
-  Widget _buildBackButton(BuildContext context, bool isDarkMode) {
-    return GestureDetector(
-      onTap: () => context.pop(),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: isDarkMode ? Colors.white24 : Colors.black12,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: HugeIcon(
-          icon: HugeIcons.strokeRoundedArrowLeft01,
-          color: isDarkMode ? Colors.white : Colors.black,
-          size: 24,
-        ),
-      ),
-    );
-  }
 
   Widget _buildRecipeImage(Recipe recipe) {
     return Container(
