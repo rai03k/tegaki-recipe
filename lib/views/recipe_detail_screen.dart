@@ -91,49 +91,37 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
         return Scaffold(
           backgroundColor: isDarkMode ? Colors.black : Colors.white,
           body: SafeArea(
-            child: Stack(
+            child: Column(
               children: [
-                // PageViewでレシピをスライド表示
-                PageView.builder(
-                  controller: _pageController,
-                  itemCount: recipes.length,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
-                  itemBuilder: (context, index) {
-                    final recipe = recipes[index];
-                    return isTablet
-                        ? _buildTabletLayout(context, isDarkMode, recipe)
-                        : _buildPhoneLayout(context, isDarkMode, recipe);
-                  },
+                // PageViewでレシピをスライド表示（画面の大部分）
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: recipes.length,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentIndex = index;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      final recipe = recipes[index];
+                      return isTablet
+                          ? _buildTabletLayout(context, isDarkMode, recipe)
+                          : _buildPhoneLayout(context, isDarkMode, recipe);
+                    },
+                  ),
                 ),
 
-                // ページインジケーター（画面下部中央）
+                // ページインジケーター（画面最下部）
                 if (recipes.length > 1)
-                  Positioned(
-                    bottom: 30,
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          '${_currentIndex + 1} / ${recipes.length}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      '${_currentIndex + 1}/${recipes.length}',
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white70 : Colors.black54,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
