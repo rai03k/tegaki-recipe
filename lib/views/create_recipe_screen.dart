@@ -376,7 +376,10 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
         // 材料追加ボタン
         GestureDetector(
           onTap: () async {
-            final result = await context.push('/ingredient-selection');
+            final result = await context.push(
+              '/ingredient-selection', 
+              extra: _selectedIngredients.isEmpty ? null : _selectedIngredients,
+            );
             if (result != null && result is List<RecipeIngredient>) {
               setState(() {
                 _selectedIngredients = result;
@@ -406,7 +409,9 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '材料を選択',
+                  _selectedIngredients.isEmpty 
+                    ? '材料を選択' 
+                    : '材料を選択 (${_selectedIngredients.length}個選択済み)',
                   style: TextStyle(
                     color: Colors.deepPurple,
                     fontSize: 16,

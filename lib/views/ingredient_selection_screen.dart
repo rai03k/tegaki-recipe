@@ -6,7 +6,12 @@ import '../models/ingredient.dart';
 import '../view_models/theme_view_model.dart';
 
 class IngredientSelectionScreen extends ConsumerStatefulWidget {
-  const IngredientSelectionScreen({super.key});
+  final List<RecipeIngredient>? existingIngredients;
+  
+  const IngredientSelectionScreen({
+    super.key,
+    this.existingIngredients,
+  });
 
   @override
   ConsumerState<IngredientSelectionScreen> createState() =>
@@ -38,6 +43,117 @@ class _IngredientSelectionScreenState
   List<Ingredient> _suggestions = [];
   int _currentEditingIndex = -1;
   String _currentEditingType = 'ingredient'; // 'ingredient' or 'seasoning'
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeWithExistingIngredients();
+  }
+
+  void _initializeWithExistingIngredients() {
+    if (widget.existingIngredients == null || widget.existingIngredients!.isEmpty) {
+      return; // 既存材料がない場合は何もしない
+    }
+
+    // 既存のコントローラーをクリア
+    _clearAllControllers();
+
+    // 食材と調味料に分類
+    final ingredients = <RecipeIngredient>[];
+    final seasonings = <RecipeIngredient>[];
+
+    for (final ingredient in widget.existingIngredients!) {
+      // 定義済み材料から調味料かどうかを判定
+      final predefinedIngredient = IngredientData.predefinedIngredients
+          .where((item) => item.name == ingredient.name)
+          .firstOrNull;
+      
+      if (predefinedIngredient?.category == '調味料') {
+        seasonings.add(ingredient);
+      } else {
+        ingredients.add(ingredient);
+      }
+    }
+
+    // 食材コントローラーを設定
+    _setupIngredientsControllers(ingredients);
+    
+    // 調味料コントローラーを設定
+    _setupSeasoningsControllers(seasonings);
+  }
+
+  void _clearAllControllers() {
+    // 既存のコントローラーを全て破棄
+    for (final controller in _nameControllers) {
+      controller.dispose();
+    }
+    for (final controller in _amountControllers) {
+      controller.dispose();
+    }
+    for (final focusNode in _nameFocusNodes) {
+      focusNode.dispose();
+    }
+    for (final focusNode in _amountFocusNodes) {
+      focusNode.dispose();
+    }
+    
+    for (final controller in _seasoningNameControllers) {
+      controller.dispose();
+    }
+    for (final controller in _seasoningAmountControllers) {
+      controller.dispose();
+    }
+    for (final focusNode in _seasoningNameFocusNodes) {
+      focusNode.dispose();
+    }
+    for (final focusNode in _seasoningAmountFocusNodes) {
+      focusNode.dispose();
+    }
+
+    // リストをクリア
+    _nameControllers.clear();
+    _amountControllers.clear();
+    _nameFocusNodes.clear();
+    _amountFocusNodes.clear();
+    _seasoningNameControllers.clear();
+    _seasoningAmountControllers.clear();
+    _seasoningNameFocusNodes.clear();
+    _seasoningAmountFocusNodes.clear();
+  }
+
+  void _setupIngredientsControllers(List<RecipeIngredient> ingredients) {
+    for (final ingredient in ingredients) {
+      _nameControllers.add(TextEditingController(text: ingredient.name));
+      _amountControllers.add(TextEditingController(text: ingredient.amount));
+      _nameFocusNodes.add(FocusNode());
+      _amountFocusNodes.add(FocusNode());
+    }
+    
+    // 最後に空の行を追加
+    if (_nameControllers.isEmpty) {
+      _nameControllers.add(TextEditingController());
+      _amountControllers.add(TextEditingController());
+      _nameFocusNodes.add(FocusNode());
+      _amountFocusNodes.add(FocusNode());
+    }
+  }
+
+  void _setupSeasoningsControllers(List<RecipeIngredient> seasonings) {
+    for (final seasoning in seasonings) {
+      _seasoningNameControllers.add(TextEditingController(text: seasoning.name));
+      _seasoningAmountControllers.add(TextEditingController(text: seasoning.amount));
+      _seasoningNameFocusNodes.add(FocusNode());
+      _seasoningAmountFocusNodes.add(FocusNode());
+    }
+    
+    // 最後に空の行を追加
+    if (_seasoningNameControllers.isEmpty) {
+      _seasoningNameControllers.add(TextEditingController());
+      _seasoningAmountControllers.add(TextEditingController());
+      _seasoningNameFocusNodes.add(FocusNode());
+      _seasoningAmountFocusNodes.add(FocusNode());
+    }
+  }
 
   @override
   void dispose() {
@@ -84,11 +200,9 @@ class _IngredientSelectionScreenState
       if (value.isEmpty) {
         // 空の場合は候補を表示しない
         _suggestions = [];
-        print('  - Empty value, clearing suggestions');
       } else {
         // 入力値に基づいて候補を検索
         final allResults = IngredientData.searchByName(value);
-        print('  - All search results: ${allResults.length}');
 
         if (type == 'seasoning') {
           // 調味料のみをフィルタリング
@@ -97,7 +211,6 @@ class _IngredientSelectionScreenState
                   .where((ingredient) => ingredient.category == '調味料')
                   .take(5) // 最大5件に制限
                   .toList();
-          print('  - Seasoning suggestions: ${_suggestions.length}');
         } else {
           // 調味料以外をフィルタリング
           _suggestions =
@@ -105,55 +218,41 @@ class _IngredientSelectionScreenState
                   .where((ingredient) => ingredient.category != '調味料')
                   .take(5) // 最大5件に制限
                   .toList();
-          print('  - Ingredient suggestions: ${_suggestions.length}');
         }
 
-        print(
-          '  - Final suggestions: ${_suggestions.map((e) => e.name).toList()}',
-        );
+        // 新仕様: 材料名を入力したら次の行を自動追加
+        _addNewRowIfNeeded(type, index);
       }
-
-      print('  - _currentEditingIndex: $_currentEditingIndex');
-      print('  - _currentEditingType: $_currentEditingType');
-      print('  - _suggestions.length: ${_suggestions.length}');
     });
   }
 
-  void _selectIngredient(Ingredient ingredient, int index) {
-    print('🎯 _selectIngredient called');
-    print('  - ingredient.name: ${ingredient.name}');
-    print('  - index: $index');
-    print('  - _currentEditingType: $_currentEditingType');
-
-    // 入力範囲チェック
-    if (_currentEditingType == 'seasoning') {
-      print(
-        '  - Checking seasoning controllers (length: ${_seasoningNameControllers.length})',
-      );
-      if (index >= _seasoningNameControllers.length) {
-        print('  - ERROR: Index out of range for seasoning!');
-        return;
+  void _addNewRowIfNeeded(String type, int currentIndex) {
+    if (type == 'seasoning') {
+      // 調味料の場合：最後の行で入力していて、まだ追加の空行がない場合
+      if (currentIndex == _seasoningNameControllers.length - 1) {
+        _addNewSeasoningRow();
       }
     } else {
-      print(
-        '  - Checking ingredient controllers (length: ${_nameControllers.length})',
-      );
-      if (index >= _nameControllers.length) {
-        print('  - ERROR: Index out of range for ingredient!');
-        return;
+      // 食材の場合：最後の行で入力していて、まだ追加の空行がない場合
+      if (currentIndex == _nameControllers.length - 1) {
+        _addNewIngredientRow();
       }
     }
+  }
 
-    print('  - Setting text in controller...');
+  void _selectIngredient(Ingredient ingredient, int index) {
+    // 入力範囲チェック
+    if (_currentEditingType == 'seasoning') {
+      if (index >= _seasoningNameControllers.length) return;
+    } else {
+      if (index >= _nameControllers.length) return;
+    }
+
     setState(() {
       if (_currentEditingType == 'seasoning') {
         _seasoningNameControllers[index].text = ingredient.name;
-        print(
-          '  - Set seasoning text: ${_seasoningNameControllers[index].text}',
-        );
       } else {
         _nameControllers[index].text = ingredient.name;
-        print('  - Set ingredient text: ${_nameControllers[index].text}');
       }
 
       // 候補リストをクリア
@@ -161,22 +260,16 @@ class _IngredientSelectionScreenState
       _currentEditingIndex = -1;
     });
 
-    print('  - Selection completed successfully!');
-
-    // 次のフィールドにフォーカスを移動
-    Future.delayed(const Duration(milliseconds: 150), () {
-      try {
-        if (_currentEditingType == 'seasoning') {
-          if (index < _seasoningAmountFocusNodes.length) {
-            _seasoningAmountFocusNodes[index].requestFocus();
-          }
-        } else {
-          if (index < _amountFocusNodes.length) {
-            _amountFocusNodes[index].requestFocus();
-          }
+    // 新仕様: 候補選択後、即座に分量フィールドにフォーカス移動
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (_currentEditingType == 'seasoning') {
+        if (index < _seasoningAmountFocusNodes.length) {
+          _seasoningAmountFocusNodes[index].requestFocus();
         }
-      } catch (e) {
-        print('  - Focus error: $e');
+      } else {
+        if (index < _amountFocusNodes.length) {
+          _amountFocusNodes[index].requestFocus();
+        }
       }
     });
   }
@@ -251,7 +344,8 @@ class _IngredientSelectionScreenState
       final name = _nameControllers[i].text.trim();
       final amount = _amountControllers[i].text.trim();
 
-      if (name.isNotEmpty && amount.isNotEmpty) {
+      // 新仕様: 材料名があれば保存（分量は空でもOK）
+      if (name.isNotEmpty) {
         // 定義済み材料から背景色とアイコンを取得
         final predefinedIngredient =
             IngredientData.predefinedIngredients
@@ -261,7 +355,7 @@ class _IngredientSelectionScreenState
         ingredients.add(
           RecipeIngredient(
             name: name,
-            amount: amount,
+            amount: amount, // 空でもそのまま保存
             iconPath: predefinedIngredient?.iconPath,
             backgroundColor: predefinedIngredient?.backgroundColor,
           ),
@@ -274,7 +368,8 @@ class _IngredientSelectionScreenState
       final name = _seasoningNameControllers[i].text.trim();
       final amount = _seasoningAmountControllers[i].text.trim();
 
-      if (name.isNotEmpty && amount.isNotEmpty) {
+      // 新仕様: 材料名があれば保存（分量は空でもOK）
+      if (name.isNotEmpty) {
         // 定義済み調味料から背景色とアイコンを取得
         final predefinedIngredient =
             IngredientData.predefinedIngredients
@@ -284,7 +379,7 @@ class _IngredientSelectionScreenState
         ingredients.add(
           RecipeIngredient(
             name: name,
-            amount: amount,
+            amount: amount, // 空でもそのまま保存
             iconPath: predefinedIngredient?.iconPath,
             backgroundColor: predefinedIngredient?.backgroundColor,
           ),
@@ -633,19 +728,8 @@ class _IngredientSelectionScreenState
                     vertical: 12,
                   ),
                 ),
-                onChanged: (value) {
-                  // 分量が入力されたら新しい行を自動追加
-                  if (value.isNotEmpty &&
-                      nameControllers[index].text.isNotEmpty) {
-                    if (type == 'seasoning' &&
-                        index == _seasoningNameControllers.length - 1) {
-                      _addNewSeasoningRow();
-                    } else if (type == 'ingredient' &&
-                        index == _nameControllers.length - 1) {
-                      _addNewIngredientRow();
-                    }
-                  }
-                },
+                // 新仕様では分量入力時の自動行追加は行わない
+                onChanged: (value) {},
               ),
             ),
           ),

@@ -66,11 +66,14 @@ class AppRouter {
       ),
       GoRoute(
         path: '/ingredient-selection',
-        pageBuilder: (context, state) => PageTransitions.rippleTransition(
-          context,
-          state,
-          const IngredientSelectionScreen(),
-        ),
+        pageBuilder: (context, state) {
+          final existingIngredients = state.extra as List<RecipeIngredient>?;
+          return PageTransitions.rippleTransition(
+            context,
+            state,
+            IngredientSelectionScreen(existingIngredients: existingIngredients),
+          );
+        },
       ),
       GoRoute(
         path: '/timer',
