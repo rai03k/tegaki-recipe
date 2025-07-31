@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../models/database.dart';
+import '../models/ingredient.dart';
 
 class RecipeRepository {
   final TegakiDatabase _database;
@@ -30,20 +31,42 @@ class RecipeRepository {
     String? memo,
     String? instructions,
     String? referenceUrl,
+    List<RecipeIngredient>? ingredients,
   }) async {
-    return await _database.into(_database.recipes).insert(
-          RecipesCompanion(
-            recipeBookId: Value(recipeBookId),
-            title: Value(title),
-            imagePath: Value(imagePath),
-            cookingTimeMinutes: Value(cookingTimeMinutes),
-            memo: Value(memo),
-            instructions: Value(instructions),
-            referenceUrl: Value(referenceUrl),
-            createdAt: Value(DateTime.now()),
-            updatedAt: Value(DateTime.now()),
-          ),
-        );
+    // トランザクションで レシピと材料を一緒に保存
+    return await _database.transaction(() async {
+      // レシピを保存
+      final recipeId = await _database.into(_database.recipes).insert(
+        RecipesCompanion(
+          recipeBookId: Value(recipeBookId),
+          title: Value(title),
+          imagePath: Value(imagePath),
+          cookingTimeMinutes: Value(cookingTimeMinutes),
+          memo: Value(memo),
+          instructions: Value(instructions),
+          referenceUrl: Value(referenceUrl),
+          createdAt: Value(DateTime.now()),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
+      // 材料を保存
+      if (ingredients != null && ingredients.isNotEmpty) {
+        for (int i = 0; i < ingredients.length; i++) {
+          final ingredient = ingredients[i];
+          await _database.into(_database.ingredients).insert(
+            IngredientsCompanion(
+              recipeId: Value(recipeId),
+              name: Value(ingredient.name),
+              amount: Value(ingredient.amount),
+              sortOrder: Value(i), // 入力順で並び順を設定
+            ),
+          );
+        }
+      }
+
+      return recipeId;
+    });
   }
 
   // レシピを更新

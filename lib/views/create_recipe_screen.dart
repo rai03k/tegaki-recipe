@@ -92,6 +92,7 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
               _referenceUrlController.text.trim().isNotEmpty
                   ? _referenceUrlController.text.trim()
                   : null,
+          ingredients: _selectedIngredients.isNotEmpty ? _selectedIngredients : null,
         );
 
     if (mounted) {

@@ -6,7 +6,7 @@ part of 'recipe_view_model.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$recipeNotifierHash() => r'74bb1367ac705bc337a3fd9724281890f891f311';
+String _$recipeNotifierHash() => r'e4a3b7c84075c21c715e925c701c0951f4bab98f';
 
 /// レシピ一覧の状態管理を行うNotifier
 ///

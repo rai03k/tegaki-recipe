@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:tegaki_recipe/models/ingredient.dart';
 import '../views/home_screen.dart';
 import '../views/create_recipe_book_screen.dart';
 import '../views/edit_recipe_book_screen.dart';
@@ -17,19 +18,21 @@ class AppRouter {
     routes: [
       GoRoute(
         path: '/',
-        pageBuilder: (context, state) => PageTransitions.fadeScaleTransition(
-          context,
-          state,
-          const HomeScreen(),
-        ),
+        pageBuilder:
+            (context, state) => PageTransitions.fadeScaleTransition(
+              context,
+              state,
+              const HomeScreen(),
+            ),
       ),
       GoRoute(
         path: '/create-recipe-book',
-        pageBuilder: (context, state) => PageTransitions.fadeSlideTransition(
-          context,
-          state,
-          const CreateRecipeBookScreen(),
-        ),
+        pageBuilder:
+            (context, state) => PageTransitions.fadeSlideTransition(
+              context,
+              state,
+              const CreateRecipeBookScreen(),
+            ),
       ),
       GoRoute(
         path: '/edit-recipe-book/:recipeBookId',
@@ -77,11 +80,12 @@ class AppRouter {
       ),
       GoRoute(
         path: '/timer',
-        pageBuilder: (context, state) => PageTransitions.fadeTransition(
-          context,
-          state,
-          const TimerScreen(),
-        ),
+        pageBuilder:
+            (context, state) => PageTransitions.fadeTransition(
+              context,
+              state,
+              const TimerScreen(),
+            ),
       ),
       GoRoute(
         path: '/recipe-detail/:recipeId',
@@ -96,19 +100,21 @@ class AppRouter {
       ),
       GoRoute(
         path: '/shopping-memo',
-        pageBuilder: (context, state) => PageTransitions.fadeTransition(
-          context,
-          state,
-          const ShoppingMemoScreen(),
-        ),
+        pageBuilder:
+            (context, state) => PageTransitions.fadeTransition(
+              context,
+              state,
+              const ShoppingMemoScreen(),
+            ),
       ),
       GoRoute(
         path: '/settings',
-        pageBuilder: (context, state) => PageTransitions.fadeTransition(
-          context,
-          state,
-          const SettingsScreen(),
-        ),
+        pageBuilder:
+            (context, state) => PageTransitions.fadeTransition(
+              context,
+              state,
+              const SettingsScreen(),
+            ),
       ),
     ],
   );

@@ -7,7 +7,7 @@ part of 'recipe_book_view_model.dart';
 // **************************************************************************
 
 String _$recipeBookNotifierHash() =>
-    r'a23ad36f953146289e1a8752d8cfbe3d16ea0065';
+    r'9938fcd289209743981ae19950d19d866ddbfc42';
 
 /// レシピ本一覧の状態管理を行うNotifier
 ///

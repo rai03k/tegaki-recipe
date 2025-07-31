@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../models/recipe_state.dart';
+import '../models/ingredient.dart';
 import '../repositories/recipe_repository.dart';
 import '../services/database_service.dart';
 
@@ -49,6 +50,7 @@ class RecipeNotifier extends _$RecipeNotifier {
     String? memo,
     String? instructions,
     String? referenceUrl,
+    List<RecipeIngredient>? ingredients,
   }) async {
     try {
       state = state.copyWith(isLoading: true, errorMessage: null);
@@ -60,6 +62,7 @@ class RecipeNotifier extends _$RecipeNotifier {
         memo: memo,
         instructions: instructions,
         referenceUrl: referenceUrl,
+        ingredients: ingredients,
       );
       // 作成後に一覧を再読み込み
       await loadRecipesByBookId(recipeBookId);
