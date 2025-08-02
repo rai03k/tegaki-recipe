@@ -81,19 +81,25 @@ class RecipeRepository {
     List<RecipeIngredient>? ingredients,
   }) async {
     return await _database.transaction(() async {
-      // レシピ情報を更新
-      final recipeUpdated = await _database.update(_database.recipes).replace(
-        RecipesCompanion(
-          id: Value(id),
-          title: title != null ? Value(title) : const Value.absent(),
-          imagePath: imagePath != null ? Value(imagePath) : const Value.absent(),
-          cookingTimeMinutes: cookingTimeMinutes != null ? Value(cookingTimeMinutes) : const Value.absent(),
-          memo: memo != null ? Value(memo) : const Value.absent(),
-          instructions: instructions != null ? Value(instructions) : const Value.absent(),
-          referenceUrl: referenceUrl != null ? Value(referenceUrl) : const Value.absent(),
-          updatedAt: Value(DateTime.now()),
-        ),
+      // 更新するフィールドだけを含むCompanionを作成
+      final updateCompanion = RecipesCompanion(
+        updatedAt: Value(DateTime.now()),
       );
+
+      // 各フィールドをnullでない場合のみ追加
+      final companion = updateCompanion.copyWith(
+        title: title != null ? Value(title) : const Value.absent(),
+        imagePath: imagePath != null ? Value(imagePath) : const Value.absent(),
+        cookingTimeMinutes: cookingTimeMinutes != null ? Value(cookingTimeMinutes) : const Value.absent(),
+        memo: memo != null ? Value(memo) : const Value.absent(),
+        instructions: instructions != null ? Value(instructions) : const Value.absent(),
+        referenceUrl: referenceUrl != null ? Value(referenceUrl) : const Value.absent(),
+      );
+
+      // レシピ情報を更新（where句で特定のIDのみ更新）
+      final recipeUpdated = await (_database.update(_database.recipes)
+            ..where((tbl) => tbl.id.equals(id)))
+          .write(companion);
 
       // 材料を更新する場合
       if (ingredients != null) {
@@ -116,7 +122,7 @@ class RecipeRepository {
         }
       }
 
-      return recipeUpdated;
+      return recipeUpdated > 0;
     });
   }
 
