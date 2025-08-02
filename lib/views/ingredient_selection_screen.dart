@@ -228,6 +228,9 @@ class _IngredientSelectionScreenState
       if (index >= _nameControllers.length) return;
     }
 
+    // タイプを保存（setState後に参照するため）
+    final currentType = _currentEditingType;
+
     setState(() {
       if (_currentEditingType == 'seasoning') {
         _seasoningNameControllers[index].text = ingredient.name;
@@ -242,7 +245,7 @@ class _IngredientSelectionScreenState
 
     // 新仕様: 候補選択後、即座に分量フィールドにフォーカス移動
     Future.delayed(_focusDelay, () {
-      if (_currentEditingType == 'seasoning') {
+      if (currentType == 'seasoning') {
         if (index < _seasoningAmountFocusNodes.length) {
           _seasoningAmountFocusNodes[index].requestFocus();
         }
@@ -745,17 +748,14 @@ class _IngredientSelectionScreenState
           const SizedBox(height: 12),
 
           // 候補リストを縦一列で表示
-          Listener(
-            behavior: HitTestBehavior.opaque,
-            child: Column(
-              children:
-                  _suggestions.map((ingredient) {
-                    return _buildIngredientSuggestionItem(
-                      ingredient,
-                      isDarkMode,
-                    );
-                  }).toList(),
-            ),
+          Column(
+            children:
+                _suggestions.map((ingredient) {
+                  return _buildIngredientSuggestionItem(
+                    ingredient,
+                    isDarkMode,
+                  );
+                }).toList(),
           ),
         ],
       ),
@@ -767,7 +767,7 @@ class _IngredientSelectionScreenState
     bool isDarkMode,
   ) {
     return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+      behavior: HitTestBehavior.translucent,
       onTap: () {
         if (_currentEditingIndex >= 0) {
           _selectIngredient(ingredient, _currentEditingIndex);
