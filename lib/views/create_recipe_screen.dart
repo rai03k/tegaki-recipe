@@ -194,7 +194,7 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
           context,
         ).showSnackBar(SnackBar(
           content: Text(isEditMode ? 'レシピを更新しました' : 'レシピを作成しました')));
-        context.pop();
+        context.pop(success); // 成功時にtrueを返す
       } else {
         ScaffoldMessenger.of(
           context,

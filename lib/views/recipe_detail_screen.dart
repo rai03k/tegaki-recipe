@@ -9,7 +9,7 @@ import '../view_models/theme_view_model.dart';
 import '../services/database_service.dart';
 
 // レシピの材料を取得するプロバイダー
-final recipeIngredientsProvider = FutureProvider.family<List<Ingredient>, int>((
+final recipeIngredientsProvider = FutureProvider.family.autoDispose<List<Ingredient>, int>((
   ref,
   recipeId,
 ) async {
@@ -23,7 +23,7 @@ final recipeIngredientsProvider = FutureProvider.family<List<Ingredient>, int>((
 });
 
 // レシピ本の全レシピを取得するプロバイダー
-final recipeBookRecipesProvider = FutureProvider.family<List<Recipe>, int>((
+final recipeBookRecipesProvider = FutureProvider.family.autoDispose<List<Recipe>, int>((
   ref,
   recipeBookId,
 ) async {
@@ -575,11 +575,25 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     }
   }
 
-  void _navigateToEditScreen(BuildContext context, Recipe recipe) {
-    context.pushNamed(
+  void _navigateToEditScreen(BuildContext context, Recipe recipe) async {
+    final result = await context.pushNamed(
       'edit-recipe',
       pathParameters: {'recipeId': recipe.id.toString()},
       extra: recipe,
     );
+    
+    // 編集完了後にプロバイダーを無効化してデータを再取得
+    if (result == true && mounted) {
+      // プロバイダーを無効化して最新データを取得
+      ref.invalidate(recipeBookRecipesProvider(recipe.recipeBookId));
+      ref.invalidate(recipeIngredientsProvider(recipe.id));
+      
+      // 少し待ってから再構築を促す
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          ref.refresh(recipeBookRecipesProvider(recipe.recipeBookId));
+        }
+      });
+    }
   }
 }
