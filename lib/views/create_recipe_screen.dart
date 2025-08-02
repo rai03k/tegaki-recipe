@@ -3,17 +3,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:drift/drift.dart' show OrderingTerm;
 import '../models/database.dart';
 import '../models/ingredient.dart';
 import '../services/image_service.dart';
+import '../services/database_service.dart';
 import '../view_models/recipe_view_model.dart';
 import '../view_models/theme_view_model.dart';
 import 'dart:io';
 
 class CreateRecipeScreen extends ConsumerStatefulWidget {
   final RecipeBook recipeBook;
+  final Recipe? existingRecipe; // 編集モード用の既存レシピ
 
-  const CreateRecipeScreen({super.key, required this.recipeBook});
+  const CreateRecipeScreen({
+    super.key, 
+    required this.recipeBook,
+    this.existingRecipe,
+  });
 
   @override
   ConsumerState<CreateRecipeScreen> createState() => _CreateRecipeScreenState();
@@ -30,6 +37,65 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
 
   String? _selectedImagePath;
   List<RecipeIngredient> _selectedIngredients = [];
+
+  // 編集モードかどうかを判定
+  bool get isEditMode => widget.existingRecipe != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeExistingData();
+  }
+
+  // 既存レシピのデータを初期値として設定
+  void _initializeExistingData() {
+    if (widget.existingRecipe != null) {
+      final recipe = widget.existingRecipe!;
+      _titleController.text = recipe.title;
+      _selectedImagePath = recipe.imagePath;
+      _cookingTimeController.text = recipe.cookingTimeMinutes?.toString() ?? '';
+      _memoController.text = recipe.memo ?? '';
+      _instructionsController.text = recipe.instructions ?? '';
+      _referenceUrlController.text = recipe.referenceUrl ?? '';
+      
+      // 材料データは後で非同期で読み込む
+      _loadExistingIngredients();
+    }
+  }
+
+  // 既存の材料を読み込む
+  Future<void> _loadExistingIngredients() async {
+    if (widget.existingRecipe != null) {
+      try {
+        final database = DatabaseService.instance.database;
+        final ingredients = await (database.select(database.ingredients)
+              ..where((tbl) => tbl.recipeId.equals(widget.existingRecipe!.id))
+              ..orderBy([(tbl) => OrderingTerm.asc(tbl.sortOrder)]))
+            .get();
+
+        // Ingredient を RecipeIngredient に変換
+        final recipeIngredients = ingredients.map((ingredient) {
+          // 定義済み材料から追加情報を取得
+          final predefinedIngredient = IngredientData.predefinedIngredients
+              .where((item) => item.name == ingredient.name)
+              .firstOrNull;
+
+          return RecipeIngredient(
+            name: ingredient.name,
+            amount: ingredient.amount ?? '',
+            iconPath: predefinedIngredient?.iconPath,
+            backgroundColor: predefinedIngredient?.backgroundColor,
+          );
+        }).toList();
+
+        setState(() {
+          _selectedIngredients = recipeIngredients;
+        });
+      } catch (e) {
+        print('材料の読み込みに失敗しました: $e');
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -73,38 +139,67 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
       cookingTimeMinutes = int.tryParse(_cookingTimeController.text.trim());
     }
 
-    final success = await ref
-        .read(recipeNotifierProvider.notifier)
-        .createRecipe(
-          recipeBookId: widget.recipeBook.id,
-          title: _titleController.text.trim(),
-          imagePath: _selectedImagePath,
-          cookingTimeMinutes: cookingTimeMinutes,
-          memo:
-              _memoController.text.trim().isNotEmpty
-                  ? _memoController.text.trim()
-                  : null,
-          instructions:
-              _instructionsController.text.trim().isNotEmpty
-                  ? _instructionsController.text.trim()
-                  : null,
-          referenceUrl:
-              _referenceUrlController.text.trim().isNotEmpty
-                  ? _referenceUrlController.text.trim()
-                  : null,
-          ingredients: _selectedIngredients.isNotEmpty ? _selectedIngredients : null,
-        );
+    bool success;
+    if (isEditMode) {
+      // 編集モード：更新処理
+      success = await ref
+          .read(recipeNotifierProvider.notifier)
+          .updateRecipe(
+            id: widget.existingRecipe!.id,
+            title: _titleController.text.trim(),
+            imagePath: _selectedImagePath,
+            cookingTimeMinutes: cookingTimeMinutes,
+            memo:
+                _memoController.text.trim().isNotEmpty
+                    ? _memoController.text.trim()
+                    : null,
+            instructions:
+                _instructionsController.text.trim().isNotEmpty
+                    ? _instructionsController.text.trim()
+                    : null,
+            referenceUrl:
+                _referenceUrlController.text.trim().isNotEmpty
+                    ? _referenceUrlController.text.trim()
+                    : null,
+            ingredients: _selectedIngredients.isNotEmpty ? _selectedIngredients : null,
+          );
+    } else {
+      // 作成モード：新規作成処理
+      success = await ref
+          .read(recipeNotifierProvider.notifier)
+          .createRecipe(
+            recipeBookId: widget.recipeBook.id,
+            title: _titleController.text.trim(),
+            imagePath: _selectedImagePath,
+            cookingTimeMinutes: cookingTimeMinutes,
+            memo:
+                _memoController.text.trim().isNotEmpty
+                    ? _memoController.text.trim()
+                    : null,
+            instructions:
+                _instructionsController.text.trim().isNotEmpty
+                    ? _instructionsController.text.trim()
+                    : null,
+            referenceUrl:
+                _referenceUrlController.text.trim().isNotEmpty
+                    ? _referenceUrlController.text.trim()
+                    : null,
+            ingredients: _selectedIngredients.isNotEmpty ? _selectedIngredients : null,
+          );
+    }
 
     if (mounted) {
       if (success) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('レシピを作成しました')));
+        ).showSnackBar(SnackBar(
+          content: Text(isEditMode ? 'レシピを更新しました' : 'レシピを作成しました')));
         context.pop();
       } else {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('レシピの作成に失敗しました')));
+        ).showSnackBar(SnackBar(
+          content: Text(isEditMode ? 'レシピの更新に失敗しました' : 'レシピの作成に失敗しました')));
       }
     }
   }
@@ -156,7 +251,7 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                     ),
                     const SizedBox(width: 16),
                     Text(
-                      'レシピ作成',
+                      isEditMode ? 'レシピ編集' : 'レシピ作成',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -353,9 +448,9 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                                 ),
                               ),
                             )
-                            : const Text(
-                              '作成',
-                              style: TextStyle(
+                            : Text(
+                              isEditMode ? '更新' : '作成',
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),

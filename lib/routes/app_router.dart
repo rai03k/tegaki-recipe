@@ -68,6 +68,30 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: '/edit-recipe/:recipeId',
+        name: 'edit-recipe',
+        pageBuilder: (context, state) {
+          final recipe = state.extra as Recipe;
+          // RecipeBookは既存レシピから取得する必要があるが、
+          // とりあえずダミーのRecipeBookを作成（実際にはIDから取得が必要）
+          final recipeBook = RecipeBook(
+            id: recipe.recipeBookId,
+            title: '', // 実際のタイトルは必要に応じて取得
+            coverImagePath: null,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
+          return PageTransitions.fadeSlideTransition(
+            context,
+            state,
+            CreateRecipeScreen(
+              recipeBook: recipeBook,
+              existingRecipe: recipe,
+            ),
+          );
+        },
+      ),
+      GoRoute(
         path: '/ingredient-selection',
         pageBuilder: (context, state) {
           final existingIngredients = state.extra as List<RecipeIngredient>?;

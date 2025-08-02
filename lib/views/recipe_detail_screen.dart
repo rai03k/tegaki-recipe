@@ -100,6 +100,16 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
               ),
               onPressed: () => Navigator.of(context).pop(),
             ),
+            actions: [
+              IconButton(
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedEdit02,
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  size: 24.0,
+                ),
+                onPressed: () => _navigateToEditScreen(context, recipes[_currentIndex]),
+              ),
+            ],
           ),
           body: Column(
             children: [
@@ -563,5 +573,13 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
+  }
+
+  void _navigateToEditScreen(BuildContext context, Recipe recipe) {
+    context.pushNamed(
+      'edit-recipe',
+      pathParameters: {'recipeId': recipe.id.toString()},
+      extra: recipe,
+    );
   }
 }

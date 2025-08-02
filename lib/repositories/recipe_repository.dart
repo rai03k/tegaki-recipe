@@ -78,20 +78,46 @@ class RecipeRepository {
     String? memo,
     String? instructions,
     String? referenceUrl,
+    List<RecipeIngredient>? ingredients,
   }) async {
-    final companion = RecipesCompanion(
-      id: Value(id),
-      updatedAt: Value(DateTime.now()),
-    );
+    return await _database.transaction(() async {
+      // レシピ情報を更新
+      final recipeUpdated = await _database.update(_database.recipes).replace(
+        RecipesCompanion(
+          id: Value(id),
+          title: title != null ? Value(title) : const Value.absent(),
+          imagePath: imagePath != null ? Value(imagePath) : const Value.absent(),
+          cookingTimeMinutes: cookingTimeMinutes != null ? Value(cookingTimeMinutes) : const Value.absent(),
+          memo: memo != null ? Value(memo) : const Value.absent(),
+          instructions: instructions != null ? Value(instructions) : const Value.absent(),
+          referenceUrl: referenceUrl != null ? Value(referenceUrl) : const Value.absent(),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
 
-    if (title != null) companion.copyWith(title: Value(title));
-    if (imagePath != null) companion.copyWith(imagePath: Value(imagePath));
-    if (cookingTimeMinutes != null) companion.copyWith(cookingTimeMinutes: Value(cookingTimeMinutes));
-    if (memo != null) companion.copyWith(memo: Value(memo));
-    if (instructions != null) companion.copyWith(instructions: Value(instructions));
-    if (referenceUrl != null) companion.copyWith(referenceUrl: Value(referenceUrl));
+      // 材料を更新する場合
+      if (ingredients != null) {
+        // 既存の材料をすべて削除
+        await (_database.delete(_database.ingredients)
+              ..where((tbl) => tbl.recipeId.equals(id)))
+            .go();
 
-    return await _database.update(_database.recipes).replace(companion);
+        // 新しい材料を追加
+        for (int i = 0; i < ingredients.length; i++) {
+          final ingredient = ingredients[i];
+          await _database.into(_database.ingredients).insert(
+            IngredientsCompanion(
+              recipeId: Value(id),
+              name: Value(ingredient.name),
+              amount: Value(ingredient.amount),
+              sortOrder: Value(i),
+            ),
+          );
+        }
+      }
+
+      return recipeUpdated;
+    });
   }
 
   // レシピを削除
