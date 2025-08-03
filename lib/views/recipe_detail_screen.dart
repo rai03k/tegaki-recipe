@@ -109,6 +109,14 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                 ),
                 onPressed: () => _navigateToEditScreen(context, recipes[_currentIndex]),
               ),
+              IconButton(
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedDelete02,
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  size: 24.0,
+                ),
+                onPressed: () => _showDeleteConfirmDialog(context, recipes[_currentIndex]),
+              ),
             ],
           ),
           body: Column(
@@ -594,6 +602,68 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           ref.refresh(recipeBookRecipesProvider(recipe.recipeBookId));
         }
       });
+    }
+  }
+
+  void _showDeleteConfirmDialog(BuildContext context, Recipe recipe) {
+    final isDarkMode = ref.read(themeNotifierProvider) == ThemeMode.dark;
+    
+    showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: isDarkMode ? Colors.grey[800] : Colors.white,
+          title: Text(
+            'レシピを削除しますか？',
+            style: TextStyle(
+              color: isDarkMode ? Colors.white : Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            '「${recipe.title}」を削除します。\nこの操作は取り消せません。',
+            style: TextStyle(
+              color: isDarkMode ? Colors.white70 : Colors.black87,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                'キャンセル',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white70 : Colors.black54,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text(
+                '削除',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    ).then((confirmed) {
+      if (confirmed == true) {
+        _deleteRecipe(context, recipe);
+      }
+    });
+  }
+
+  void _deleteRecipe(BuildContext context, Recipe recipe) async {
+    final success = await ref
+        .read(recipeNotifierProvider.notifier)
+        .deleteRecipe(recipe.id, recipe.recipeBookId);
+    
+    if (success && mounted) {
+      // 削除成功時は目次画面に戻る
+      context.pop();
     }
   }
 }

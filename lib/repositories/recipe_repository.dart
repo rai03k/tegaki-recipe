@@ -126,10 +126,20 @@ class RecipeRepository {
     });
   }
 
-  // レシピを削除
+  // レシピを削除（材料も一緒に削除）
   Future<int> deleteRecipe(int id) async {
-    return await (_database.delete(_database.recipes)
-          ..where((recipe) => recipe.id.equals(id)))
-        .go();
+    return await _database.transaction(() async {
+      // まず材料を削除
+      await (_database.delete(_database.ingredients)
+            ..where((ingredient) => ingredient.recipeId.equals(id)))
+          .go();
+      
+      // 次にレシピを削除
+      final deletedRecipes = await (_database.delete(_database.recipes)
+            ..where((recipe) => recipe.id.equals(id)))
+          .go();
+      
+      return deletedRecipes;
+    });
   }
 }
