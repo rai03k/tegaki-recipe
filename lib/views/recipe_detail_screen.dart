@@ -338,18 +338,24 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
               ? FutureBuilder<bool>(
                 future: File(recipe.imagePath!).exists(),
                 builder: (context, snapshot) {
+                  print('DEBUG: Recipe image path: ${recipe.imagePath}');
+                  print('DEBUG: File exists: ${snapshot.data}');
+                  
                   if (snapshot.hasData && snapshot.data == true) {
+                    print('DEBUG: Loading image from: ${recipe.imagePath}');
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.file(
                         File(recipe.imagePath!),
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
+                          print('DEBUG: Image load error: $error');
                           return _buildImagePlaceholder();
                         },
                       ),
                     );
                   }
+                  print('DEBUG: File does not exist, showing placeholder');
                   return _buildImagePlaceholder();
                 },
               )

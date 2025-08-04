@@ -135,9 +135,13 @@ class ImageService {
     final appDir = await getApplicationDocumentsDirectory();
     final imagesDir = Directory(p.join(appDir.path, 'images'));
 
+    print('DEBUG: App documents directory: ${appDir.path}');
+    print('DEBUG: Images directory: ${imagesDir.path}');
+
     // imagesディレクトリが存在しない場合は作成
     if (!await imagesDir.exists()) {
       await imagesDir.create(recursive: true);
+      print('DEBUG: Created images directory');
     }
 
     // ユニークなファイル名を生成
@@ -146,9 +150,22 @@ class ImageService {
     final fileName = 'img_$timestamp$extension';
     final targetPath = p.join(imagesDir.path, fileName);
 
+    print('DEBUG: Source path: $sourcePath');
+    print('DEBUG: Target path: $targetPath');
+
     // ファイルをコピー
     final sourceFile = File(sourcePath);
     await sourceFile.copy(targetPath);
+
+    // コピー後にファイルが存在するか確認
+    final targetFile = File(targetPath);
+    final exists = await targetFile.exists();
+    print('DEBUG: File copied successfully: $exists');
+    
+    if (exists) {
+      final fileSize = await targetFile.length();
+      print('DEBUG: File size: $fileSize bytes');
+    }
 
     return targetPath;
   }

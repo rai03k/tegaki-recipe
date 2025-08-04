@@ -229,7 +229,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ? FutureBuilder<bool>(
                     future: File(recipeBook.coverImagePath!).exists(),
                     builder: (context, snapshot) {
+                      print('DEBUG: RecipeBook cover image path: ${recipeBook.coverImagePath}');
+                      print('DEBUG: Cover file exists: ${snapshot.data}');
+                      
                       if (snapshot.hasData && snapshot.data == true) {
+                        print('DEBUG: Loading cover image from: ${recipeBook.coverImagePath}');
                         return ClipRRect(
                           borderRadius: BorderRadius.circular(6),
                           child: Image.file(
@@ -238,6 +242,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             width: double.infinity,
                             height: double.infinity,
                             errorBuilder: (context, error, stackTrace) {
+                              print('DEBUG: Cover image load error: $error');
                               return _buildDefaultBookContent(
                                 recipeBook,
                                 isDarkMode,
@@ -246,6 +251,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                         );
                       } else {
+                        print('DEBUG: Cover file does not exist, showing default content');
                         return _buildDefaultBookContent(recipeBook, isDarkMode);
                       }
                     },
