@@ -7,6 +7,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:tegaki_recipe/view_models/recipe_view_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/database.dart';
+import '../services/image_service.dart';
 import '../view_models/theme_view_model.dart';
 import '../services/database_service.dart';
 
@@ -335,27 +336,36 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
       ),
       child:
           (recipe.imagePath != null && recipe.imagePath!.isNotEmpty)
-              ? FutureBuilder<bool>(
-                future: File(recipe.imagePath!).exists(),
+              ? FutureBuilder<File>(
+                future: ImageService.getImageFile(recipe.imagePath!),
                 builder: (context, snapshot) {
-                  print('DEBUG: Recipe image path: ${recipe.imagePath}');
-                  print('DEBUG: File exists: ${snapshot.data}');
-                  
-                  if (snapshot.hasData && snapshot.data == true) {
-                    print('DEBUG: Loading image from: ${recipe.imagePath}');
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.file(
-                        File(recipe.imagePath!),
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          print('DEBUG: Image load error: $error');
-                          return _buildImagePlaceholder();
-                        },
-                      ),
+                  if (snapshot.hasData) {
+                    return FutureBuilder<bool>(
+                      future: snapshot.data!.exists(),
+                      builder: (context, existsSnapshot) {
+                        print('DEBUG: Recipe image filename: ${recipe.imagePath}');
+                        print('DEBUG: Recipe file path: ${snapshot.data!.path}');
+                        print('DEBUG: Recipe file exists: ${existsSnapshot.data}');
+                        
+                        if (existsSnapshot.hasData && existsSnapshot.data == true) {
+                          print('DEBUG: Loading recipe image from: ${snapshot.data!.path}');
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.file(
+                              snapshot.data!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                print('DEBUG: Recipe image load error: $error');
+                                return _buildImagePlaceholder();
+                              },
+                            ),
+                          );
+                        }
+                        print('DEBUG: Recipe file does not exist, showing placeholder');
+                        return _buildImagePlaceholder();
+                      },
                     );
                   }
-                  print('DEBUG: File does not exist, showing placeholder');
                   return _buildImagePlaceholder();
                 },
               )

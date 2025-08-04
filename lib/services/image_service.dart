@@ -167,7 +167,8 @@ class ImageService {
       print('DEBUG: File size: $fileSize bytes');
     }
 
-    return targetPath;
+    // 絶対パスではなくファイル名のみを返す
+    return fileName;
   }
 
   // 画像ファイルを削除
@@ -246,5 +247,18 @@ class ImageService {
   Future<bool> imageExists(String imagePath) async {
     final file = File(imagePath);
     return await file.exists();
+  }
+
+  // ファイル名から完全なパスを構築
+  static Future<String> getImagePath(String fileName) async {
+    final appDir = await getApplicationDocumentsDirectory();
+    final imagesDir = Directory(p.join(appDir.path, 'images'));
+    return p.join(imagesDir.path, fileName);
+  }
+
+  // ファイル名から File オブジェクトを取得
+  static Future<File> getImageFile(String fileName) async {
+    final fullPath = await getImagePath(fileName);
+    return File(fullPath);
   }
 }

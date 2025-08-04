@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../models/database.dart';
+import '../services/image_service.dart';
 import '../view_models/recipe_book_view_model.dart';
 import '../view_models/theme_view_model.dart';
 import '../view_models/timer_view_model.dart';
@@ -226,34 +227,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           child:
               recipeBook.coverImagePath != null
-                  ? FutureBuilder<bool>(
-                    future: File(recipeBook.coverImagePath!).exists(),
+                  ? FutureBuilder<File>(
+                    future: ImageService.getImageFile(recipeBook.coverImagePath!),
                     builder: (context, snapshot) {
-                      print('DEBUG: RecipeBook cover image path: ${recipeBook.coverImagePath}');
-                      print('DEBUG: Cover file exists: ${snapshot.data}');
-                      
-                      if (snapshot.hasData && snapshot.data == true) {
-                        print('DEBUG: Loading cover image from: ${recipeBook.coverImagePath}');
-                        return ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: Image.file(
-                            File(recipeBook.coverImagePath!),
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                            errorBuilder: (context, error, stackTrace) {
-                              print('DEBUG: Cover image load error: $error');
-                              return _buildDefaultBookContent(
-                                recipeBook,
-                                isDarkMode,
+                      if (snapshot.hasData) {
+                        return FutureBuilder<bool>(
+                          future: snapshot.data!.exists(),
+                          builder: (context, existsSnapshot) {
+                            print('DEBUG: RecipeBook cover image filename: ${recipeBook.coverImagePath}');
+                            print('DEBUG: Cover file path: ${snapshot.data!.path}');
+                            print('DEBUG: Cover file exists: ${existsSnapshot.data}');
+                            
+                            if (existsSnapshot.hasData && existsSnapshot.data == true) {
+                              print('DEBUG: Loading cover image from: ${snapshot.data!.path}');
+                              return ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: Image.file(
+                                  snapshot.data!,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    print('DEBUG: Cover image load error: $error');
+                                    return _buildDefaultBookContent(
+                                      recipeBook,
+                                      isDarkMode,
+                                    );
+                                  },
+                                ),
                               );
-                            },
-                          ),
+                            } else {
+                              print('DEBUG: Cover file does not exist, showing default content');
+                              return _buildDefaultBookContent(recipeBook, isDarkMode);
+                            }
+                          },
                         );
-                      } else {
-                        print('DEBUG: Cover file does not exist, showing default content');
-                        return _buildDefaultBookContent(recipeBook, isDarkMode);
                       }
+                      return _buildDefaultBookContent(recipeBook, isDarkMode);
                     },
                   )
                   : _buildDefaultBookContent(recipeBook, isDarkMode),

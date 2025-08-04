@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../models/database.dart';
+import '../services/image_service.dart';
 import '../view_models/recipe_view_model.dart';
 import '../view_models/recipe_book_view_model.dart';
 import '../view_models/theme_view_model.dart';
