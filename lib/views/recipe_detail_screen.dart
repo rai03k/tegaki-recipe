@@ -1,40 +1,38 @@
+import 'dart:io';
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:tegaki_recipe/view_models/recipe_view_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/database.dart';
 import '../view_models/theme_view_model.dart';
 import '../services/database_service.dart';
 
 // レシピの材料を取得するプロバイダー
-final recipeIngredientsProvider = FutureProvider.family.autoDispose<List<Ingredient>, int>((
-  ref,
-  recipeId,
-) async {
-  final database = DatabaseService.instance.database;
-  final ingredients =
-      await (database.select(database.ingredients)
-            ..where((tbl) => tbl.recipeId.equals(recipeId))
-            ..orderBy([(tbl) => OrderingTerm.asc(tbl.sortOrder)]))
-          .get();
-  return ingredients;
-});
+final recipeIngredientsProvider = FutureProvider.family
+    .autoDispose<List<Ingredient>, int>((ref, recipeId) async {
+      final database = DatabaseService.instance.database;
+      final ingredients =
+          await (database.select(database.ingredients)
+                ..where((tbl) => tbl.recipeId.equals(recipeId))
+                ..orderBy([(tbl) => OrderingTerm.asc(tbl.sortOrder)]))
+              .get();
+      return ingredients;
+    });
 
 // レシピ本の全レシピを取得するプロバイダー
-final recipeBookRecipesProvider = FutureProvider.family.autoDispose<List<Recipe>, int>((
-  ref,
-  recipeBookId,
-) async {
-  final database = DatabaseService.instance.database;
-  final recipes =
-      await (database.select(database.recipes)
-            ..where((tbl) => tbl.recipeBookId.equals(recipeBookId))
-            ..orderBy([(tbl) => OrderingTerm.asc(tbl.id)]))
-          .get();
-  return recipes;
-});
+final recipeBookRecipesProvider = FutureProvider.family
+    .autoDispose<List<Recipe>, int>((ref, recipeBookId) async {
+      final database = DatabaseService.instance.database;
+      final recipes =
+          await (database.select(database.recipes)
+                ..where((tbl) => tbl.recipeBookId.equals(recipeBookId))
+                ..orderBy([(tbl) => OrderingTerm.asc(tbl.id)]))
+              .get();
+      return recipes;
+    });
 
 class RecipeDetailScreen extends ConsumerStatefulWidget {
   final Recipe recipe;
@@ -107,7 +105,9 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                   color: isDarkMode ? Colors.white : Colors.black,
                   size: 24.0,
                 ),
-                onPressed: () => _navigateToEditScreen(context, recipes[_currentIndex]),
+                onPressed:
+                    () =>
+                        _navigateToEditScreen(context, recipes[_currentIndex]),
               ),
               IconButton(
                 icon: HugeIcon(
@@ -115,7 +115,11 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                   color: isDarkMode ? Colors.white : Colors.black,
                   size: 24.0,
                 ),
-                onPressed: () => _showDeleteConfirmDialog(context, recipes[_currentIndex]),
+                onPressed:
+                    () => _showDeleteConfirmDialog(
+                      context,
+                      recipes[_currentIndex],
+                    ),
               ),
             ],
           ),
@@ -331,15 +335,23 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
       ),
       child:
           (recipe.imagePath != null && recipe.imagePath!.isNotEmpty)
-              ? ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  recipe.imagePath!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return _buildImagePlaceholder();
-                  },
-                ),
+              ? FutureBuilder<bool>(
+                future: File(recipe.imagePath!).exists(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data == true) {
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(
+                        File(recipe.imagePath!),
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildImagePlaceholder();
+                        },
+                      ),
+                    );
+                  }
+                  return _buildImagePlaceholder();
+                },
               )
               : _buildImagePlaceholder(),
     );
@@ -589,13 +601,13 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
       pathParameters: {'recipeId': recipe.id.toString()},
       extra: recipe,
     );
-    
+
     // 編集完了後にプロバイダーを無効化してデータを再取得
     if (result == true && mounted) {
       // プロバイダーを無効化して最新データを取得
       ref.invalidate(recipeBookRecipesProvider(recipe.recipeBookId));
       ref.invalidate(recipeIngredientsProvider(recipe.id));
-      
+
       // 少し待ってから再構築を促す
       Future.delayed(const Duration(milliseconds: 100), () {
         if (mounted) {
@@ -607,7 +619,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
 
   void _showDeleteConfirmDialog(BuildContext context, Recipe recipe) {
     final isDarkMode = ref.read(themeNotifierProvider) == ThemeMode.dark;
-    
+
     showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -660,7 +672,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     final success = await ref
         .read(recipeNotifierProvider.notifier)
         .deleteRecipe(recipe.id, recipe.recipeBookId);
-    
+
     if (success && mounted) {
       // 削除成功時は目次画面に戻る
       context.pop();

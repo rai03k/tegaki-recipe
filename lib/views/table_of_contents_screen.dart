@@ -286,9 +286,10 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
             '右下のボタンから\n最初のレシピを作ってみよう！',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 18,
               color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
               height: 1.5,
+              letterSpacing: -1.5,
             ),
           ),
         ],
