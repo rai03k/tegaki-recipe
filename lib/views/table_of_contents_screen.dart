@@ -184,9 +184,10 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                 Text(
                   '目次',
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 32,
                     fontWeight: FontWeight.bold,
                     color: isDarkMode ? Colors.white : Colors.black,
+                    letterSpacing: -2,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -195,7 +196,7 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                   '料理名をタップでそのレシピに移動できるよ',
                   style: TextStyle(
                     fontSize: 18,
-                    letterSpacing: -1.0,
+                    letterSpacing: -1.5,
                     color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                   ),
                 ),

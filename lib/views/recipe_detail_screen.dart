@@ -211,10 +211,9 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
             // メモ
             if (recipe.memo != null && recipe.memo!.isNotEmpty) ...[
               _buildMemo(isDarkMode, recipe),
-              const SizedBox(height: 20),
             ],
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 20),
 
             // 材料
             _buildIngredientsSection(isDarkMode, recipe),
@@ -343,12 +342,21 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                     return FutureBuilder<bool>(
                       future: snapshot.data!.exists(),
                       builder: (context, existsSnapshot) {
-                        print('DEBUG: Recipe image filename: ${recipe.imagePath}');
-                        print('DEBUG: Recipe file path: ${snapshot.data!.path}');
-                        print('DEBUG: Recipe file exists: ${existsSnapshot.data}');
-                        
-                        if (existsSnapshot.hasData && existsSnapshot.data == true) {
-                          print('DEBUG: Loading recipe image from: ${snapshot.data!.path}');
+                        print(
+                          'DEBUG: Recipe image filename: ${recipe.imagePath}',
+                        );
+                        print(
+                          'DEBUG: Recipe file path: ${snapshot.data!.path}',
+                        );
+                        print(
+                          'DEBUG: Recipe file exists: ${existsSnapshot.data}',
+                        );
+
+                        if (existsSnapshot.hasData &&
+                            existsSnapshot.data == true) {
+                          print(
+                            'DEBUG: Loading recipe image from: ${snapshot.data!.path}',
+                          );
                           return ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Image.file(
@@ -361,7 +369,9 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                             ),
                           );
                         }
-                        print('DEBUG: Recipe file does not exist, showing placeholder');
+                        print(
+                          'DEBUG: Recipe file does not exist, showing placeholder',
+                        );
                         return _buildImagePlaceholder();
                       },
                     );
@@ -445,10 +455,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
                     decoration: BoxDecoration(
                       color: const Color(0xFF9BB8D3), // 青い背景色
                       borderRadius: BorderRadius.circular(6),
@@ -456,7 +463,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                     child: Text(
                       '材料（1人分）',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -481,31 +488,44 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Row(
                               children: [
-                                Text(
-                                  '• ',
-                                  style: TextStyle(
-                                    fontFamily: 'ArmedLemon',
-                                    fontSize: 16,
-                                    color:
-                                        isDarkMode
-                                            ? Colors.white
-                                            : Colors.black,
-                                  ),
-                                ),
-                                Expanded(
+                                Flexible(
                                   child: Text(
-                                    '${ingredient.name}　${ingredient.amount ?? ''}',
+                                    '${ingredient.name}',
                                     style: TextStyle(
-                                      fontFamily: 'ArmedLemon',
-                                      fontSize: 16,
+                                      fontSize: 20,
                                       color:
                                           isDarkMode
                                               ? Colors.white
                                               : Colors.black,
-                                      height: 1.4,
                                     ),
                                   ),
                                 ),
+                                if (ingredient.amount != null ||
+                                    ingredient.amount!.isEmpty) ...[
+                                  Text(
+                                    '・・・',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      color:
+                                          isDarkMode
+                                              ? Colors.white
+                                              : Colors.black,
+                                      letterSpacing: -3,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      '${ingredient.amount ?? ''}',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        color:
+                                            isDarkMode
+                                                ? Colors.white
+                                                : Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
@@ -517,11 +537,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           error:
               (error, stack) => Text(
                 '材料の読み込みエラー',
-                style: TextStyle(
-                  fontFamily: 'ArmedLemon',
-                  fontSize: 14,
-                  color: Colors.red,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.red),
               ),
         );
       },
@@ -535,7 +551,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 2),
           decoration: BoxDecoration(
             color: const Color(0xFF9BB8D3), // 青い背景色
             borderRadius: BorderRadius.circular(6),
@@ -543,7 +559,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           child: Text(
             '作り方',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
