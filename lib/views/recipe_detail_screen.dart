@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:tegaki_recipe/view_models/recipe_view_model.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:page_flip/page_flip.dart';
 import '../models/database.dart';
 import '../services/image_service.dart';
 import '../view_models/theme_view_model.dart';
@@ -45,18 +46,12 @@ class RecipeDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
-  PageController? _pageController;
   int _currentIndex = 0;
+  final GlobalKey<PageFlipWidgetState> _pageFlipKey = GlobalKey<PageFlipWidgetState>();
 
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _pageController?.dispose();
-    super.dispose();
   }
 
   // 画像が存在するかどうかを判定
@@ -81,10 +76,15 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           (r) => r.id == widget.recipe.id,
         );
 
-        // PageControllerを初期化（一度だけ）
-        if (_pageController == null && currentIndex != -1) {
-          _pageController = PageController(initialPage: currentIndex);
+        // 初期インデックスを設定（一度だけ）
+        if (_currentIndex == 0 && currentIndex != -1) {
           _currentIndex = currentIndex;
+          // ウィジェット構築後に指定のページに移動
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (currentIndex > 0) {
+              _pageFlipKey.currentState?.goToPage(currentIndex);
+            }
+          });
         }
 
         return Scaffold(
@@ -126,22 +126,16 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           ),
           body: Column(
             children: [
-              // PageViewでレシピをスライド表示（画面の大部分）
+              // PageFlipWidgetでレシピをページめくりアニメーション表示（画面の大部分）
               Expanded(
-                child: PageView.builder(
-                  controller: _pageController,
-                  itemCount: recipes.length,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
-                  itemBuilder: (context, index) {
-                    final recipe = recipes[index];
+                child: PageFlipWidget(
+                  key: _pageFlipKey,
+                  backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                  children: recipes.map((recipe) {
                     return isTablet
                         ? _buildTabletLayout(context, isDarkMode, recipe)
                         : _buildPhoneLayout(context, isDarkMode, recipe);
-                  },
+                  }).toList(),
                 ),
               ),
 
