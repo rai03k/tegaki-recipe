@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:tegaki_recipe/view_models/recipe_view_model.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:page_flip/page_flip.dart';
+import 'package:turn_page_transition/turn_page_transition.dart';
 import '../models/database.dart';
 import '../services/image_service.dart';
 import '../view_models/theme_view_model.dart';
@@ -47,11 +47,18 @@ class RecipeDetailScreen extends ConsumerStatefulWidget {
 
 class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   int _currentIndex = 0;
-  final GlobalKey<PageFlipWidgetState> _pageFlipKey = GlobalKey<PageFlipWidgetState>();
+  late TurnPageController _turnPageController;
 
   @override
   void initState() {
     super.initState();
+    _turnPageController = TurnPageController();
+  }
+
+  @override
+  void dispose() {
+    _turnPageController.dispose();
+    super.dispose();
   }
 
   // 画像が存在するかどうかを判定
@@ -189,19 +196,24 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           // ウィジェット構築後に指定のページに移動
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (currentIndex > 0) {
-              _pageFlipKey.currentState?.goToPage(currentIndex);
+              _turnPageController.animateToPage(currentIndex);
             }
           });
         }
 
         return Scaffold(
           backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          body: PageFlipWidget(
-            key: _pageFlipKey,
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            children: recipes.map((recipe) {
+          body: TurnPageView.builder(
+            controller: _turnPageController,
+            itemCount: recipes.length,
+            itemBuilder: (context, index) {
+              final recipe = recipes[index];
               return _buildFullPageLayout(context, isDarkMode, recipe, recipes, isTablet);
-            }).toList(),
+            },
+            overleafColorBuilder: (index) {
+              return isDarkMode ? Colors.grey[800]! : Colors.grey[200]!;
+            },
+            animationTransitionPoint: 0.5,
           ),
         );
       },
