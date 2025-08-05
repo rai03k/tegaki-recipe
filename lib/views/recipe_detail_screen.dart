@@ -58,6 +58,113 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   bool hasImage(Recipe recipe) =>
       recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
 
+  // AppBar、Body、Footerを含む完全なページレイアウト
+  Widget _buildFullPageLayout(
+    BuildContext context,
+    bool isDarkMode,
+    Recipe recipe,
+    List<Recipe> recipes,
+    bool isTablet,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.black : Colors.white,
+        // 紙の質感を表現するため、わずかな影を追加
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            // AppBar部分
+            _buildCustomAppBar(context, isDarkMode, recipe),
+            
+            // 区切り線
+            Container(
+              height: 1,
+              color: isDarkMode 
+                  ? Colors.grey[800]!.withValues(alpha: 0.3)
+                  : Colors.grey[300]!.withValues(alpha: 0.5),
+            ),
+            
+            // Body部分（メインコンテンツ）
+            Expanded(
+              child: isTablet
+                  ? _buildTabletLayout(context, isDarkMode, recipe)
+                  : _buildPhoneLayout(context, isDarkMode, recipe),
+            ),
+
+            // Footer部分（ページインジケーター）
+            if (recipes.length > 1) ...[
+              Container(
+                height: 1,
+                color: isDarkMode 
+                    ? Colors.grey[800]!.withValues(alpha: 0.3)
+                    : Colors.grey[300]!.withValues(alpha: 0.5),
+              ),
+              _buildPageIndicator(isDarkMode, recipes),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  // カスタムAppBar
+  Widget _buildCustomAppBar(BuildContext context, bool isDarkMode, Recipe recipe) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: isDarkMode ? Colors.white : Colors.black,
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          const Spacer(),
+          IconButton(
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedEdit02,
+              color: isDarkMode ? Colors.white : Colors.black,
+              size: 24.0,
+            ),
+            onPressed: () => _navigateToEditScreen(context, recipe),
+          ),
+          IconButton(
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedDelete02,
+              color: isDarkMode ? Colors.white : Colors.black,
+              size: 24.0,
+            ),
+            onPressed: () => _showDeleteConfirmDialog(context, recipe),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ページインジケーター
+  Widget _buildPageIndicator(bool isDarkMode, List<Recipe> recipes) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Text(
+        '${_currentIndex + 1}/${recipes.length}',
+        style: TextStyle(
+          color: isDarkMode ? Colors.white70 : Colors.black54,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = ref.watch(themeNotifierProvider) == ThemeMode.dark;
@@ -89,70 +196,12 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
 
         return Scaffold(
           backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back,
-                color: isDarkMode ? Colors.white : Colors.black,
-              ),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            actions: [
-              IconButton(
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedEdit02,
-                  color: isDarkMode ? Colors.white : Colors.black,
-                  size: 24.0,
-                ),
-                onPressed:
-                    () =>
-                        _navigateToEditScreen(context, recipes[_currentIndex]),
-              ),
-              IconButton(
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedDelete02,
-                  color: isDarkMode ? Colors.white : Colors.black,
-                  size: 24.0,
-                ),
-                onPressed:
-                    () => _showDeleteConfirmDialog(
-                      context,
-                      recipes[_currentIndex],
-                    ),
-              ),
-            ],
-          ),
-          body: Column(
-            children: [
-              // PageFlipWidgetでレシピをページめくりアニメーション表示（画面の大部分）
-              Expanded(
-                child: PageFlipWidget(
-                  key: _pageFlipKey,
-                  backgroundColor: isDarkMode ? Colors.black : Colors.white,
-                  children: recipes.map((recipe) {
-                    return isTablet
-                        ? _buildTabletLayout(context, isDarkMode, recipe)
-                        : _buildPhoneLayout(context, isDarkMode, recipe);
-                  }).toList(),
-                ),
-              ),
-
-              // ページインジケーター（画面最下部）
-              if (recipes.length > 1)
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Text(
-                    '${_currentIndex + 1}/${recipes.length}',
-                    style: TextStyle(
-                      color: isDarkMode ? Colors.white70 : Colors.black54,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-            ],
+          body: PageFlipWidget(
+            key: _pageFlipKey,
+            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            children: recipes.map((recipe) {
+              return _buildFullPageLayout(context, isDarkMode, recipe, recipes, isTablet);
+            }).toList(),
           ),
         );
       },
