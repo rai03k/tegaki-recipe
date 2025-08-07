@@ -136,12 +136,13 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          IconButton(
-            icon: Icon(
-              Icons.arrow_back,
+          GestureDetector(
+            onTap: () => context.pop(),
+            child: HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowLeft01,
               color: isDarkMode ? Colors.white : Colors.black,
+              size: 24.0,
             ),
-            onPressed: () => Navigator.of(context).pop(),
           ),
           const Spacer(),
           IconButton(
@@ -166,14 +167,18 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   }
 
   // ページインジケーター
-  Widget _buildPageIndicator(bool isDarkMode, List<Recipe> recipes, int currentPageIndex) {
+  Widget _buildPageIndicator(
+    bool isDarkMode,
+    List<Recipe> recipes,
+    int currentPageIndex,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Text(
         '${currentPageIndex + 1}/${recipes.length}',
         style: TextStyle(
           color: isDarkMode ? Colors.white70 : Colors.black54,
-          fontSize: 16,
+          fontSize: 20,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -511,7 +516,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     return Text(
       recipe.memo ?? '',
       style: TextStyle(
-        fontSize: 20,
+        fontSize: 18,
         color: isDarkMode ? Colors.white60 : Colors.black45,
       ),
     );

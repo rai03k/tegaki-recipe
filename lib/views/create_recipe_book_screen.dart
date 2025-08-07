@@ -115,7 +115,7 @@ class _CreateRecipeBookScreenState extends ConsumerState<CreateRecipeBookScreen>
                   onTap: _selectImage,
                   child: Container(
                     width: 200,
-                    height: 267, // 3:4比率
+                    height: 200 * 4 / 3, // 3:4比率（縦長）を正確に計算
                     decoration: BoxDecoration(
                       color: isDarkMode ? Colors.grey[800] : Colors.white,
                       border: Border.all(
