@@ -403,7 +403,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   Widget _buildRecipeImage(Recipe recipe) {
     return Container(
       width: double.infinity,
-      height: 200,
+      height: (MediaQuery.of(context).size.width - 40) * 3 / 4, // 4:3比率に統一
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: Colors.grey[200],
