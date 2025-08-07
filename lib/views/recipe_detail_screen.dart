@@ -90,29 +90,32 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           children: [
             // AppBar部分
             _buildCustomAppBar(context, isDarkMode, recipe),
-            
+
             // 区切り線
             Container(
               height: 1,
-              color: isDarkMode 
-                  ? Colors.grey[800]!.withValues(alpha: 0.3)
-                  : Colors.grey[300]!.withValues(alpha: 0.5),
+              color:
+                  isDarkMode
+                      ? Colors.grey[800]!.withValues(alpha: 0.3)
+                      : Colors.grey[300]!.withValues(alpha: 0.5),
             ),
-            
+
             // Body部分（メインコンテンツ）
             Expanded(
-              child: isTablet
-                  ? _buildTabletLayout(context, isDarkMode, recipe)
-                  : _buildPhoneLayout(context, isDarkMode, recipe),
+              child:
+                  isTablet
+                      ? _buildTabletLayout(context, isDarkMode, recipe)
+                      : _buildPhoneLayout(context, isDarkMode, recipe),
             ),
 
             // Footer部分（ページインジケーター）
             if (recipes.length > 1) ...[
               Container(
                 height: 1,
-                color: isDarkMode 
-                    ? Colors.grey[800]!.withValues(alpha: 0.3)
-                    : Colors.grey[300]!.withValues(alpha: 0.5),
+                color:
+                    isDarkMode
+                        ? Colors.grey[800]!.withValues(alpha: 0.3)
+                        : Colors.grey[300]!.withValues(alpha: 0.5),
               ),
               _buildPageIndicator(isDarkMode, recipes),
             ],
@@ -123,7 +126,11 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   }
 
   // カスタムAppBar
-  Widget _buildCustomAppBar(BuildContext context, bool isDarkMode, Recipe recipe) {
+  Widget _buildCustomAppBar(
+    BuildContext context,
+    bool isDarkMode,
+    Recipe recipe,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -208,10 +215,21 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
             itemCount: recipes.length,
             itemBuilder: (context, index) {
               final recipe = recipes[index];
-              return _buildFullPageLayout(context, isDarkMode, recipe, recipes, isTablet);
+              return _buildFullPageLayout(
+                context,
+                isDarkMode,
+                recipe,
+                recipes,
+                isTablet,
+              );
             },
             overleafColorBuilder: (index) {
-              return isDarkMode ? Colors.grey[800]! : Colors.grey[200]!;
+              return isDarkMode
+                  ? Colors.black.withOpacity(0.8)
+                  : Colors.white.withOpacity(0.8);
+            },
+            overleafBorderWidthBuilder: (index) {
+              return 0.5;
             },
             animationTransitionPoint: 0.5,
           ),
