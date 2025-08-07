@@ -19,6 +19,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   PageController? _pageController;
+  bool _isShelfOpen = false; // 棚の開閉状態を管理
 
   @override
   void initState() {
@@ -531,6 +532,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // 共通の家具アイテム構築ヘルパー
   Widget _buildFurnitureItem({
+    Key? key,
     required String assetPath,
     required VoidCallback onTap,
     required double size,
@@ -542,6 +544,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final width = height * aspectRatio; // 高さに基づいて幅を計算
 
     return GestureDetector(
+      key: key,
       onTap: onTap,
       child: SizedBox(
         width: width,
@@ -573,13 +576,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // 棚ウィジェット（設定画面へ遷移）
   Widget _buildShelfWidget(bool isDarkMode, double furnitureSize) {
-    return _buildFurnitureItem(
-      assetPath: 'assets/images/furniture/tana.png',
-      onTap: () => context.push('/settings'),
-      size: furnitureSize,
-      isDarkMode: isDarkMode,
-      heightMultiplier: 1.1,
-      aspectRatio: 1.2, // 棚は横長（幅：高さ = 1.2：1）
+    return GestureDetector(
+      onTap: () => _onShelfTap(),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: _buildFurnitureItem(
+          key: ValueKey(_isShelfOpen), // キーを設定してアニメーションを発生させる
+          assetPath: _isShelfOpen 
+              ? 'assets/images/furniture/tana_open.png'
+              : 'assets/images/furniture/tana_close.png',
+          onTap: () => _onShelfTap(),
+          size: furnitureSize,
+          isDarkMode: isDarkMode,
+          heightMultiplier: 1.1,
+          aspectRatio: 1.2, // 棚は横長（幅：高さ = 1.2：1）
+        ),
+      ),
     );
+  }
+
+  // 棚をタップした時の処理
+  void _onShelfTap() async {
+    // 棚を開く
+    setState(() {
+      _isShelfOpen = true;
+    });
+
+    // 設定画面に遷移
+    await context.push('/settings');
+
+    // 設定画面から戻ってきたら、1秒後に棚を閉じる
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) {
+        setState(() {
+          _isShelfOpen = false;
+        });
+      }
+    });
   }
 }
