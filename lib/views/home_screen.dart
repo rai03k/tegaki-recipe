@@ -520,7 +520,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // メモ帳（前景）
               Positioned(
                 top: stackHeight * 0.2, // 上から10%の位置
-                left: stackWidth * 0.15, // 左から10%の位置
+                left: stackWidth * 0.12, // 左から10%の位置
                 child: _buildMemoWidget(isDarkMode, memoSize),
               ),
             ],
@@ -587,9 +587,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             alignment: Alignment.topLeft, // 上部と左部を基準に配置
             child: _buildFurnitureItem(
               key: ValueKey(_isShelfOpen), // キーを設定してアニメーションを発生させる
-              assetPath: _isShelfOpen 
-                  ? 'assets/images/furniture/tana_open.png'
-                  : 'assets/images/furniture/tana_close.png',
+              assetPath:
+                  _isShelfOpen
+                      ? 'assets/images/furniture/tana_open.png'
+                      : 'assets/images/furniture/tana_close.png',
               onTap: () => _onShelfTap(),
               size: furnitureSize,
               isDarkMode: isDarkMode,

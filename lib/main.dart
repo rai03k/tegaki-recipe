@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'routes/app_router.dart';
 import 'view_models/theme_view_model.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // 縦画面固定
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+  
   runApp(const ProviderScope(child: MyApp()));
 }
 
