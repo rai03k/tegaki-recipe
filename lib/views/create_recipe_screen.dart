@@ -211,6 +211,33 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
     }
   }
 
+  Widget _buildImagePlaceholder(bool isDarkMode) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        HugeIcon(
+          icon: HugeIcons.strokeRoundedImage01,
+          color:
+              isDarkMode
+                  ? Colors.grey[400]!
+                  : Colors.grey[600]!,
+          size: 48.0,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          '料理画像を選択',
+          style: TextStyle(
+            color:
+                isDarkMode
+                    ? Colors.grey[400]
+                    : Colors.grey[600],
+            fontSize: 20,
+          ),
+        ),
+      ],
+    );
+  }
+
   Future<void> _launchUrl(String urlString) async {
     try {
       final Uri url = Uri.parse(urlString);
@@ -299,39 +326,35 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                           ),
                           child:
                               _selectedImagePath != null
-                                  ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Image.file(
-                                      File(_selectedImagePath!),
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                    ),
+                                  ? FutureBuilder<File>(
+                                    future: ImageService.getImageFile(_selectedImagePath!),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return FutureBuilder<bool>(
+                                          future: snapshot.data!.exists(),
+                                          builder: (context, existsSnapshot) {
+                                            if (existsSnapshot.hasData && existsSnapshot.data == true) {
+                                              return ClipRRect(
+                                                borderRadius: BorderRadius.circular(10),
+                                                child: Image.file(
+                                                  snapshot.data!,
+                                                  fit: BoxFit.cover,
+                                                  width: double.infinity,
+                                                  height: double.infinity,
+                                                  errorBuilder: (context, error, stackTrace) {
+                                                    return _buildImagePlaceholder(isDarkMode);
+                                                  },
+                                                ),
+                                              );
+                                            }
+                                            return _buildImagePlaceholder(isDarkMode);
+                                          },
+                                        );
+                                      }
+                                      return _buildImagePlaceholder(isDarkMode);
+                                    },
                                   )
-                                  : Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      HugeIcon(
-                                        icon: HugeIcons.strokeRoundedImage01,
-                                        color:
-                                            isDarkMode
-                                                ? Colors.grey[400]!
-                                                : Colors.grey[600]!,
-                                        size: 48.0,
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        '料理画像を選択',
-                                        style: TextStyle(
-                                          color:
-                                              isDarkMode
-                                                  ? Colors.grey[400]
-                                                  : Colors.grey[600],
-                                          fontSize: 20,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                  : _buildImagePlaceholder(isDarkMode),
                         ),
                       ),
                       const SizedBox(height: 32),
