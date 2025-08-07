@@ -578,18 +578,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildShelfWidget(bool isDarkMode, double furnitureSize) {
     return GestureDetector(
       onTap: () => _onShelfTap(),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: _buildFurnitureItem(
-          key: ValueKey(_isShelfOpen), // キーを設定してアニメーションを発生させる
-          assetPath: _isShelfOpen 
-              ? 'assets/images/furniture/tana_open.png'
-              : 'assets/images/furniture/tana_close.png',
-          onTap: () => _onShelfTap(),
-          size: furnitureSize,
-          isDarkMode: isDarkMode,
-          heightMultiplier: 1.1,
-          aspectRatio: 1.2, // 棚は横長（幅：高さ = 1.2：1）
+      child: SizedBox(
+        width: furnitureSize * 1.2 * 1.1, // 固定サイズでコンテナを確保
+        height: furnitureSize * 1.1,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: Align(
+            alignment: Alignment.topLeft, // 上部と左部を基準に配置
+            child: _buildFurnitureItem(
+              key: ValueKey(_isShelfOpen), // キーを設定してアニメーションを発生させる
+              assetPath: _isShelfOpen 
+                  ? 'assets/images/furniture/tana_open.png'
+                  : 'assets/images/furniture/tana_close.png',
+              onTap: () => _onShelfTap(),
+              size: furnitureSize,
+              isDarkMode: isDarkMode,
+              heightMultiplier: 1.1,
+              aspectRatio: 1.2, // 棚は横長（幅：高さ = 1.2：1）
+            ),
+          ),
         ),
       ),
     );
