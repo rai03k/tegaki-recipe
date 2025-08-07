@@ -72,6 +72,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     Recipe recipe,
     List<Recipe> recipes,
     bool isTablet,
+    int currentPageIndex,
   ) {
     return Container(
       decoration: BoxDecoration(
@@ -117,7 +118,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                         ? Colors.grey[800]!.withValues(alpha: 0.3)
                         : Colors.grey[300]!.withValues(alpha: 0.5),
               ),
-              _buildPageIndicator(isDarkMode, recipes),
+              _buildPageIndicator(isDarkMode, recipes, currentPageIndex),
             ],
           ],
         ),
@@ -165,11 +166,11 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   }
 
   // ページインジケーター
-  Widget _buildPageIndicator(bool isDarkMode, List<Recipe> recipes) {
+  Widget _buildPageIndicator(bool isDarkMode, List<Recipe> recipes, int currentPageIndex) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Text(
-        '${_currentIndex + 1}/${recipes.length}',
+        '${currentPageIndex + 1}/${recipes.length}',
         style: TextStyle(
           color: isDarkMode ? Colors.white70 : Colors.black54,
           fontSize: 16,
@@ -221,6 +222,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                 recipe,
                 recipes,
                 isTablet,
+                index, // 現在のページインデックスを渡す
               );
             },
             overleafColorBuilder: (index) {
