@@ -89,62 +89,44 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
                       child: Row(
                         children: [
                           if (_currentRecipeBook.coverImagePath != null)
-                            FutureBuilder<bool>(
-                              future:
-                                  File(
-                                    _currentRecipeBook.coverImagePath!,
-                                  ).exists(),
+                            FutureBuilder<File>(
+                              future: ImageService.getImageFile(_currentRecipeBook.coverImagePath!),
                               builder: (context, snapshot) {
-                                if (snapshot.hasData && snapshot.data == true) {
-                                  return Container(
-                                    width: 40,
-                                    height: 53,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(4),
-                                      border: Border.all(
-                                        color:
-                                            isDarkMode
-                                                ? Colors.grey[600]!
-                                                : Colors.grey[300]!,
-                                      ),
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(3),
-                                      child: Image.file(
-                                        File(
-                                          _currentRecipeBook.coverImagePath!,
-                                        ),
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  return Container(
-                                    width: 40,
-                                    height: 53,
-                                    decoration: BoxDecoration(
-                                      color:
-                                          isDarkMode
-                                              ? Colors.grey[800]
-                                              : Colors.white,
-                                      borderRadius: BorderRadius.circular(4),
-                                      border: Border.all(
-                                        color:
-                                            isDarkMode
-                                                ? Colors.grey[600]!
-                                                : Colors.grey[300]!,
-                                      ),
-                                    ),
-                                    child: HugeIcon(
-                                      icon: HugeIcons.strokeRoundedBook02,
-                                      color:
-                                          isDarkMode
-                                              ? Colors.grey[400]!
-                                              : Colors.grey[600]!,
-                                      size: 20.0,
-                                    ),
+                                if (snapshot.hasData) {
+                                  return FutureBuilder<bool>(
+                                    future: snapshot.data!.exists(),
+                                    builder: (context, existsSnapshot) {
+                                      if (existsSnapshot.hasData && existsSnapshot.data == true) {
+                                        return Container(
+                                          width: 40,
+                                          height: 53,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(4),
+                                            border: Border.all(
+                                              color:
+                                                  isDarkMode
+                                                      ? Colors.grey[600]!
+                                                      : Colors.grey[300]!,
+                                            ),
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(3),
+                                            child: Image.file(
+                                              snapshot.data!,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) {
+                                                return _buildPlaceholderIcon(isDarkMode);
+                                              },
+                                            ),
+                                          ),
+                                        );
+                                      } else {
+                                        return _buildPlaceholderIcon(isDarkMode);
+                                      }
+                                    },
                                   );
                                 }
+                                return _buildPlaceholderIcon(isDarkMode);
                               },
                             ),
                           const SizedBox(width: 12),
@@ -412,4 +394,33 @@ class DotLeaderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+// プレースホルダーアイコンを構築
+Widget _buildPlaceholderIcon(bool isDarkMode) {
+  return Container(
+    width: 40,
+    height: 53,
+    decoration: BoxDecoration(
+      color:
+          isDarkMode
+              ? Colors.grey[800]
+              : Colors.white,
+      borderRadius: BorderRadius.circular(4),
+      border: Border.all(
+        color:
+            isDarkMode
+                ? Colors.grey[600]!
+                : Colors.grey[300]!,
+      ),
+    ),
+    child: HugeIcon(
+      icon: HugeIcons.strokeRoundedBook02,
+      color:
+          isDarkMode
+              ? Colors.grey[400]!
+              : Colors.grey[600]!,
+      size: 20.0,
+    ),
+  );
 }

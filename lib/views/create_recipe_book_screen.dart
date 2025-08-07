@@ -128,35 +128,35 @@ class _CreateRecipeBookScreenState extends ConsumerState<CreateRecipeBookScreen>
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: _selectedImagePath != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.file(
-                              File(_selectedImagePath!),
-                              fit: BoxFit.cover,
-                            ),
+                        ? FutureBuilder<File>(
+                            future: ImageService.getImageFile(_selectedImagePath!),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return FutureBuilder<bool>(
+                                  future: snapshot.data!.exists(),
+                                  builder: (context, existsSnapshot) {
+                                    if (existsSnapshot.hasData && existsSnapshot.data == true) {
+                                      return ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: Image.file(
+                                          snapshot.data!,
+                                          fit: BoxFit.cover,
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return _buildImagePlaceholder(isDarkMode);
+                                          },
+                                        ),
+                                      );
+                                    }
+                                    return _buildImagePlaceholder(isDarkMode);
+                                  },
+                                );
+                              }
+                              return _buildImagePlaceholder(isDarkMode);
+                            },
                           )
-                        : Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              HugeIcon(
-                                icon: HugeIcons.strokeRoundedImage01,
-                                color: isDarkMode
-                                    ? Colors.grey[400]!
-                                    : Colors.grey[600]!,
-                                size: 48.0,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                '表紙画像を選択',
-                                style: TextStyle(
-                                  color: isDarkMode
-                                      ? Colors.grey[400]
-                                      : Colors.grey[600],
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
+                        : _buildImagePlaceholder(isDarkMode),
                   ),
                 ),
               ),
@@ -249,6 +249,31 @@ class _CreateRecipeBookScreenState extends ConsumerState<CreateRecipeBookScreen>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildImagePlaceholder(bool isDarkMode) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        HugeIcon(
+          icon: HugeIcons.strokeRoundedImage01,
+          color: isDarkMode
+              ? Colors.grey[400]!
+              : Colors.grey[600]!,
+          size: 48.0,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '表紙画像を選択',
+          style: TextStyle(
+            color: isDarkMode
+                ? Colors.grey[400]
+                : Colors.grey[600],
+            fontSize: 16,
+          ),
+        ),
+      ],
     );
   }
 }

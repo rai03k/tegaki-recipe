@@ -25,7 +25,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
   }
 
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -44,7 +43,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final cardHeight = screenHeight / 3;
+    final cardHeight = screenHeight / 3.5;
     final recipeBookState = ref.watch(recipeBookNotifierProvider);
     final themeNotifier = ref.read(themeNotifierProvider.notifier);
     final isDarkMode = ref.watch(themeNotifierProvider) == ThemeMode.dark;
@@ -228,18 +227,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child:
               recipeBook.coverImagePath != null
                   ? FutureBuilder<File>(
-                    future: ImageService.getImageFile(recipeBook.coverImagePath!),
+                    future: ImageService.getImageFile(
+                      recipeBook.coverImagePath!,
+                    ),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         return FutureBuilder<bool>(
                           future: snapshot.data!.exists(),
                           builder: (context, existsSnapshot) {
-                            print('DEBUG: RecipeBook cover image filename: ${recipeBook.coverImagePath}');
-                            print('DEBUG: Cover file path: ${snapshot.data!.path}');
-                            print('DEBUG: Cover file exists: ${existsSnapshot.data}');
-                            
-                            if (existsSnapshot.hasData && existsSnapshot.data == true) {
-                              print('DEBUG: Loading cover image from: ${snapshot.data!.path}');
+                            print(
+                              'DEBUG: RecipeBook cover image filename: ${recipeBook.coverImagePath}',
+                            );
+                            print(
+                              'DEBUG: Cover file path: ${snapshot.data!.path}',
+                            );
+                            print(
+                              'DEBUG: Cover file exists: ${existsSnapshot.data}',
+                            );
+
+                            if (existsSnapshot.hasData &&
+                                existsSnapshot.data == true) {
+                              print(
+                                'DEBUG: Loading cover image from: ${snapshot.data!.path}',
+                              );
                               return ClipRRect(
                                 borderRadius: BorderRadius.circular(6),
                                 child: Image.file(
@@ -248,7 +258,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   width: double.infinity,
                                   height: double.infinity,
                                   errorBuilder: (context, error, stackTrace) {
-                                    print('DEBUG: Cover image load error: $error');
+                                    print(
+                                      'DEBUG: Cover image load error: $error',
+                                    );
                                     return _buildDefaultBookContent(
                                       recipeBook,
                                       isDarkMode,
@@ -257,8 +269,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                               );
                             } else {
-                              print('DEBUG: Cover file does not exist, showing default content');
-                              return _buildDefaultBookContent(recipeBook, isDarkMode);
+                              print(
+                                'DEBUG: Cover file does not exist, showing default content',
+                              );
+                              return _buildDefaultBookContent(
+                                recipeBook,
+                                isDarkMode,
+                              );
                             }
                           },
                         );
