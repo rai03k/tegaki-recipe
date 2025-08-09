@@ -112,3 +112,12 @@ flutter:
     - family: ArmedLemon
       fonts:
         - asset: assets/font/ArmedLemon.TTF
+flutter_icons:
+  image_path_android: assets/images/launcher_icon/android_icon.png
+  adaptive_icon_background: '#f1efe2' #iconの背景色
+  adaptive_icon_foreground: assets/images/launcher_icon/android_icon.png
+  image_path_ios: assets/images/launcher_icon/ios_icon.png
+  android: true
+  adaptive_icon_padding: true
+  min_sdk_android: 30 #Androidの最小SDKバージョン
+  ios: true
