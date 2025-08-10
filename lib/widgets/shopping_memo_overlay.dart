@@ -83,20 +83,24 @@ class _ShoppingMemoOverlayState extends ConsumerState<ShoppingMemoOverlay>
   Widget build(BuildContext context) {
     final isDarkMode = ref.watch(themeNotifierProvider) == ThemeMode.dark;
     final screenSize = MediaQuery.of(context).size;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // 背景のオーバーレイ（タップで閉じる）
-            GestureDetector(
-              onTap: _closeOverlay,
-              child: Container(
-                color: Colors.black.withValues(alpha: 0.5 * _fadeAnimation.value),
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          resizeToAvoidBottomInset: false,
+          body: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // 背景のオーバーレイ（タップで閉じる）
+              GestureDetector(
+                onTap: _closeOverlay,
+                child: Container(
+                  color: Colors.black.withValues(alpha: 0.5 * _fadeAnimation.value),
+                ),
               ),
-            ),
 
             // 買い物メモのコンテンツ
             Center(
@@ -106,8 +110,13 @@ class _ShoppingMemoOverlayState extends ConsumerState<ShoppingMemoOverlay>
                   opacity: _fadeAnimation.value,
                   child: Container(
                     width: screenSize.width * 0.9,
-                    height: screenSize.height * 0.8,
-                    margin: const EdgeInsets.all(16),
+                    height: (screenSize.height - keyboardHeight) * 0.8,
+                    margin: EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      top: 16,
+                      bottom: keyboardHeight > 0 ? 16 : 16,
+                    ),
                     decoration: BoxDecoration(
                       color: isDarkMode ? Colors.grey[850] : Colors.white,
                       borderRadius: BorderRadius.circular(20),
@@ -176,7 +185,7 @@ class _ShoppingMemoOverlayState extends ConsumerState<ShoppingMemoOverlay>
                             padding: const EdgeInsets.all(20),
                             child: Column(
                               children: [
-                                // 入力フィールド
+                                // 入力フィールド（キーボードの影響を受けないように固定）
                                 Row(
                                   children: [
                                     Expanded(
@@ -230,8 +239,11 @@ class _ShoppingMemoOverlayState extends ConsumerState<ShoppingMemoOverlay>
 
                                 // アイテムリスト
                                 Expanded(
-                                  child: _memoItems.isEmpty
-                                      ? Center(
+                                  child: SingleChildScrollView(
+                                    child: _memoItems.isEmpty
+                                        ? SizedBox(
+                                            height: 200,
+                                            child: Center(
                                           child: Column(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
@@ -249,10 +261,13 @@ class _ShoppingMemoOverlayState extends ConsumerState<ShoppingMemoOverlay>
                                                   color: Colors.grey[500] ?? Colors.grey,
                                                 ),
                                               ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
                                         )
-                                      : ListView.builder(
+                                        : ListView.builder(
+                                            shrinkWrap: true,
+                                            physics: const NeverScrollableScrollPhysics(),
                                           itemCount: _memoItems.length,
                                           itemBuilder: (context, index) {
                                             return Container(
@@ -304,6 +319,7 @@ class _ShoppingMemoOverlayState extends ConsumerState<ShoppingMemoOverlay>
                                             );
                                           },
                                         ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -315,7 +331,8 @@ class _ShoppingMemoOverlayState extends ConsumerState<ShoppingMemoOverlay>
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         );
       },
     );

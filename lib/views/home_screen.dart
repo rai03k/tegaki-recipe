@@ -58,6 +58,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.grey[900] : Colors.grey[100],
+      resizeToAvoidBottomInset: false, // キーボード表示時にレイアウトを変更しない
       body: Stack(
         children: [
           // メインコンテンツ
