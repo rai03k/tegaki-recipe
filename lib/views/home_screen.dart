@@ -8,6 +8,7 @@ import '../view_models/recipe_book_view_model.dart';
 import '../view_models/theme_view_model.dart';
 import '../view_models/timer_view_model.dart';
 import '../utils/responsive_size.dart';
+import '../widgets/shopping_memo_overlay.dart';
 import 'dart:io';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -20,6 +21,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   PageController? _pageController;
   bool _isShelfOpen = false; // 棚の開閉状態を管理
+  bool _showShoppingMemo = false; // 買い物メモオーバーレイの表示状態
 
   @override
   void initState() {
@@ -68,6 +70,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               cardHeight,
               isDarkMode,
               recipeBookState.recipeBooks,
+            ),
+          
+          // 買い物メモオーバーレイ
+          if (_showShoppingMemo)
+            Positioned.fill(
+              child: ShoppingMemoOverlay(
+                onClose: _closeShoppingMemoOverlay,
+              ),
             ),
 
           // ランプUI（ステータスバーから伸びる）
@@ -565,15 +575,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // メモ帳ウィジェット（買い物メモ画面へ遷移）
+  // メモ帳ウィジェット（買い物メモオーバーレイ表示）
   Widget _buildMemoWidget(bool isDarkMode, double furnitureSize) {
     return _buildFurnitureItem(
       assetPath: 'assets/images/furniture/memo.png',
-      onTap: () => context.push('/shopping-memo'),
+      onTap: () => _showShoppingMemoOverlay(),
       size: furnitureSize,
       isDarkMode: isDarkMode,
       aspectRatio: 0.7, // メモ帳は縦長（幅：高さ = 0.7：1）
     );
+  }
+
+  // 買い物メモオーバーレイを表示
+  void _showShoppingMemoOverlay() {
+    setState(() {
+      _showShoppingMemo = true;
+    });
+  }
+
+  // 買い物メモオーバーレイを閉じる
+  void _closeShoppingMemoOverlay() {
+    setState(() {
+      _showShoppingMemo = false;
+    });
   }
 
   // 棚ウィジェット（設定画面へ遷移）

@@ -200,33 +200,6 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
             ],
           ),
           const SizedBox(height: 32),
-          // 目次タイトル
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              '目次',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white : Colors.black,
-                letterSpacing: -2,
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          // サブタイトル
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              '料理名をタップでそのレシピに移動できるよ',
-              style: TextStyle(
-                fontSize: 20,
-                letterSpacing: -1,
-                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
           // 空状態の表示（画面中央）
           Expanded(
             child: Center(
@@ -440,7 +413,7 @@ class _TableOfContentsScreenState extends ConsumerState<TableOfContentsScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final textStyle = TextStyle(
-          fontSize: 18,
+          fontSize: 20,
           color: isDarkMode ? Colors.white : Colors.black,
           letterSpacing: -1.5,
         );

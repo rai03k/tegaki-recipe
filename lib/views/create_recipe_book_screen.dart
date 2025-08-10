@@ -106,7 +106,7 @@ class _CreateRecipeBookScreenState
                       ),
                       const SizedBox(width: 16),
                       Text(
-                        'レシピ本作成',
+                        'レシピ本の表紙作成',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -289,12 +289,12 @@ class _CreateRecipeBookScreenState
           color: isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
           size: 48.0,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
         Text(
           '表紙画像を選択',
           style: TextStyle(
             color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-            fontSize: 16,
+            fontSize: 20,
           ),
         ),
       ],
