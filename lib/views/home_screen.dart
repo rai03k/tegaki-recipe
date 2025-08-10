@@ -71,14 +71,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               isDarkMode,
               recipeBookState.recipeBooks,
             ),
-          
-          // 買い物メモオーバーレイ
-          if (_showShoppingMemo)
-            Positioned.fill(
-              child: ShoppingMemoOverlay(
-                onClose: _closeShoppingMemoOverlay,
-              ),
-            ),
 
           // ランプUI（ステータスバーから伸びる）
           Positioned(
@@ -102,24 +94,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             left: 0,
             child: _buildFurnitureWidgets(isDarkMode),
           ),
+          
+          // 買い物メモオーバーレイ（最前面に配置）
+          if (_showShoppingMemo)
+            Positioned.fill(
+              child: Material(
+                type: MaterialType.transparency,
+                child: ShoppingMemoOverlay(
+                  onClose: _closeShoppingMemoOverlay,
+                ),
+              ),
+            ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          await context.push('/create-recipe-book');
-          // 画面から戻ってきたときにデータを再読み込み
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref.read(recipeBookNotifierProvider.notifier).refresh();
-          });
-        },
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        label: const Text("作成", style: TextStyle(fontSize: 20)),
-        icon: const HugeIcon(
-          icon: HugeIcons.strokeRoundedAdd01,
-          color: Colors.white,
-        ),
-      ),
+      // オーバーレイ表示中はFloatingActionButtonを非表示
+      floatingActionButton: _showShoppingMemo 
+          ? null 
+          : FloatingActionButton.extended(
+              onPressed: () async {
+                await context.push('/create-recipe-book');
+                // 画面から戻ってきたときにデータを再読み込み
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ref.read(recipeBookNotifierProvider.notifier).refresh();
+                });
+              },
+              backgroundColor: Colors.deepPurple,
+              foregroundColor: Colors.white,
+              label: const Text("作成", style: TextStyle(fontSize: 20)),
+              icon: const HugeIcon(
+                icon: HugeIcons.strokeRoundedAdd01,
+                color: Colors.white,
+              ),
+            ),
     );
   }
 

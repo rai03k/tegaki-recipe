@@ -88,6 +88,7 @@ class _ShoppingMemoOverlayState extends ConsumerState<ShoppingMemoOverlay>
       animation: _animationController,
       builder: (context, child) {
         return Stack(
+          clipBehavior: Clip.none,
           children: [
             // 背景のオーバーレイ（タップで閉じる）
             GestureDetector(
@@ -115,6 +116,7 @@ class _ShoppingMemoOverlayState extends ConsumerState<ShoppingMemoOverlay>
                           color: Colors.black.withValues(alpha: 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
+                          spreadRadius: 2,
                         ),
                       ],
                     ),
