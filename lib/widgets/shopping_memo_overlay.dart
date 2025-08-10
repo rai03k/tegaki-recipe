@@ -83,7 +83,6 @@ class _ShoppingMemoOverlayState extends ConsumerState<ShoppingMemoOverlay>
   Widget build(BuildContext context) {
     final isDarkMode = ref.watch(themeNotifierProvider) == ThemeMode.dark;
     final screenSize = MediaQuery.of(context).size;
-    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
     return AnimatedBuilder(
       animation: _animationController,
@@ -110,13 +109,8 @@ class _ShoppingMemoOverlayState extends ConsumerState<ShoppingMemoOverlay>
                   opacity: _fadeAnimation.value,
                   child: Container(
                     width: screenSize.width * 0.9,
-                    height: (screenSize.height - keyboardHeight) * 0.8,
-                    margin: EdgeInsets.only(
-                      left: 16,
-                      right: 16,
-                      top: 16,
-                      bottom: keyboardHeight > 0 ? 16 : 16,
-                    ),
+                    height: screenSize.height * 0.8,
+                    margin: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: isDarkMode ? Colors.grey[850] : Colors.white,
                       borderRadius: BorderRadius.circular(20),
