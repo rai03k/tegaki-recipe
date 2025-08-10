@@ -7,11 +7,8 @@ import '../view_models/theme_view_model.dart';
 
 class IngredientSelectionScreen extends ConsumerStatefulWidget {
   final List<RecipeIngredient>? existingIngredients;
-  
-  const IngredientSelectionScreen({
-    super.key,
-    this.existingIngredients,
-  });
+
+  const IngredientSelectionScreen({super.key, this.existingIngredients});
 
   @override
   ConsumerState<IngredientSelectionScreen> createState() =>
@@ -23,7 +20,7 @@ class _IngredientSelectionScreenState
   // 定数
   static const int _maxSuggestions = 5;
   static const Duration _focusDelay = Duration(milliseconds: 100);
-  
+
   // 食材用のコントローラー
   final List<TextEditingController> _nameControllers = [
     TextEditingController(),
@@ -55,7 +52,8 @@ class _IngredientSelectionScreenState
   }
 
   void _initializeWithExistingIngredients() {
-    if (widget.existingIngredients == null || widget.existingIngredients!.isEmpty) {
+    if (widget.existingIngredients == null ||
+        widget.existingIngredients!.isEmpty) {
       return; // 既存材料がない場合は何もしない
     }
 
@@ -63,11 +61,13 @@ class _IngredientSelectionScreenState
     _clearAllControllers();
 
     // 食材と調味料に分類
-    final (ingredients, seasonings) = _classifyIngredients(widget.existingIngredients!);
+    final (ingredients, seasonings) = _classifyIngredients(
+      widget.existingIngredients!,
+    );
 
     // 食材コントローラーを設定
     _setupIngredientsControllers(ingredients);
-    
+
     // 調味料コントローラーを設定
     _setupSeasoningsControllers(seasonings);
   }
@@ -77,7 +77,7 @@ class _IngredientSelectionScreenState
     _disposeControllersList(_amountControllers);
     _disposeFocusNodesList(_nameFocusNodes);
     _disposeFocusNodesList(_amountFocusNodes);
-    
+
     _disposeControllersList(_seasoningNameControllers);
     _disposeControllersList(_seasoningAmountControllers);
     _disposeFocusNodesList(_seasoningNameFocusNodes);
@@ -105,7 +105,7 @@ class _IngredientSelectionScreenState
       _nameFocusNodes.add(FocusNode());
       _amountFocusNodes.add(FocusNode());
     }
-    
+
     // 最後に空の行を追加
     if (_nameControllers.isEmpty) {
       _nameControllers.add(TextEditingController());
@@ -117,12 +117,16 @@ class _IngredientSelectionScreenState
 
   void _setupSeasoningsControllers(List<RecipeIngredient> seasonings) {
     for (final seasoning in seasonings) {
-      _seasoningNameControllers.add(TextEditingController(text: seasoning.name));
-      _seasoningAmountControllers.add(TextEditingController(text: seasoning.amount));
+      _seasoningNameControllers.add(
+        TextEditingController(text: seasoning.name),
+      );
+      _seasoningAmountControllers.add(
+        TextEditingController(text: seasoning.amount),
+      );
       _seasoningNameFocusNodes.add(FocusNode());
       _seasoningAmountFocusNodes.add(FocusNode());
     }
-    
+
     // 最後に空の行を追加
     if (_seasoningNameControllers.isEmpty) {
       _seasoningNameControllers.add(TextEditingController());
@@ -138,12 +142,12 @@ class _IngredientSelectionScreenState
     _disposeControllersList(_amountControllers);
     _disposeFocusNodesList(_nameFocusNodes);
     _disposeFocusNodesList(_amountFocusNodes);
-    
+
     _disposeControllersList(_seasoningNameControllers);
     _disposeControllersList(_seasoningAmountControllers);
     _disposeFocusNodesList(_seasoningNameFocusNodes);
     _disposeFocusNodesList(_seasoningAmountFocusNodes);
-    
+
     super.dispose();
   }
 
@@ -167,7 +171,9 @@ class _IngredientSelectionScreenState
     });
   }
 
-  (List<RecipeIngredient>, List<RecipeIngredient>) _classifyIngredients(List<RecipeIngredient> allIngredients) {
+  (List<RecipeIngredient>, List<RecipeIngredient>) _classifyIngredients(
+    List<RecipeIngredient> allIngredients,
+  ) {
     final ingredients = <RecipeIngredient>[];
     final seasonings = <RecipeIngredient>[];
 
@@ -183,14 +189,18 @@ class _IngredientSelectionScreenState
   }
 
   bool _isSeasoningIngredient(String ingredientName) {
-    final predefinedIngredient = IngredientData.predefinedIngredients
-        .where((item) => item.name == ingredientName)
-        .firstOrNull;
-    
+    final predefinedIngredient =
+        IngredientData.predefinedIngredients
+            .where((item) => item.name == ingredientName)
+            .firstOrNull;
+
     return predefinedIngredient?.category == '調味料';
   }
 
-  List<Ingredient> _filterIngredientsByType(List<Ingredient> allResults, String type) {
+  List<Ingredient> _filterIngredientsByType(
+    List<Ingredient> allResults,
+    String type,
+  ) {
     if (type == 'seasoning') {
       // 調味料のみをフィルタリング
       return allResults
@@ -323,10 +333,17 @@ class _IngredientSelectionScreenState
     final ingredients = <RecipeIngredient>[];
 
     // 食材を追加
-    ingredients.addAll(_extractIngredientsFromControllers(_nameControllers, _amountControllers));
+    ingredients.addAll(
+      _extractIngredientsFromControllers(_nameControllers, _amountControllers),
+    );
 
     // 調味料を追加
-    ingredients.addAll(_extractIngredientsFromControllers(_seasoningNameControllers, _seasoningAmountControllers));
+    ingredients.addAll(
+      _extractIngredientsFromControllers(
+        _seasoningNameControllers,
+        _seasoningAmountControllers,
+      ),
+    );
 
     // 前画面に材料データを返す
     context.pop(ingredients);
@@ -337,15 +354,16 @@ class _IngredientSelectionScreenState
     List<TextEditingController> amountControllers,
   ) {
     final extractedIngredients = <RecipeIngredient>[];
-    
+
     for (int i = 0; i < nameControllers.length; i++) {
       final name = nameControllers[i].text.trim();
       final amount = amountControllers[i].text.trim();
 
       if (name.isNotEmpty) {
-        final predefinedIngredient = IngredientData.predefinedIngredients
-            .where((ingredient) => ingredient.name == name)
-            .firstOrNull;
+        final predefinedIngredient =
+            IngredientData.predefinedIngredients
+                .where((ingredient) => ingredient.name == name)
+                .firstOrNull;
 
         extractedIngredients.add(
           RecipeIngredient(
@@ -357,7 +375,7 @@ class _IngredientSelectionScreenState
         );
       }
     }
-    
+
     return extractedIngredients;
   }
 
@@ -367,135 +385,152 @@ class _IngredientSelectionScreenState
 
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.grey[900] : Colors.grey[100],
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ヘッダー
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => context.pop(),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedArrowLeft01,
-                      color: isDarkMode ? Colors.white : Colors.black,
-                      size: 24.0,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(
-                    '材料選択',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white : Colors.black,
-                      fontFamily: 'ArmedLemon',
-                    ),
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: _saveIngredients,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // ヘッダー
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => context.pop(),
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedArrowLeft01,
+                        color: isDarkMode ? Colors.white : Colors.black,
+                        size: 24.0,
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.deepPurple,
-                        borderRadius: BorderRadius.circular(20),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      '材料選択',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white : Colors.black,
+                        fontFamily: 'ArmedLemon',
                       ),
-                      child: const Text(
-                        '完了',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                    ),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: _saveIngredients,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurple,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          '完了',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-
-            // メインコンテンツ
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const ClampingScrollPhysics(), // タッチイベントの競合を減らす
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 食材セクション
-                    _buildSectionTitle('食材', isDarkMode),
-                    const SizedBox(height: 12),
-
-                    // 食材入力フォーム
-                    ...List.generate(_nameControllers.length, (index) {
-                      return Column(
-                        children: [
-                          _buildIngredientRow(index, isDarkMode, 'ingredient'),
-                          // 候補表示（このフィールドが編集中の場合）
-                          Builder(
-                            builder: (context) {
-                              final shouldShow =
-                                  _suggestions.isNotEmpty &&
-                                  _currentEditingIndex == index &&
-                                  _currentEditingType == 'ingredient';
-
-                              if (shouldShow) {
-                                return _buildFullWidthSuggestionsList(
-                                  isDarkMode,
-                                );
-                              }
-                              return const SizedBox.shrink();
-                            },
-                          ),
-                        ],
-                      );
-                    }),
-
-                    // 食材追加ボタン
-                    _buildAddButton('食材を追加', _addNewIngredientRow, isDarkMode),
-                    const SizedBox(height: 24),
-
-                    // 調味料セクション
-                    _buildSectionTitle('調味料', isDarkMode),
-                    const SizedBox(height: 12),
-
-                    // 調味料入力フォーム
-                    ...List.generate(_seasoningNameControllers.length, (index) {
-                      return Column(
-                        children: [
-                          _buildIngredientRow(index, isDarkMode, 'seasoning'),
-                          // 候補表示（このフィールドが編集中の場合）
-                          Builder(
-                            builder: (context) {
-                              final shouldShow =
-                                  _suggestions.isNotEmpty &&
-                                  _currentEditingIndex == index &&
-                                  _currentEditingType == 'seasoning';
-
-                              if (shouldShow) {
-                                return _buildFullWidthSuggestionsList(
-                                  isDarkMode,
-                                );
-                              }
-                              return const SizedBox.shrink();
-                            },
-                          ),
-                        ],
-                      );
-                    }),
-
-                    // 調味料追加ボタン
-                    _buildAddButton('調味料を追加', _addNewSeasoningRow, isDarkMode),
-                    const SizedBox(height: 32),
                   ],
                 ),
               ),
-            ),
-          ],
+
+              // メインコンテンツ
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(), // タッチイベントの競合を減らす
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 食材セクション
+                      _buildSectionTitle('食材', isDarkMode),
+                      const SizedBox(height: 12),
+
+                      // 食材入力フォーム
+                      ...List.generate(_nameControllers.length, (index) {
+                        return Column(
+                          children: [
+                            _buildIngredientRow(
+                              index,
+                              isDarkMode,
+                              'ingredient',
+                            ),
+                            // 候補表示（このフィールドが編集中の場合）
+                            Builder(
+                              builder: (context) {
+                                final shouldShow =
+                                    _suggestions.isNotEmpty &&
+                                    _currentEditingIndex == index &&
+                                    _currentEditingType == 'ingredient';
+
+                                if (shouldShow) {
+                                  return _buildFullWidthSuggestionsList(
+                                    isDarkMode,
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                          ],
+                        );
+                      }),
+
+                      // 食材追加ボタン
+                      _buildAddButton(
+                        '食材を追加',
+                        _addNewIngredientRow,
+                        isDarkMode,
+                      ),
+                      const SizedBox(height: 40),
+
+                      // 調味料セクション
+                      _buildSectionTitle('調味料', isDarkMode),
+                      const SizedBox(height: 12),
+
+                      // 調味料入力フォーム
+                      ...List.generate(_seasoningNameControllers.length, (
+                        index,
+                      ) {
+                        return Column(
+                          children: [
+                            _buildIngredientRow(index, isDarkMode, 'seasoning'),
+                            // 候補表示（このフィールドが編集中の場合）
+                            Builder(
+                              builder: (context) {
+                                final shouldShow =
+                                    _suggestions.isNotEmpty &&
+                                    _currentEditingIndex == index &&
+                                    _currentEditingType == 'seasoning';
+
+                                if (shouldShow) {
+                                  return _buildFullWidthSuggestionsList(
+                                    isDarkMode,
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                          ],
+                        );
+                      }),
+
+                      // 調味料追加ボタン
+                      _buildAddButton(
+                        '調味料を追加',
+                        _addNewSeasoningRow,
+                        isDarkMode,
+                      ),
+                      const SizedBox(height: 32),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -505,7 +540,7 @@ class _IngredientSelectionScreenState
     return Text(
       title,
       style: TextStyle(
-        fontSize: 20,
+        fontSize: 24,
         fontWeight: FontWeight.bold,
         color: isDarkMode ? Colors.white : Colors.black,
       ),
@@ -599,7 +634,7 @@ class _IngredientSelectionScreenState
                       focusNode: nameFocusNodes[index],
                       style: TextStyle(
                         color: isDarkMode ? Colors.white : Colors.black,
-                        fontSize: 16,
+                        fontSize: 20,
                       ),
                       decoration: InputDecoration(
                         hintText: hintText,
@@ -621,8 +656,13 @@ class _IngredientSelectionScreenState
                           _currentEditingIndex = index;
                           _currentEditingType = type;
                           if (nameControllers[index].text.isNotEmpty) {
-                            final allResults = IngredientData.searchByName(nameControllers[index].text);
-                            _suggestions = _filterIngredientsByType(allResults, type);
+                            final allResults = IngredientData.searchByName(
+                              nameControllers[index].text,
+                            );
+                            _suggestions = _filterIngredientsByType(
+                              allResults,
+                              type,
+                            );
                           } else {
                             _suggestions = [];
                           }
@@ -666,7 +706,7 @@ class _IngredientSelectionScreenState
                 focusNode: amountFocusNodes[index],
                 style: TextStyle(
                   color: isDarkMode ? Colors.white : Colors.black,
-                  fontSize: 16,
+                  fontSize: 20,
                 ),
                 decoration: InputDecoration(
                   hintText: '分量',
@@ -747,14 +787,13 @@ class _IngredientSelectionScreenState
           ),
           const SizedBox(height: 12),
 
-          // 候補リストを縦一列で表示
-          Column(
+          // 候補リストをチップ形式で表示
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children:
                 _suggestions.map((ingredient) {
-                  return _buildIngredientSuggestionItem(
-                    ingredient,
-                    isDarkMode,
-                  );
+                  return _buildIngredientSuggestionChip(ingredient, isDarkMode);
                 }).toList(),
           ),
         ],
@@ -825,6 +864,85 @@ class _IngredientSelectionScreenState
     );
   }
 
+  Widget _buildIngredientSuggestionChip(
+    Ingredient ingredient,
+    bool isDarkMode,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        if (_currentEditingIndex >= 0) {
+          _selectIngredient(ingredient, _currentEditingIndex);
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: ingredient.backgroundColor.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: ingredient.backgroundColor.withValues(alpha: 0.4),
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 材料の小さなアイコン
+            Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                color: ingredient.backgroundColor.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  ingredient.iconPath,
+                  width: 20,
+                  height: 20,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: ingredient.backgroundColor,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: Text(
+                          ingredient.name.isNotEmpty
+                              ? ingredient.name.substring(0, 1)
+                              : '?',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            
+            // 材料名
+            Text(
+              ingredient.name,
+              style: TextStyle(
+                color: isDarkMode ? Colors.white : Colors.black87,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildSuggestionIcon(Ingredient ingredient) {
     return Container(
@@ -955,5 +1073,4 @@ class _IngredientSelectionScreenState
       return false;
     }
   }
-
 }

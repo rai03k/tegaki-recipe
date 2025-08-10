@@ -94,7 +94,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           await context.push('/create-recipe-book');
           // 画面から戻ってきたときにデータを再読み込み
@@ -102,9 +102,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ref.read(recipeBookNotifierProvider.notifier).refresh();
           });
         },
-        backgroundColor: isDarkMode ? Colors.grey[700] : Colors.deepPurple,
+        backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
-        child: const HugeIcon(
+        label: const Text("作成", style: TextStyle(fontSize: 20)),
+        icon: const HugeIcon(
           icon: HugeIcons.strokeRoundedAdd01,
           color: Colors.white,
         ),
@@ -131,9 +132,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             '右下のボタンから\nレシピ本を作ってみよう！',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 20,
               color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
               height: 1.5,
+              letterSpacing: -2,
             ),
           ),
         ],

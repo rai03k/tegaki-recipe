@@ -217,20 +217,14 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
       children: [
         HugeIcon(
           icon: HugeIcons.strokeRoundedImage01,
-          color:
-              isDarkMode
-                  ? Colors.grey[400]!
-                  : Colors.grey[600]!,
+          color: isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
           size: 48.0,
         ),
         const SizedBox(height: 16),
         Text(
           '料理画像を選択',
           style: TextStyle(
-            color:
-                isDarkMode
-                    ? Colors.grey[400]
-                    : Colors.grey[600],
+            color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
             fontSize: 20,
           ),
         ),
@@ -265,107 +259,125 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
 
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.grey[900] : Colors.grey[100],
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              // ヘッダー
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => context.pop(),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedArrowLeft01,
-                        color: isDarkMode ? Colors.white : Colors.black,
-                        size: 24.0,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Text(
-                      isEditMode ? 'レシピ編集' : 'レシピ作成',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // スクロール可能なコンテンツ
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SafeArea(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                // ヘッダー
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Row(
                     children: [
-                      // 料理画像選択
                       GestureDetector(
-                        onTap: _selectImage,
-                        child: Container(
-                          width: double.infinity,
-                          height:
-                              (MediaQuery.of(context).size.width - 40) *
-                              3 /
-                              4, // 4:3比率
-                          decoration: BoxDecoration(
-                            color: isDarkMode ? Colors.grey[800] : Colors.white,
-                            border: Border.all(
-                              color:
-                                  isDarkMode
-                                      ? Colors.grey[600]!
-                                      : Colors.grey[300]!,
-                              width: 2,
-                              style: BorderStyle.solid,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child:
-                              _selectedImagePath != null
-                                  ? FutureBuilder<File>(
-                                    future: ImageService.getImageFile(_selectedImagePath!),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasData) {
-                                        return FutureBuilder<bool>(
-                                          future: snapshot.data!.exists(),
-                                          builder: (context, existsSnapshot) {
-                                            if (existsSnapshot.hasData && existsSnapshot.data == true) {
-                                              return ClipRRect(
-                                                borderRadius: BorderRadius.circular(10),
-                                                child: Image.file(
-                                                  snapshot.data!,
-                                                  fit: BoxFit.cover,
-                                                  width: double.infinity,
-                                                  height: double.infinity,
-                                                  errorBuilder: (context, error, stackTrace) {
-                                                    return _buildImagePlaceholder(isDarkMode);
-                                                  },
-                                                ),
-                                              );
-                                            }
-                                            return _buildImagePlaceholder(isDarkMode);
-                                          },
-                                        );
-                                      }
-                                      return _buildImagePlaceholder(isDarkMode);
-                                    },
-                                  )
-                                  : _buildImagePlaceholder(isDarkMode),
+                        onTap: () => context.pop(),
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedArrowLeft01,
+                          color: isDarkMode ? Colors.white : Colors.black,
+                          size: 24.0,
                         ),
                       ),
-                      const SizedBox(height: 32),
-
-                      // ノート風セクション（料理名以下）
-                      _buildNotePaperSection(isDarkMode),
+                      const SizedBox(width: 16),
+                      Text(
+                        isEditMode ? 'レシピ編集' : 'レシピ作成',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.black,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              ),
-            ],
+
+                // スクロール可能なコンテンツ
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 料理画像選択
+                        GestureDetector(
+                          onTap: _selectImage,
+                          child: Container(
+                            width: double.infinity,
+                            height:
+                                (MediaQuery.of(context).size.width - 40) *
+                                3 /
+                                4, // 4:3比率
+                            decoration: BoxDecoration(
+                              color:
+                                  isDarkMode ? Colors.grey[800] : Colors.white,
+                              border: Border.all(
+                                color:
+                                    isDarkMode
+                                        ? Colors.grey[600]!
+                                        : Colors.grey[300]!,
+                                width: 2,
+                                style: BorderStyle.solid,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child:
+                                _selectedImagePath != null
+                                    ? FutureBuilder<File>(
+                                      future: ImageService.getImageFile(
+                                        _selectedImagePath!,
+                                      ),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.hasData) {
+                                          return FutureBuilder<bool>(
+                                            future: snapshot.data!.exists(),
+                                            builder: (context, existsSnapshot) {
+                                              if (existsSnapshot.hasData &&
+                                                  existsSnapshot.data == true) {
+                                                return ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                  child: Image.file(
+                                                    snapshot.data!,
+                                                    fit: BoxFit.cover,
+                                                    width: double.infinity,
+                                                    height: double.infinity,
+                                                    errorBuilder: (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) {
+                                                      return _buildImagePlaceholder(
+                                                        isDarkMode,
+                                                      );
+                                                    },
+                                                  ),
+                                                );
+                                              }
+                                              return _buildImagePlaceholder(
+                                                isDarkMode,
+                                              );
+                                            },
+                                          );
+                                        }
+                                        return _buildImagePlaceholder(
+                                          isDarkMode,
+                                        );
+                                      },
+                                    )
+                                    : _buildImagePlaceholder(isDarkMode),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+
+                        // ノート風セクション（料理名以下）
+                        _buildNotePaperSection(isDarkMode),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -383,7 +395,7 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                 isDarkMode
                     ? Colors.grey[700]!.withValues(alpha: 0.3)
                     : Colors.grey[300]!.withValues(alpha: 0.5),
-            lineSpacing: 40.0,
+            lineSpacing: 20.0,
           ),
           child: Container(
             width: double.infinity,
