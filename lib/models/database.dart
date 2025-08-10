@@ -71,6 +71,13 @@ class TegakiDatabase extends _$TegakiDatabase {
       // 初期データの追加
       await _insertInitialIngredients();
     },
+    onUpgrade: (Migrator m, int from, int to) async {
+      // バージョン1から2へのマイグレーション
+      if (from == 1 && to == 2) {
+        // ShoppingItemsテーブルが追加されたので作成
+        await m.createTable(shoppingItems);
+      }
+    },
   );
 
   // 初期材料データを追加
