@@ -116,7 +116,7 @@ class _EditRecipeBookScreenState extends ConsumerState<EditRecipeBookScreen> {
                       ),
                       const SizedBox(width: 16),
                       Text(
-                        'レシピ本編集',
+                        'レシピ本の表紙編集',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -196,7 +196,7 @@ class _EditRecipeBookScreenState extends ConsumerState<EditRecipeBookScreen> {
 
                   // タイトル入力
                   Text(
-                    'レシピ本タイトル',
+                    'タイトル',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,

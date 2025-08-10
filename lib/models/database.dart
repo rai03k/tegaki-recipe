@@ -48,12 +48,21 @@ class IngredientMaster extends Table {
   TextColumn get backgroundColor => text().nullable()(); // HEXカラーコード
 }
 
-@DriftDatabase(tables: [RecipeBooks, Recipes, Ingredients, IngredientMaster])
+// 買い物リストテーブル
+class ShoppingItems extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().withLength(min: 1, max: 100)();
+  BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get completedAt => dateTime().nullable()();
+}
+
+@DriftDatabase(tables: [RecipeBooks, Recipes, Ingredients, IngredientMaster, ShoppingItems])
 class TegakiDatabase extends _$TegakiDatabase {
   TegakiDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -88,6 +97,38 @@ class TegakiDatabase extends _$TegakiDatabase {
         ),
       );
     }
+  }
+
+  // 買い物リスト関連のCRUD操作
+  Future<List<ShoppingItem>> getAllShoppingItems() async {
+    return await select(shoppingItems).get();
+  }
+
+  Future<int> addShoppingItem(String name) async {
+    return await into(shoppingItems).insert(
+      ShoppingItemsCompanion(
+        name: Value(name),
+        isCompleted: const Value(false),
+      ),
+    );
+  }
+
+  Future<bool> updateShoppingItemCompleted(int id, bool isCompleted) async {
+    final result = await (update(shoppingItems)..where((item) => item.id.equals(id)))
+        .write(ShoppingItemsCompanion(
+      isCompleted: Value(isCompleted),
+      completedAt: Value(isCompleted ? DateTime.now() : null),
+    ));
+    return result > 0;
+  }
+
+  Future<int> deleteShoppingItem(int id) async {
+    return await (delete(shoppingItems)..where((item) => item.id.equals(id)))
+        .go();
+  }
+
+  Future<void> clearAllShoppingItems() async {
+    await delete(shoppingItems).go();
   }
 }
 

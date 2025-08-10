@@ -186,7 +186,7 @@ class _CreateRecipeBookScreenState
 
                   // タイトル入力
                   Text(
-                    'レシピ本タイトル',
+                    'タイトル',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
